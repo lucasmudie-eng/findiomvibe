@@ -35,7 +35,7 @@ type FeaturedBusiness = {
   ctaUrl: string | null;
 };
 
-// ---- Fallback mock data ----
+// ---- FALLBACK MOCK DATA (non-marketplace only) ----
 
 const FALLBACK_EVENTS: EventPreview[] = [
   {
@@ -50,7 +50,7 @@ const FALLBACK_EVENTS: EventPreview[] = [
   },
 ];
 
-// NOTE: no fallback listings now – we only show *real* boosted listings
+// NOTE: no fallback listings – boosted section is *real data only*.
 
 const FALLBACK_DEALS: DealPreview[] = [
   {
@@ -105,7 +105,7 @@ export default function HomePageClient() {
 
   const [_loadError, setLoadError] = useState<string | null>(null);
 
-  // Load all preview data once
+  // ---- LOAD HOMEPAGE PREVIEW DATA ----
   useEffect(() => {
     setLoadError(null);
     if (!supabase) return;
@@ -172,8 +172,7 @@ export default function HomePageClient() {
               return {
                 id: String(l.id),
                 title: l.title ?? "Untitled listing",
-                meta:
-                  [l.area, l.category].filter(Boolean).join(" • ") || "",
+                meta: [l.area, l.category].filter(Boolean).join(" • ") || "",
                 price,
                 imageUrl,
               };
@@ -181,7 +180,8 @@ export default function HomePageClient() {
 
             setListings(mapped);
           } else {
-            setListings([]); // no boosted listings right now
+            // No boosted listings right now
+            setListings([]);
           }
         }
 
@@ -209,7 +209,7 @@ export default function HomePageClient() {
           }
         }
 
-        // 4) Sports
+        // 4) Sports (simple recent results feed)
         {
           const { data, error } = await supabase
             .from("sports_results")
@@ -299,7 +299,7 @@ export default function HomePageClient() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Rotate featured businesses every 10 seconds (kept as-is)
+  // ---- ROTATE FEATURED BUSINESSES ----
   useEffect(() => {
     if (featuredBusinesses.length <= 1) return;
 
@@ -310,7 +310,7 @@ export default function HomePageClient() {
     return () => window.clearInterval(intervalId);
   }, [featuredBusinesses.length]);
 
-  // ---- primary items / derived data ----
+  // ---- DERIVED DATA ----
   const primaryEvent = events[0] ?? FALLBACK_EVENTS[0];
   const primarySport = sports[0] ?? FALLBACK_SPORTS[0];
   const primaryDeal = deals[0] ?? FALLBACK_DEALS[0];
@@ -333,11 +333,11 @@ export default function HomePageClient() {
         : "/businesses"));
 
   // For bottom cards: ending soon deals + community highlights
-  const endingSoonDeals = [...deals]
+  const endingSoonDeals = deals
     .filter((d) => d.endsAt)
     .sort((a, b) => {
-      const aTime = a.endsAt ? new Date(d.endsAt!).getTime() : Infinity;
-      const bTime = b.endsAt ? new Date(b.endsAt!).getTime() : Infinity;
+      const aTime = a.endsAt ? new Date(a.endsAt).getTime() : Infinity;
+      const bTime = b.endsAt ? new Date(b.endsAt).getTime() : Infinity;
       return aTime - bTime;
     })
     .slice(0, 3);
@@ -350,6 +350,7 @@ export default function HomePageClient() {
     current: featuredBusiness,
   });
 
+  // ---- RENDER ----
   return (
     <div className="relative">
       {/* Soft hero wash */}
