@@ -20,21 +20,15 @@ type Provider = {
   category_slug: string | null;
 };
 
-// Server Component (no "use client")
+// Server Component
 export default async function ProviderPage({ params }: { params: { slug: string } }) {
-  // Fetch the record on the server with the service role client
-  const { data, error } = await supabaseAdmin
+  const { data: p, error } = await supabaseAdmin
     .from("providers")
     .select("*")
     .eq("slug", params.slug)
     .maybeSingle<Provider>();
 
-  // If nothing or an error: 404 (don’t redirect to /providers)
-  if (error || !data) {
-    notFound();
-  }
-
-  const p = data;
+  if (error || !p) notFound();
 
   return (
     <main className="mx-auto max-w-6xl px-4 py-10">
@@ -121,8 +115,8 @@ export default async function ProviderPage({ params }: { params: { slug: string 
         {/* Right column */}
         <aside className="rounded-2xl border bg-white p-5 shadow-sm">
           <h3 className="mb-3 text-lg font-semibold">Contact {p.name}</h3>
-          {/* LeadForm is a client component; it’s fine to render it here */}
-          <LeadForm listingId={p.slug} providerId={p.id} categorySlug={p.category_slug ?? ""} />
+          {/* LeadForm (client) now expects providerSlug & providerName */}
+          <LeadForm providerSlug={p.slug} providerName={p.name} />
           <div className="mt-4 space-y-1 text-sm text-gray-600">
             {p.email && <p>Email: {p.email}</p>}
             {p.phone && <p>Phone: {p.phone}</p>}

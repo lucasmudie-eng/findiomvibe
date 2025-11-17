@@ -1,72 +1,101 @@
 // src/app/api/leads/route.ts
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import { Resend } from "resend";
 
-type LeadBody = {
-  name: string;
-  email?: string;
-  phone?: string;
-  message?: string;
-  categorySlug?: string;     // optional: to know which category the lead came from
-  providerId?: string | null; // preferred: uuid from public.providers.id
-  listingId?: string | null;  // legacy fallback: provider slug if you don’t have id yet
-};
+const resend = new Resend(process.env.RESEND_API_KEY);
+
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL ?? "manxhive@gmail.com";
+const FROM_EMAIL  = process.env.EMAIL_FROM   ?? "enquiries@manxhive.com"; // your Resend sender
+
+function validEmail(e: string) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);
+}
 
 export async function POST(req: Request) {
   try {
-    const body = (await req.json()) as Partial<LeadBody>;
+    const body = await req.json().catch(() => ({}));
 
-    // Minimal validation
-    if (!body?.name) {
-      return NextResponse.json({ error: "Name is required" }, { status: 400 });
+    const providerSlug  = String(body?.providerSlug || "").trim();
+    const providerName  = String(body?.providerName || "").trim();
+    const name          = String(body?.name || "").trim();
+    const email         = String(body?.email || "").trim();
+    const message       = String(body?.message || "").trim();
+
+    if (!providerSlug || !providerName || !name || !email || !message) {
+      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
-    if (!body?.email && !body?.phone) {
-      return NextResponse.json(
-        { error: "Provide at least an email or a phone number" },
-        { status: 400 }
-      );
-    }
-
-    // If client only sent listingId (slug), resolve provider_id
-    let provider_id: string | null = body.providerId ?? null;
-
-    if (!provider_id && body?.listingId) {
-      const { data: p, error: findErr } = await supabaseAdmin
-        .from("providers")
-        .select("id")
-        .eq("slug", body.listingId)
-        .maybeSingle();
-
-      if (findErr) {
-        console.error(findErr);
-      }
-      provider_id = p?.id ?? null;
+    if (!validEmail(email)) {
+      return NextResponse.json({ error: "Invalid email" }, { status: 400 });
     }
 
-    const insertPayload = {
-      name: body.name.trim(),
-      email: body.email?.trim() ?? null,
-      phone: body.phone?.trim() ?? null,
-      message: body.message?.trim() ?? null,
-      category_slug: body.categorySlug ?? null, // add this column if you like (optional)
-      provider_id: provider_id,                 // new column we added
-      listing_id: body.listingId ?? null        // keep legacy value for now if you’re using it
-    };
-
-    const { data, error } = await supabaseAdmin
-      .from("leads")
-      .insert(insertPayload)
-      .select("*")
-      .single();
-
-    if (error) {
-      console.error("Insert lead error:", error);
-      return NextResponse.json({ error: "Failed to save lead" }, { status: 500 });
+    // 1) Store the lead
+    const { error: insertError } = await supabaseAdmin.from("leads").insert({
+      provider_slug: providerSlug,
+      provider_name: providerName,
+      name,
+      email,
+      message,
+      handled: false,
+    });
+    if (insertError) {
+      console.error(insertError);
+      return NextResponse.json({ error: "Database insert failed" }, { status: 500 });
     }
 
-    return NextResponse.json({ ok: true, lead: data }, { status: 201 });
-  } catch (e) {
-    console.error(e);
-    return NextResponse.json({ error: "Invalid request" }, { status: 400 });
+    // 2) Get provider email (if present)
+    const { data: provider, error: fetchError } = await supabaseAdmin
+      .from("providers")
+      .select("email")
+      .eq("slug", providerSlug)
+      .maybeSingle<{ email: string | null }>();
+
+    if (fetchError) console.error(fetchError);
+
+    const providerEmail = (provider?.email && validEmail(provider.email))
+      ? provider.email
+      : null;
+
+    // 3) Compose recipients (always CC admin)
+    const toRecipients = providerEmail ? [providerEmail, ADMIN_EMAIL] : [ADMIN_EMAIL];
+
+    // 4) Send the email via Resend
+    await resend.emails.send({
+      from: `ManxHive Enquiries <${FROM_EMAIL}>`,
+      to: toRecipients,
+      replyTo: email, // provider can reply directly to the customer
+      subject: `New enquiry for ${providerName}`,
+      text: [
+        `New enquiry from ${name}`,
+        ``,
+        `Service: ${providerName}`,
+        `Email: ${email}`,
+        ``,
+        `Message:`,
+        message,
+      ].join("\n"),
+      html: `
+        <div style="font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; line-height:1.5; color:#111;">
+          <h2 style="margin:0 0 12px;">New enquiry from ${escapeHtml(name)}</h2>
+          <p style="margin:0 0 8px;"><strong>Service:</strong> ${escapeHtml(providerName)}</p>
+          <p style="margin:0 0 16px;"><strong>Email:</strong> <a href="mailto:${escapeAttr(email)}">${escapeHtml(email)}</a></p>
+          <p style="margin:0 0 6px;"><strong>Message:</strong></p>
+          <p style="white-space:pre-wrap; margin:0;">${escapeHtml(message)}</p>
+        </div>
+      `,
+    });
+
+    return NextResponse.json({ ok: true }, { status: 201 });
+  } catch (err) {
+    console.error(err);
+    return NextResponse.json({ error: "Unexpected error" }, { status: 500 });
   }
+}
+
+// tiny helpers to avoid HTML injection
+function escapeHtml(s: string) {
+  return s.replace(/[&<>"']/g, (c) => ({ "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;" }[c]!));
+}
+function escapeAttr(s: string) {
+  return s.replace(/"/g, "&quot;");
 }
