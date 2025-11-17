@@ -1,9 +1,15 @@
 // src/app/sports/football/page.tsx
 import Link from "next/link";
 import { headers } from "next/headers";
-import { Trophy, Calendar, MapPin, Clock, Users, RefreshCw } from "lucide-react";
+import {
+  Trophy,
+  Calendar,
+  MapPin,
+  Clock,
+  Users,
+  RefreshCw,
+} from "lucide-react";
 import type { LeagueBundle, Result, Fixture } from "@/lib/football/types";
-import RedButton from "@/components/RedButton";
 
 // ---------- helpers ----------
 function absolute(path: string) {
@@ -56,7 +62,7 @@ async function fetchLeague(leagueSlug: string): Promise<LeagueBundle> {
 function formatWhen(iso: string | undefined) {
   if (!iso) return "TBD";
   try {
-    return new Date(iso).toLocaleString(undefined, {
+    return new Date(iso).toLocaleString("en-GB", {
       weekday: "short",
       hour: "2-digit",
       minute: "2-digit",
@@ -134,12 +140,11 @@ export default async function FootballPage({
   const leagueSlug = leagueKeyToSlug(leagueKey);
   const bundle = await fetchLeague(leagueSlug);
 
-  // Use real teamId for URLs, pretty name for display
   const tableRows =
     bundle.table?.length
       ? bundle.table.map((e) => ({
-          id: e.teamId,                 // <- URL param
-          name: titleCase(e.teamId),    // <- Display
+          id: e.teamId,
+          name: titleCase(e.teamId),
           p: e.played,
           w: e.won,
           d: e.drawn,
@@ -155,67 +160,170 @@ export default async function FootballPage({
   const FIXTURES: FixtureItem[] = toFixtureItems(bundle.fixturesUpcoming ?? []);
 
   const leagueHref = (key: LeagueKey) => `/sports/football?league=${key}`;
+  const headlineScore = SCORES[0];
 
   return (
-    <main className="mx-auto max-w-6xl px-4 py-8">
-      <nav className="mb-4 text-sm text-gray-500">
+    <main className="mx-auto max-w-6xl space-y-8 px-4 py-8">
+      {/* Breadcrumb */}
+      <nav className="text-sm text-gray-500">
         <Link href="/sports" className="hover:underline">
           Sports
         </Link>{" "}
         / <span className="text-gray-800">Football</span>
       </nav>
 
-      {/* Header / league selector */}
-      <section className="mb-6 rounded-2xl border bg-white p-5 shadow-sm">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-red-50">
-              <Trophy className="h-5 w-5 text-[#D90429]" />
+      {/* HERO */}
+      <section className="rounded-3xl bg-gradient-to-r from-[#D90429] via-[#f97316] to-[#facc15] px-6 py-7 text-white shadow-lg sm:px-8 sm:py-9">
+        <div className="flex flex-col gap-8 lg:flex-row lg:items-center lg:justify-between">
+          <div className="max-w-2xl space-y-4">
+            <div className="inline-flex items-center gap-2 rounded-full bg-black/15 px-3 py-1 text-xs font-medium backdrop-blur">
+              <span className="h-2 w-2 rounded-full bg-emerald-300" />
+              <span>Manx Football Hub</span>
+              <span className="text-white/70">• Live beta</span>
             </div>
-            <div>
-              <h1 className="text-xl font-semibold text-gray-900">Football</h1>
-              <p className="text-sm text-gray-600">
-                Live scores, fixtures, and league tables across the Isle of Man.
+
+            <div className="space-y-2">
+              <h1 className="text-3xl font-semibold leading-tight sm:text-4xl">
+                Manx football results, tables &amp; fixtures.
+              </h1>
+              <p className="text-sm text-red-50/90 sm:text-base">
+                Follow Isle of Man league football across all divisions, with
+                live results and updated tables. Start with{" "}
+                <span className="font-semibold">{leagueLabel}</span>, or switch
+                league below.
               </p>
+            </div>
+
+            <div className="flex flex-wrap gap-3 pt-1 text-sm">
+              <Link
+                href={`/sports/football/${leagueSlug}`}
+                className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-2.5 font-semibold text-[#D90429] shadow-sm transition hover:bg-red-50"
+              >
+                <Trophy className="h-4 w-4" />
+                Open {leagueLabel} hub
+              </Link>
+              <Link
+                href="/sports"
+                className="inline-flex items-center gap-2 rounded-full bg-white/10 px-5 py-2.5 font-semibold text-white ring-1 ring-white/30 transition hover:bg-white/15"
+              >
+                Back to sports hub
+              </Link>
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
-            <label htmlFor="league" className="text-sm text-gray-600">
-              League
-            </label>
-            <select
-              id="league"
-              defaultValue={leagueKey}
-              className="rounded-lg border bg-white px-3 py-1.5 text-sm text-gray-900"
+          {/* Latest full-time card */}
+          <div className="w-full max-w-md rounded-2xl bg-white/95 p-5 text-sm text-gray-900 shadow-md">
+            <div className="mb-3 flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <Trophy className="h-4 w-4 text-[#D90429]" />
+                <h2 className="text-sm font-semibold text-gray-900">
+                  Latest full-time
+                </h2>
+              </div>
+              <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-medium text-emerald-700">
+                Updated live
+              </span>
+            </div>
+
+            {headlineScore ? (
+              <div className="space-y-2">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <p className="text-sm font-semibold text-gray-900">
+                      {headlineScore.home}{" "}
+                      <span className="font-bold">
+                        {headlineScore.homeScore} – {headlineScore.awayScore}
+                      </span>{" "}
+                      {headlineScore.away}
+                    </p>
+                    <p className="text-xs text-gray-600">
+                      {leagueLabel} • Full time
+                    </p>
+                  </div>
+                </div>
+                <div className="flex flex-wrap items-center gap-3 text-xs text-gray-600">
+                  {headlineScore.when && (
+                    <span className="inline-flex items-center gap-1">
+                      <Clock className="h-3.5 w-3.5" />
+                      {headlineScore.when}
+                    </span>
+                  )}
+                  {headlineScore.venue && (
+                    <span className="inline-flex items-center gap-1">
+                      <MapPin className="h-3.5 w-3.5 text-gray-400" />
+                      {headlineScore.venue}
+                    </span>
+                  )}
+                </div>
+                <Link
+                  href={`/sports/football/${leagueSlug}?tab=results`}
+                  className="inline-flex text-xs font-medium text-[#D90429] hover:underline"
+                >
+                  View full results &amp; tables →
+                </Link>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <p className="text-sm font-semibold text-gray-900">
+                  No full-time scores yet.
+                </p>
+                <p className="text-xs text-gray-600">
+                  As soon as results are added, the latest match will appear
+                  here.
+                </p>
+                <Link
+                  href={`/sports/football/${leagueSlug}?tab=fixtures`}
+                  className="inline-flex text-xs font-medium text-[#D90429] hover:underline"
+                >
+                  Check upcoming fixtures →
+                </Link>
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
+
+      {/* League selector strip */}
+      <section className="rounded-2xl border bg-white p-5 shadow-sm">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">
+              League focus
+            </p>
+            <p className="text-sm font-semibold text-gray-900">{leagueLabel}</p>
+            <p className="text-xs text-gray-600">
+              Switch between divisions — the page will reload with that
+              league&apos;s table and matches.
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            <Link
+              href={`/sports/football/${leagueSlug}`}
+              className="inline-flex items-center rounded-full bg-slate-900 px-4 py-2 text-xs font-semibold text-white hover:bg-slate-800"
             >
-              {LEAGUES.map((l) => (
-                <option key={l.key} value={l.key}>
-                  {l.label}
-                </option>
-              ))}
-            </select>
+              Open league page
+            </Link>
             <Link
               href={`/sports/football?league=${leagueKey}&refresh=1`}
-              className="inline-flex items-center gap-2 rounded-lg border px-3 py-1.5 text-sm text-gray-800 hover:bg-gray-50"
-              title="Refresh"
+              className="inline-flex items-center gap-1 rounded-full border px-3 py-1.5 text-xs font-medium text-gray-800 hover:bg-gray-50"
+              title="Refresh data"
             >
-              <RefreshCw className="h-4 w-4" /> Refresh
+              <RefreshCw className="h-3.5 w-3.5" />
+              Refresh
             </Link>
           </div>
         </div>
 
-        {/* League pills */}
         <div className="mt-3 flex flex-wrap gap-2">
           {LEAGUES.map((l) => (
             <Link
               key={l.key}
               href={leagueHref(l.key)}
               className={
-                "rounded-full border px-3 py-1.5 text-sm " +
+                "rounded-full border px-3 py-1.5 text-xs sm:text-sm " +
                 (l.key === leagueKey
-                  ? "border-[#D90429] text-[#D90429]"
-                  : "text-gray-700 hover:bg-gray-50")
+                  ? "border-[#D90429] bg-[#D90429]/5 text-[#D90429]"
+                  : "border-gray-200 text-gray-700 hover:bg-gray-50")
               }
             >
               {l.label}
@@ -243,7 +351,9 @@ export default async function FootballPage({
             </div>
             <div className="divide-y">
               {SCORES.length === 0 && (
-                <div className="py-3 text-sm text-gray-500">No results yet.</div>
+                <div className="py-3 text-sm text-gray-500">
+                  No results yet for this league.
+                </div>
               )}
               {SCORES.map((s) => (
                 <div
@@ -278,11 +388,13 @@ export default async function FootballPage({
                       </span>
                     )}
                   </div>
-                  <div className="sm:col-span-2">
-                    <RedButton
+                  <div className="sm:col-span-2 flex justify-end">
+                    <Link
                       href={`/sports/football/${leagueSlug}`}
-                      label="League page"
-                    />
+                      className="inline-flex items-center justify-center rounded-full bg-[#D90429] px-4 py-1.5 text-xs font-semibold text-white shadow-sm transition hover:bg-[#b80321] whitespace-nowrap"
+                    >
+                      League page
+                    </Link>
                   </div>
                 </div>
               ))}
@@ -305,7 +417,7 @@ export default async function FootballPage({
             <ul className="divide-y">
               {FIXTURES.length === 0 && (
                 <li className="py-3 text-sm text-gray-500">
-                  No upcoming fixtures.
+                  No upcoming fixtures for this league.
                 </li>
               )}
               {FIXTURES.map((f) => (
@@ -336,11 +448,13 @@ export default async function FootballPage({
                       </span>
                     )}
                   </div>
-                  <div className="sm:col-span-2">
-                    <RedButton
-                      href={`/sports/football/${leagueSlug}`}
-                      label="Details"
-                    />
+                  <div className="sm:col-span-2 flex justify-end">
+                    <Link
+                      href={`/sports/football/${leagueSlug}?tab=fixtures`}
+                      className="inline-flex items-center justify-center rounded-full bg-[#D90429] px-4 py-1.5 text-xs font-semibold text-white shadow-sm transition hover:bg-[#b80321] w-auto"
+                    >
+                      Details
+                    </Link>
                   </div>
                 </li>
               ))}
@@ -398,6 +512,16 @@ export default async function FootballPage({
                     </td>
                   </tr>
                 ))}
+                {tableRows.length === 0 && (
+                  <tr>
+                    <td
+                      colSpan={9}
+                      className="py-3 text-sm text-gray-500"
+                    >
+                      No table data available for this league yet.
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>

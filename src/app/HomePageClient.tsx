@@ -118,6 +118,7 @@ export default function HomePageClient() {
           const { data, error } = await supabase
             .from("events")
             .select("id, title, venue, starts_at")
+            .eq("approved", true)
             .gte("starts_at", nowIso)
             .order("starts_at", { ascending: true })
             .limit(10);

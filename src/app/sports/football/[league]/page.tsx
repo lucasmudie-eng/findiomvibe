@@ -1,4 +1,5 @@
 // src/app/sports/football/[league]/page.tsx
+
 import { headers } from "next/headers";
 import Link from "next/link";
 import LeagueSwitcher from "@/components/LeagueSwitcher";
@@ -21,9 +22,7 @@ function absolute(path: string) {
 async function fetchLeagueBundle(league: string): Promise<LeagueBundle> {
   const url = absolute(`/api/feed/football?league=${league}`);
   const res = await fetch(url, { next: { revalidate: 60 } });
-  if (!res.ok) {
-    throw new Error(`Failed to load league: ${league}`);
-  }
+  if (!res.ok) throw new Error(`Failed to load league: ${league}`);
   return res.json();
 }
 
@@ -44,6 +43,7 @@ export default async function LeaguePage({
   searchParams?: Record<string, string | string[] | undefined>;
 }) {
   const league = params.league as LeagueId;
+
   const tab =
     (Array.isArray(searchParams?.tab)
       ? searchParams?.tab[0]
@@ -65,7 +65,7 @@ export default async function LeaguePage({
   }));
 
   return (
-    <main className="mx-auto max-w-6xl px-4 py-8 space-y-6">
+    <main className="mx-auto max-w-6xl space-y-6 px-4 py-8">
       {/* Breadcrumb */}
       <nav className="text-sm text-gray-500">
         <Link href="/sports" className="hover:underline">
@@ -78,25 +78,27 @@ export default async function LeaguePage({
         / <span className="text-gray-800">{label}</span>
       </nav>
 
-      {/* Hero header */}
-      <section className="flex flex-col gap-4 rounded-2xl bg-gradient-to-r from-[#D90429] via-[#e43c3c] to-[#f0634a] p-6 text-white shadow-sm">
-        <div className="flex flex-wrap items-center justify-between gap-3">
+      {/* HERO */}
+      <section className="rounded-2xl bg-gradient-to-r from-[#D90429] via-[#e43c3c] to-[#f0634a] p-6 text-white shadow-md">
+        <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-semibold">{label}</h1>
+            <h1 className="text-2xl font-semibold sm:text-3xl">{label}</h1>
             <p className="text-sm text-white/80">
-              Latest results, upcoming fixtures, and live league table.
+              Latest results, fixtures & updated league table.
             </p>
           </div>
+
           <LeagueSwitcher
             current={league}
             leagues={LEAGUE_LABELS}
-            className="bg-white/10"
+            className="rounded-xl bg-white text-gray-800 px-4 py-2 shadow-sm border border-white"
           />
         </div>
       </section>
 
+      {/* Content grid */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        {/* Left: Results + Fixtures */}
+        {/* Left Column */}
         <div className="space-y-6 lg:col-span-2">
           {/* Latest Results */}
           <section className="rounded-2xl border bg-white p-5 shadow-sm">
@@ -106,12 +108,13 @@ export default async function LeaguePage({
               </h2>
               <Link
                 href={`/sports/football/${league}?tab=results`}
-                className="text-sm text-[#D90429] hover:underline"
+                className="text-sm font-medium text-[#D90429] hover:underline"
               >
                 View all results
               </Link>
             </div>
-            {latestResults.length === 0 ? (
+
+            {!latestResults.length ? (
               <p className="py-2 text-sm text-gray-500">No results yet.</p>
             ) : (
               <ul className="divide-y">
@@ -122,12 +125,13 @@ export default async function LeaguePage({
                     r.homeGoals,
                     r.awayGoals
                   );
+
                   return (
                     <li
                       key={r.id}
-                      className="flex items-center justify-between gap-3 py-3 text-sm"
+                      className="flex items-center justify-between py-3 text-sm"
                     >
-                      <div className="flex flex-col">
+                      <div>
                         <div className="flex flex-wrap items-center gap-2">
                           <span className="font-medium text-gray-900">
                             {line.left}
@@ -137,14 +141,15 @@ export default async function LeaguePage({
                             {line.right}
                           </span>
                         </div>
-                        <span className="mt-0.5 text-xs text-gray-500">
-                          {new Date(r.date).toLocaleString(undefined, {
+                        <div className="mt-0.5 text-xs text-gray-500">
+                          {new Date(r.date).toLocaleString("en-GB", {
                             weekday: "short",
                             hour: "2-digit",
                             minute: "2-digit",
                           })}
-                        </span>
+                        </div>
                       </div>
+
                       <span className="rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-600">
                         FT
                       </span>
@@ -163,12 +168,13 @@ export default async function LeaguePage({
               </h2>
               <Link
                 href={`/sports/football/${league}?tab=fixtures`}
-                className="text-sm text-[#D90429] hover:underline"
+                className="text-sm font-medium text-[#D90429] hover:underline"
               >
                 View full schedule
               </Link>
             </div>
-            {upcoming.length === 0 ? (
+
+            {!upcoming.length ? (
               <p className="py-2 text-sm text-gray-500">
                 No upcoming fixtures.
               </p>
@@ -176,10 +182,11 @@ export default async function LeaguePage({
               <ul className="divide-y">
                 {upcoming.map((f) => {
                   const line = formatScoreLine(f.homeId, f.awayId);
+
                   return (
                     <li
                       key={f.id}
-                      className="flex items-center justify-between gap-3 py-3 text-sm"
+                      className="flex items-center justify-between py-3 text-sm"
                     >
                       <div>
                         <div className="flex flex-wrap items-center gap-2">
@@ -191,8 +198,9 @@ export default async function LeaguePage({
                             {line.right}
                           </span>
                         </div>
+
                         <div className="mt-0.5 text-xs text-gray-500">
-                          {new Date(f.date).toLocaleString(undefined, {
+                          {new Date(f.date).toLocaleString("en-GB", {
                             weekday: "short",
                             hour: "2-digit",
                             minute: "2-digit",
@@ -200,6 +208,7 @@ export default async function LeaguePage({
                           {f.venue ? ` • ${f.venue}` : ""}
                         </div>
                       </div>
+
                       <span className="rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-600">
                         Scheduled
                       </span>
@@ -211,7 +220,7 @@ export default async function LeaguePage({
           </section>
         </div>
 
-        {/* Right: League Table */}
+        {/* Right Column — League Table */}
         <aside className="rounded-2xl border bg-white p-5 shadow-sm">
           <div className="mb-3 flex items-center justify-between">
             <h2 className="text-lg font-semibold text-gray-900">
@@ -235,13 +244,15 @@ export default async function LeaguePage({
                   <th className="px-2">GF</th>
                   <th className="px-2">GA</th>
                   <th className="px-2">GD</th>
-                  <th className="pl-2 text-right">Pts</th>
+                  <th className="px-2 text-right">Pts</th>
                 </tr>
               </thead>
+
               <tbody className="divide-y">
                 {tableRows.map((row) => (
                   <tr key={row.teamId}>
                     <td className="py-1 pr-2">{row.pos}</td>
+
                     <td className="py-1 pr-2">
                       <Link
                         href={`/sports/football/${league}/${row.teamId}`}
@@ -250,6 +261,7 @@ export default async function LeaguePage({
                         {row.name}
                       </Link>
                     </td>
+
                     <td className="px-2">{row.played}</td>
                     <td className="px-2">{row.won}</td>
                     <td className="px-2">{row.drawn}</td>
@@ -257,6 +269,7 @@ export default async function LeaguePage({
                     <td className="px-2">{row.gf}</td>
                     <td className="px-2">{row.ga}</td>
                     <td className="px-2">{row.gd}</td>
+
                     <td className="px-2 text-right font-semibold">
                       {row.points}
                     </td>
