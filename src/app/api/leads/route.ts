@@ -3,44 +3,87 @@ import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { Resend } from "resend";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const resendApiKey = process.env.RESEND_API_KEY ?? "";
+const resend = resendApiKey ? new Resend(resendApiKey) : null;
 
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL ?? "manxhive@gmail.com";
-const FROM_EMAIL  = process.env.EMAIL_FROM   ?? "enquiries@manxhive.com"; // your Resend sender
+const FROM_EMAIL = process.env.EMAIL_FROM ?? "enquiries@manxhive.com"; // your Resend sender
 
 function validEmail(e: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);
 }
 
+// tiny helpers to avoid HTML injection
+function escapeHtml(s: string) {
+  return s.replace(/[&<>"']/g, (c) => {
+    return (
+      {
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;",
+      }[c] || c
+    );
+  });
+}
+
+function escapeAttr(s: string) {
+  return s.replace(/"/g, "&quot;");
+}
+
 export async function POST(req: Request) {
+  // 🔒 If Supabase admin isn’t configured, don’t throw – just return 501
+  if (!supabaseAdmin) {
+    console.warn(
+      "[api/leads] Supabase env vars missing. This route will return 501 in this environment."
+    );
+    return NextResponse.json(
+      { error: "Leads API not configured in this environment." },
+      { status: 501 }
+    );
+  }
+
   try {
     const body = await req.json().catch(() => ({}));
 
-    const providerSlug  = String(body?.providerSlug || "").trim();
-    const providerName  = String(body?.providerName || "").trim();
-    const name          = String(body?.name || "").trim();
-    const email         = String(body?.email || "").trim();
-    const message       = String(body?.message || "").trim();
+    const providerSlug = String(body?.providerSlug || "").trim();
+    const providerName = String(body?.providerName || "").trim();
+    const name = String(body?.name || "").trim();
+    const email = String(body?.email || "").trim();
+    const message = String(body?.message || "").trim();
 
     if (!providerSlug || !providerName || !name || !email || !message) {
-      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Missing required fields" },
+        { status: 400 }
+      );
     }
     if (!validEmail(email)) {
-      return NextResponse.json({ error: "Invalid email" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Invalid email" },
+        { status: 400 }
+      );
     }
 
     // 1) Store the lead
-    const { error: insertError } = await supabaseAdmin.from("leads").insert({
-      provider_slug: providerSlug,
-      provider_name: providerName,
-      name,
-      email,
-      message,
-      handled: false,
-    });
+    const { error: insertError } = await supabaseAdmin
+      .from("leads")
+      .insert({
+        provider_slug: providerSlug,
+        provider_name: providerName,
+        name,
+        email,
+        message,
+        handled: false,
+      });
+
     if (insertError) {
       console.error(insertError);
-      return NextResponse.json({ error: "Database insert failed" }, { status: 500 });
+      return NextResponse.json(
+        { error: "Database insert failed" },
+        { status: 500 }
+      );
     }
 
     // 2) Get provider email (if present)
@@ -52,50 +95,60 @@ export async function POST(req: Request) {
 
     if (fetchError) console.error(fetchError);
 
-    const providerEmail = (provider?.email && validEmail(provider.email))
-      ? provider.email
-      : null;
+    const providerEmail =
+      provider?.email && validEmail(provider.email)
+        ? provider.email
+        : null;
 
     // 3) Compose recipients (always CC admin)
-    const toRecipients = providerEmail ? [providerEmail, ADMIN_EMAIL] : [ADMIN_EMAIL];
+    const toRecipients = providerEmail
+      ? [providerEmail, ADMIN_EMAIL]
+      : [ADMIN_EMAIL];
 
-    // 4) Send the email via Resend
-    await resend.emails.send({
-      from: `ManxHive Enquiries <${FROM_EMAIL}>`,
-      to: toRecipients,
-      replyTo: email, // provider can reply directly to the customer
-      subject: `New enquiry for ${providerName}`,
-      text: [
-        `New enquiry from ${name}`,
-        ``,
-        `Service: ${providerName}`,
-        `Email: ${email}`,
-        ``,
-        `Message:`,
-        message,
-      ].join("\n"),
-      html: `
-        <div style="font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; line-height:1.5; color:#111;">
-          <h2 style="margin:0 0 12px;">New enquiry from ${escapeHtml(name)}</h2>
-          <p style="margin:0 0 8px;"><strong>Service:</strong> ${escapeHtml(providerName)}</p>
-          <p style="margin:0 0 16px;"><strong>Email:</strong> <a href="mailto:${escapeAttr(email)}">${escapeHtml(email)}</a></p>
-          <p style="margin:0 0 6px;"><strong>Message:</strong></p>
-          <p style="white-space:pre-wrap; margin:0;">${escapeHtml(message)}</p>
-        </div>
-      `,
-    });
+    // 4) Send the email via Resend (if configured)
+    if (resend) {
+      await resend.emails.send({
+        from: `ManxHive Enquiries <${FROM_EMAIL}>`,
+        to: toRecipients,
+        replyTo: email, // provider can reply directly to the customer
+        subject: `New enquiry for ${providerName}`,
+        text: [
+          `New enquiry from ${name}`,
+          ``,
+          `Service: ${providerName}`,
+          `Email: ${email}`,
+          ``,
+          `Message:`,
+          message,
+        ].join("\n"),
+        html: `
+          <div style="font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; line-height:1.5; color:#111;">
+            <h2 style="margin:0 0 12px;">New enquiry from ${escapeHtml(
+              name
+            )}</h2>
+            <p style="margin:0 0 8px;"><strong>Service:</strong> ${escapeHtml(
+              providerName
+            )}</p>
+            <p style="margin:0 0 16px;"><strong>Email:</strong> <a href="mailto:${escapeAttr(
+              email
+            )}">${escapeHtml(email)}</a></p>
+            <p style="margin:0 0 6px;"><strong>Message:</strong></p>
+            <p style="white-space:pre-wrap; margin:0;">${escapeHtml(
+              message
+            )}</p>
+          </div>
+        `,
+      });
+    } else {
+      console.warn("[api/leads] RESEND_API_KEY missing – skipping email send.");
+    }
 
     return NextResponse.json({ ok: true }, { status: 201 });
   } catch (err) {
     console.error(err);
-    return NextResponse.json({ error: "Unexpected error" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Unexpected error" },
+      { status: 500 }
+    );
   }
-}
-
-// tiny helpers to avoid HTML injection
-function escapeHtml(s: string) {
-  return s.replace(/[&<>"']/g, (c) => ({ "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;" }[c]!));
-}
-function escapeAttr(s: string) {
-  return s.replace(/"/g, "&quot;");
 }

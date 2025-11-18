@@ -1,55 +1,50 @@
+// src/app/api/admin/businesses/route.ts
 import { NextResponse } from "next/server";
-import { supabaseAdmin } from "@/lib/supabase/admin";
+import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
-const ADMIN_EMAILS =
-  (process.env.ADMIN_EMAILS || process.env.NEXT_PUBLIC_ADMIN_EMAILS || "")
-    .split(",")
-    .map(s => s.trim().toLowerCase())
-    .filter(Boolean);
+export const runtime = "nodejs";
 
-export async function POST(req: Request) {
+export async function GET() {
+  if (!supabaseAdmin) {
+    console.warn("[api/admin/businesses] Supabase admin not configured.");
+    return NextResponse.json(
+      { error: "Admin API not configured.", items: [] },
+      { status: 501 }
+    );
+  }
+
   try {
-    const body = await req.json();
-    const { action, id, value, email } = body as {
-      action: "approve" | "boost" | "delete";
-      id: string;
-      value?: boolean;
-      email?: string | null;
-    };
+    const { data, error } = await supabaseAdmin
+      .from("businesses")
+      .select(
+        `
+          id,
+          name,
+          slug,
+          area,
+          category,
+          approved,
+          boosted,
+          created_at,
+          updated_at
+        `
+      )
+      .order("created_at", { ascending: false });
 
-    // Basic guard: UI already hides for non-admins, but enforce again here
-    if (!email || !ADMIN_EMAILS.includes(email.toLowerCase())) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    if (error) {
+      console.error("[api/admin/businesses] query error", error);
+      return NextResponse.json(
+        { error: "Query error", items: [] },
+        { status: 500 }
+      );
     }
 
-    const admin = supabaseAdmin();
-
-    if (action === "approve") {
-      const { error } = await admin
-        .from("businesses")
-        .update({ approved: !!value })
-        .eq("id", id);
-      if (error) throw error;
-      return NextResponse.json({ ok: true });
-    }
-
-    if (action === "boost") {
-      const { error } = await admin
-        .from("businesses")
-        .update({ boosted: !!value })
-        .eq("id", id);
-      if (error) throw error;
-      return NextResponse.json({ ok: true });
-    }
-
-    if (action === "delete") {
-      const { error } = await admin.from("businesses").delete().eq("id", id);
-      if (error) throw error;
-      return NextResponse.json({ ok: true });
-    }
-
-    return NextResponse.json({ error: "Bad action" }, { status: 400 });
-  } catch (e: any) {
-    return NextResponse.json({ error: e?.message || "Server error" }, { status: 500 });
+    return NextResponse.json({ items: data ?? [] });
+  } catch (e) {
+    console.error("[api/admin/businesses] fatal", e);
+    return NextResponse.json(
+      { error: "Unexpected error", items: [] },
+      { status: 500 }
+    );
   }
 }
