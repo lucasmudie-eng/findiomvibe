@@ -134,11 +134,7 @@ export default function AdminEnquiriesPage() {
           buyer_email,
           message,
           status,
-          created_at,
-          marketplace_listings (
-            title,
-            seller_user_id
-          )
+          created_at
         `
         )
         .order("created_at", { ascending: false });
@@ -159,7 +155,7 @@ export default function AdminEnquiriesPage() {
           message: row.message,
           status: row.status,
           created_at: row.created_at,
-          listing: row.marketplace_listings || null,
+          listing: null, // no joined listing data for now
         })) ?? [];
 
       setEnquiries(mapped);

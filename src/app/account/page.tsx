@@ -150,7 +150,7 @@ export default function AccountPage() {
       setUpgradeBusy(true);
       setUpgradeMsg(null);
 
-      const res = await fetch("/api/billing/save-checkout", {
+      const res = await fetch("/api/billing/create-checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ plan }),

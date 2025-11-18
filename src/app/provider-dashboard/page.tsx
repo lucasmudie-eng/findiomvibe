@@ -48,9 +48,8 @@ type ListingSummary = {
 type EnquirySummary = {
   id: string;
   listing_id: string | null;
-  listing_title?: string | null;
-  from_name?: string | null;
-  from_email?: string | null;
+  buyer_name?: string | null;
+  buyer_email?: string | null;
   message_preview: string;
   created_at: string | null;
   status: string | null;
@@ -229,7 +228,7 @@ export default function ProviderDashboardPage() {
 
         setListings(mappedListings);
 
-        // 5) Enquiries (best-effort)
+        // 5) Enquiries (best-effort, scoped to this seller)
         try {
           const { data: enquiriesData, error: enquiriesError } = await supabase
             .from("marketplace_enquiries")
@@ -237,12 +236,11 @@ export default function ProviderDashboardPage() {
               `
               id,
               listing_id,
-              from_name,
-              from_email,
+              buyer_name,
+              buyer_email,
               message,
               created_at,
-              status,
-              listings:listing_id ( title )
+              status
             `
             )
             .eq("seller_user_id", user.id)
@@ -259,9 +257,8 @@ export default function ProviderDashboardPage() {
               enquiriesData?.map((e: any) => ({
                 id: e.id,
                 listing_id: e.listing_id,
-                listing_title: e.listings?.title ?? null,
-                from_name: e.from_name ?? null,
-                from_email: e.from_email ?? null,
+                buyer_name: e.buyer_name ?? null,
+                buyer_email: e.buyer_email ?? null,
                 message_preview: (e.message || "").slice(0, 80),
                 created_at: e.created_at,
                 status: e.status ?? "New",
@@ -662,7 +659,7 @@ export default function ProviderDashboardPage() {
 
         {/* Right column */}
         <aside className="space-y-4">
-          {/* Recent enquiries (live if table wired) */}
+          {/* Recent enquiries */}
           <div className="rounded-2xl border bg-white p-4 shadow-sm">
             <div className="mb-2 flex items-center justify-between">
               <h3 className="text-xs font-semibold text-gray-900">
@@ -686,7 +683,7 @@ export default function ProviderDashboardPage() {
                     >
                       <div className="flex items-center justify-between gap-2">
                         <span className="font-semibold text-gray-900">
-                          {e.from_name || e.from_email || "Enquiry"}
+                          {e.buyer_name || e.buyer_email || "Enquiry"}
                         </span>
                         <span className="text-[8px] text-gray-500">
                           {e.created_at
@@ -694,9 +691,9 @@ export default function ProviderDashboardPage() {
                             : ""}
                         </span>
                       </div>
-                      {e.listing_title && (
+                      {e.listing_id && (
                         <div className="mt-0.5 text-[9px] text-gray-500">
-                          Regarding: {e.listing_title}
+                          Listing ID: {e.listing_id}
                         </div>
                       )}
                       <div className="mt-0.5 line-clamp-2 text-[9px] text-gray-700">
