@@ -15,7 +15,8 @@ export type SpotlightStory = {
   image: string;
 };
 
-export const STORIES: SpotlightStory[] = [
+// ❗ FIX: removed "export" — Next.js pages cannot export arbitrary fields
+const STORIES: SpotlightStory[] = [
   {
     slug: "laxey-bakery-local-legend",
     title: "How A Laxey Bakery Turned Local Loaves Into Island-Wide Hype",
@@ -141,7 +142,6 @@ export default function CommunitySpotlightPage() {
             </Link>
           </div>
 
-          {/* Image slot */}
           <div className="relative h-40 w-full overflow-hidden rounded-2xl bg-gray-100">
             <Image
               src={featured.image}
