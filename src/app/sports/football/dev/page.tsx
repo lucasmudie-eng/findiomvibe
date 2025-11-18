@@ -1,25 +1,56 @@
-const getBaseUrl = () =>
-  typeof window !== "undefined" ? "" : process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+// src/app/sports/football/dev/page.tsx
+"use client";
 
-export default async function DevFootball() {
-  const res = await fetch(`${getBaseUrl()}/api/feed/football`, { next: { revalidate: 60 } });
-  const data = await res.json();
+import useSWR from "swr";
+import Link from "next/link";
+
+const fetcher = (url: string) =>
+  fetch(url).then((res) => {
+    if (!res.ok) throw new Error("Failed to load");
+    return res.json();
+  });
+
+export default function DevFootball() {
+  const { data, error, isLoading } = useSWR("/api/feed/football", fetcher, {
+    revalidateOnFocus: false,
+  });
+
+  if (isLoading) {
+    return (
+      <main className="mx-auto max-w-5xl p-6">
+        <h1 className="text-2xl font-semibold mb-4">Football Dev Links</h1>
+        <p className="text-sm text-gray-600">Loading teams…</p>
+      </main>
+    );
+  }
+
+  if (error || !data) {
+    return (
+      <main className="mx-auto max-w-5xl p-6">
+        <h1 className="text-2xl font-semibold mb-4">Football Dev Links</h1>
+        <p className="text-sm text-red-600">
+          Couldn&apos;t load data from <code>/api/feed/football</code>. Check the API route and
+          try again.
+        </p>
+      </main>
+    );
+  }
 
   return (
-    <div className="max-w-5xl mx-auto p-6">
+    <main className="mx-auto max-w-5xl p-6">
       <h1 className="text-2xl font-semibold mb-4">Football Dev Links</h1>
-      <ul className="grid sm:grid-cols-2 gap-2">
+      <ul className="grid gap-2 sm:grid-cols-2">
         {data.teams.map((t: any) => (
           <li key={t.id}>
-            <a
-              className="block border rounded-xl p-3 hover:bg-muted"
+            <Link
               href={`/sports/football/${data.league}/${t.id}`}
+              className="block rounded-xl border p-3 hover:bg-muted"
             >
               {t.name}
-            </a>
+            </Link>
           </li>
         ))}
       </ul>
-    </div>
+    </main>
   );
 }

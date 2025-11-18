@@ -1,7 +1,8 @@
+// src/app/marketplace/create/page.tsx
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { supabaseBrowser } from "@/lib/supabase/client";
 import {
   CATEGORY_LABELS,
@@ -32,7 +33,6 @@ const CONDITIONS: ItemCondition[] = [
 export default function CreateListingPage() {
   const supabase = supabaseBrowser();
   const router = useRouter();
-  const searchParams = useSearchParams();
 
   const [loadingUser, setLoadingUser] = useState(true);
   const [userId, setUserId] = useState<string | null>(null);
@@ -41,8 +41,7 @@ export default function CreateListingPage() {
   const [category, setCategory] = useState<CategorySlug>("electronics");
   const [price, setPrice] = useState("");
   const [negotiable, setNegotiable] = useState(false);
-  const [condition, setCondition] =
-    useState<ItemCondition>("Lightly Used");
+  const [condition, setCondition] = useState<ItemCondition>("Lightly Used");
   const [area, setArea] = useState("");
   const [description, setDescription] = useState("");
   const [imageUrls, setImageUrls] = useState("");
@@ -59,9 +58,7 @@ export default function CreateListingPage() {
       } = await supabase.auth.getUser();
 
       if (!user) {
-        const next = encodeURIComponent(
-          searchParams.get("next") || "/marketplace/create"
-        );
+        const next = encodeURIComponent("/marketplace/create");
         router.replace(`/login?next=${next}`);
         return;
       }
@@ -122,9 +119,7 @@ export default function CreateListingPage() {
       .maybeSingle();
 
     if (insertError || !data) {
-      setError(
-        insertError?.message || "Could not create listing. Try again."
-      );
+      setError(insertError?.message || "Could not create listing. Try again.");
       setSubmitting(false);
       return;
     }
@@ -142,9 +137,7 @@ export default function CreateListingPage() {
   if (loadingUser) {
     return (
       <main className="mx-auto max-w-3xl px-4 py-12">
-        <p className="text-sm text-gray-600">
-          Checking your account...
-        </p>
+        <p className="text-sm text-gray-600">Checking your account...</p>
       </main>
     );
   }
@@ -155,8 +148,8 @@ export default function CreateListingPage() {
         Create a marketplace listing
       </h1>
       <p className="mb-6 text-sm text-gray-600">
-        Fill in the details below. Listings are reviewed before they
-        appear publicly.
+        Fill in the details below. Listings are reviewed before they appear
+        publicly.
       </p>
 
       <form
@@ -186,9 +179,7 @@ export default function CreateListingPage() {
             <select
               className="w-full rounded-lg border px-3 py-2 text-sm"
               value={category}
-              onChange={(e) =>
-                setCategory(e.target.value as CategorySlug)
-              }
+              onChange={(e) => setCategory(e.target.value as CategorySlug)}
             >
               {CATEGORY_ORDER.map((c) => (
                 <option key={c} value={c}>
@@ -248,9 +239,7 @@ export default function CreateListingPage() {
           <select
             className="w-full rounded-lg border px-3 py-2 text-sm"
             value={condition}
-            onChange={(e) =>
-              setCondition(e.target.value as ItemCondition)
-            }
+            onChange={(e) => setCondition(e.target.value as ItemCondition)}
           >
             {CONDITIONS.map((c) => (
               <option key={c} value={c}>
@@ -290,20 +279,12 @@ export default function CreateListingPage() {
         </div>
 
         <p className="text-xs text-gray-500">
-          Your listing will be submitted for approval. Once approved,
-          it will appear on the public marketplace.
+          Your listing will be submitted for approval. Once approved, it will
+          appear on the public marketplace.
         </p>
 
-        {error && (
-          <p className="text-sm text-red-600">
-            {error}
-          </p>
-        )}
-        {ok && (
-          <p className="text-sm text-emerald-600">
-            {ok}
-          </p>
-        )}
+        {error && <p className="text-sm text-red-600">{error}</p>}
+        {ok && <p className="text-sm text-emerald-600">{ok}</p>}
 
         <button
           type="submit"

@@ -34,13 +34,13 @@ function formatCategory(raw?: string | null, style: "slash" | "amp" = "slash") {
   return raw.replace(/-/g, joiner).replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
-/** Treat any of these as “Cars & Motor Trade” without changing your DB */
+/** Cars tab logic */
 function isCarsCategory(cat?: string | null) {
   if (!cat) return false;
   return /(car|motor|vehicle|auto)/i.test(cat);
 }
 
-/** Added "cars" as a virtual tab; everything else unchanged */
+/** Add virtual tabs */
 const MAIN_TABS: (MainCategory | "cars" | "hottest" | "other")[] = [
   "hottest",
   "cars",
@@ -59,13 +59,15 @@ export default function BusinessesPage() {
 
   const activeMainDef = useMemo(
     () =>
-      activeMain !== "hottest" && activeMain !== "other" && activeMain !== "cars"
+      activeMain !== "hottest" &&
+      activeMain !== "other" &&
+      activeMain !== "cars"
         ? BUSINESS_CATEGORIES.find((c) => c.key === activeMain)
         : null,
     [activeMain]
   );
 
-  // race-guard so only last fetch updates state
+  // race-guard
   const fetchSeq = useRef(0);
 
   useEffect(() => {
@@ -76,14 +78,17 @@ export default function BusinessesPage() {
     async function load() {
       setLoading(true);
 
-      // 1) Featured — get boosted list and pick best match
+      /* ---------- FEATURED ---------- */
       try {
-        const fUrl = `/api/businesses?boosted=1&limit=10`;
-        const fres = await fetch(fUrl, { signal: controller.signal, cache: "no-store" });
+        const fres = await fetch(`/api/businesses?boosted=1&limit=10`, {
+          signal: controller.signal,
+          cache: "no-store",
+        });
         const fjson: { items?: Biz[] } = await fres.json();
         const boosted = fjson.items || [];
 
         let chosen: Biz | null = null;
+
         if (boosted.length) {
           if (activeMain === "cars") {
             chosen = boosted.find((b) => isCarsCategory(b.category)) || boosted[0];
@@ -96,6 +101,7 @@ export default function BusinessesPage() {
             chosen = boosted[0];
           }
         }
+
         if (!cancelled && mySeq === fetchSeq.current) {
           setFeatured(chosen ?? null);
         }
@@ -103,36 +109,44 @@ export default function BusinessesPage() {
         if (!cancelled && mySeq === fetchSeq.current) setFeatured(null);
       }
 
-      // 2) Listings — use your API route (stable in dev/prod)
+      /* ---------- LISTINGS ---------- */
       try {
         let url = "";
+
         if (activeMain === "hottest") {
           url = `/api/businesses?hottest=1&limit=120`;
-        } else if (activeMain === "other") {
-          // fetch all approved then filter client-side to "other"
-          url = `/api/businesses?limit=200`;
-        } else if (activeMain === "cars") {
-          // fetch all approved then filter to car/motor categories client-side
-          url = `/api/businesses?limit=200`;
+        } else if (activeMain === "other" || activeMain === "cars") {
+          url = `/api/businesses?limit=200`; // fetch all
         } else {
           url = `/api/businesses?category=${encodeURIComponent(
             String(activeMain)
           )}&limit=120`;
         }
 
-        const res = await fetch(url, { signal: controller.signal, cache: "no-store" });
+        const res = await fetch(url, {
+          signal: controller.signal,
+          cache: "no-store",
+        });
         const json: { items?: Biz[] } = await res.json();
         let rows: Biz[] = json.items || [];
 
+        /* ---------- OTHER FILTER ---------- */
         if (activeMain === "other") {
-          const mainKeys = new Set(BUSINESS_CATEGORIES.map((c) => c.key));
-          rows = rows.filter((r) => !r.category || !mainKeys.has(r.category));
+          const mainKeys = new Set<string>(
+            BUSINESS_CATEGORIES.map((c) => c.key as string)
+          );
+
+          rows = rows.filter(
+            (r) => !r.category || !mainKeys.has(r.category as string)
+          );
         }
 
+        /* ---------- CARS FILTER ---------- */
         if (activeMain === "cars") {
           rows = rows.filter((r) => isCarsCategory(r.category));
         }
 
+        /* ---------- SUBCATEGORY FILTER ---------- */
         if (activeSub) {
           rows = rows.filter((r) => (r.subcategory || "") === activeSub);
         }
@@ -189,6 +203,7 @@ export default function BusinessesPage() {
                   </span>
                 )}
               </div>
+
               <div className="mt-4 flex gap-3">
                 {featured ? (
                   <>
@@ -198,6 +213,7 @@ export default function BusinessesPage() {
                     >
                       View profile →
                     </Link>
+
                     {featured.website_url && (
                       <a
                         href={
@@ -224,10 +240,9 @@ export default function BusinessesPage() {
               </div>
             </div>
 
-            {/* Visual */}
             <div className="relative h-40 w-full overflow-hidden rounded-2xl bg-slate-800 md:h-48">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
               {featured?.images?.[0] || featured?.logo_url ? (
+                // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={(featured.images && featured.images[0]) || featured.logo_url!}
                   alt={featured.name}
@@ -243,7 +258,7 @@ export default function BusinessesPage() {
         </div>
       </section>
 
-      {/* Main category pills */}
+      {/* MAIN TABS */}
       <section className="mt-6 flex flex-wrap gap-3">
         {MAIN_TABS.map((key) => {
           const label =
@@ -253,7 +268,8 @@ export default function BusinessesPage() {
               ? "Other"
               : key === "cars"
               ? "Cars & Motor Trade"
-              : BUSINESS_CATEGORIES.find((c) => c.key === key)?.label ?? String(key);
+              : BUSINESS_CATEGORIES.find((c) => c.key === key)?.label ?? key;
+
           return (
             <button
               key={key}
@@ -274,7 +290,7 @@ export default function BusinessesPage() {
         })}
       </section>
 
-      {/* Subcategories */}
+      {/* SUBCATEGORIES */}
       {activeMainDef && (
         <section className="mt-4 flex flex-wrap gap-2">
           <button
@@ -305,7 +321,7 @@ export default function BusinessesPage() {
         </section>
       )}
 
-      {/* Grid list */}
+      {/* GRID */}
       <section className="mt-8">
         {loading ? (
           <div className="text-sm text-slate-500">Loading…</div>
@@ -320,8 +336,8 @@ export default function BusinessesPage() {
               >
                 <Link href={`/businesses/${b.slug || b.id}`} className="block">
                   <div className="relative mb-3 h-40 w-full overflow-hidden rounded-xl bg-slate-100">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
                     {b.images?.[0] || b.logo_url ? (
+                      // eslint-disable-next-line @next/next/no-img-element
                       <img
                         src={(b.images && b.images[0]) || b.logo_url!}
                         alt={b.name}
@@ -332,6 +348,7 @@ export default function BusinessesPage() {
                         No image
                       </div>
                     )}
+
                     {b.boosted && (
                       <span className="absolute left-2 top-2 rounded-full bg-rose-100 px-2 py-0.5 text-[10px] font-semibold text-[#D90429]">
                         Boosted
@@ -344,9 +361,7 @@ export default function BusinessesPage() {
                       {b.name}
                     </h3>
                     {b.area && (
-                      <span className="text-[10px] text-slate-500">
-                        {b.area}
-                      </span>
+                      <span className="text-[10px] text-slate-500">{b.area}</span>
                     )}
                   </div>
 
@@ -357,9 +372,7 @@ export default function BusinessesPage() {
                   )}
 
                   <div className="mt-2 flex flex-wrap items-center gap-2 text-[11px] text-slate-500">
-                    {b.category && (
-                      <span>{formatCategory(b.category, "slash")}</span>
-                    )}
+                    {b.category && <span>{formatCategory(b.category)}</span>}
                     {b.subcategory && <span>• {b.subcategory}</span>}
                   </div>
 

@@ -176,8 +176,9 @@ export default async function TeamPage({
   const position =
     typeof data.position === "number" ? data.position : teamRow?.pos;
 
-  const played = teamRow?.played ?? teamRow?.p;
-  const points = teamRow?.points ?? teamRow?.pts;
+  // changed: drop legacy `p` field, just use `played`
+  const played = teamRow?.played;
+  const points = teamRow?.points;
   const gf = teamRow?.gf;
   const ga = teamRow?.ga;
   const gd = teamRow?.gd;

@@ -7,7 +7,7 @@ import type { LeagueBundle } from "@/lib/football/types";
 import { formatScoreLine } from "@/lib/football/utils";
 import { DEFAULT_LEAGUE } from "@/lib/football/source";
 
-// Fallback: if for any reason DEFAULT_LEAGUE is missing, use prem.
+// Fallback league for safety
 const FALLBACK_LEAGUE = "iom-premier-league";
 
 const fetcher = (url: string) =>
@@ -17,7 +17,10 @@ const fetcher = (url: string) =>
   });
 
 export default function FootballNow() {
-  const league = DEFAULT_LEAGUE || (FALLBACK_LEAGUE as const);
+  // ❌ Removed invalid `as const`
+  // ❌ Removed union violation
+  const league = DEFAULT_LEAGUE || FALLBACK_LEAGUE;
+
   const { data, error, isLoading } = useSWR<LeagueBundle>(
     `/api/feed/football?league=${league}`,
     fetcher,
@@ -32,14 +35,12 @@ export default function FootballNow() {
 
   return (
     <div className="grid gap-4 sm:grid-cols-2">
-      {/* Latest results */}
+      {/* ---------------- Latest results ---------------- */}
       <div className="space-y-2">
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-1.5">
             <Trophy className="h-3.5 w-3.5 text-[#D90429]" />
-            <h3 className="text-xs font-semibold text-gray-900">
-              Latest results
-            </h3>
+            <h3 className="text-xs font-semibold text-gray-900">Latest results</h3>
           </div>
           <Link
             href="/sports/football/iom-premier-league?tab=results"
@@ -49,28 +50,15 @@ export default function FootballNow() {
           </Link>
         </div>
 
-        {isLoading && (
-          <p className="text-[10px] text-gray-500">Loading…</p>
-        )}
-        {error && (
-          <p className="text-[10px] text-red-500">
-            Couldn&apos;t load results.
-          </p>
-        )}
+        {isLoading && <p className="text-[10px] text-gray-500">Loading…</p>}
+        {error && <p className="text-[10px] text-red-500">Couldn&apos;t load results.</p>}
         {!isLoading && !error && lastTwo.length === 0 && (
-          <p className="text-[10px] text-gray-500">
-            No results yet.
-          </p>
+          <p className="text-[10px] text-gray-500">No results yet.</p>
         )}
 
         <ul className="space-y-1.5">
           {lastTwo.map((r) => {
-            const line = formatScoreLine(
-              r.homeId,
-              r.awayId,
-              r.homeGoals,
-              r.awayGoals
-            );
+            const line = formatScoreLine(r.homeId, r.awayId, r.homeGoals, r.awayGoals);
             return (
               <li
                 key={r.id}
@@ -95,14 +83,12 @@ export default function FootballNow() {
         </ul>
       </div>
 
-      {/* Upcoming fixtures */}
+      {/* ---------------- Upcoming fixtures ---------------- */}
       <div className="space-y-2">
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-1.5">
             <Calendar className="h-3.5 w-3.5 text-[#D90429]" />
-            <h3 className="text-xs font-semibold text-gray-900">
-              Upcoming fixtures
-            </h3>
+            <h3 className="text-xs font-semibold text-gray-900">Upcoming fixtures</h3>
           </div>
           <Link
             href="/sports/football/iom-premier-league?tab=fixtures"
@@ -112,18 +98,10 @@ export default function FootballNow() {
           </Link>
         </div>
 
-        {isLoading && (
-          <p className="text-[10px] text-gray-500">Loading…</p>
-        )}
-        {error && (
-          <p className="text-[10px] text-red-500">
-            Couldn&apos;t load fixtures.
-          </p>
-        )}
+        {isLoading && <p className="text-[10px] text-gray-500">Loading…</p>}
+        {error && <p className="text-[10px] text-red-500">Couldn&apos;t load fixtures.</p>}
         {!isLoading && !error && nextTwo.length === 0 && (
-          <p className="text-[10px] text-gray-500">
-            No upcoming fixtures.
-          </p>
+          <p className="text-[10px] text-gray-500">No upcoming fixtures.</p>
         )}
 
         <ul className="space-y-1.5">

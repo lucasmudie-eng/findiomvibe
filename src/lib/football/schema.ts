@@ -1,51 +1,71 @@
 // src/lib/football/schema.ts
-import { z } from "zod";
 
-// Minimal schemas for external feeds; extend as your source dictates.
-export const FixtureSchema = z.object({
-  id: z.string(),
-  league: z.string(),
-  date: z.string(), // ISO
-  homeId: z.string(),
-  awayId: z.string(),
-  venue: z.string().optional(),
-  status: z.enum(["SCHEDULED", "LIVE", "FT"]).default("SCHEDULED"),
-});
+// We mirror the core football types so DTOs stay in sync.
+import type {
+  LeagueId,
+  TeamId,
+  Fixture,
+  Result,
+  TableEntry,
+  LeagueBundle,
+} from "./types";
 
-export const ResultSchema = FixtureSchema.extend({
-  status: z.literal("FT"),
-  homeGoals: z.number().int().nonnegative(),
-  awayGoals: z.number().int().nonnegative(),
-});
+/**
+ * DTO types – these are the shapes we expect from our
+ * (future) external feeds or intermediate transforms.
+ *
+ * Right now they just alias the core types to avoid
+ * duplicating shape definitions.
+ */
 
-export const TableEntrySchema = z.object({
-  teamId: z.string(),
-  played: z.number().int().nonnegative(),
-  won: z.number().int().nonnegative(),
-  drawn: z.number().int().nonnegative(),
-  lost: z.number().int().nonnegative(),
-  gf: z.number().int().nonnegative(),
-  ga: z.number().int().nonnegative(),
-  gd: z.number().int(), // can be negative
-  points: z.number().int().nonnegative(),
-  pos: z.number().int().positive().optional(),
-});
+export type FixtureDTO = Fixture & {
+  league: LeagueId | string;
+  homeId: TeamId | string;
+  awayId: TeamId | string;
+};
 
-export const LeagueBundleSchema = z.object({
-  league: z.string(),
-  teams: z.array(z.object({
-    id: z.string(),
-    name: z.string(),
-    league: z.string(),
-    isCombination: z.boolean().optional(),
-    crestUrl: z.string().url().optional(),
-  })),
-  fixturesUpcoming: z.array(FixtureSchema),
-  resultsRecent: z.array(ResultSchema),
-  table: z.array(TableEntrySchema),
-  updatedAt: z.string(),
-});
+export type ResultDTO = Result & {
+  league: LeagueId | string;
+  homeId: TeamId | string;
+  awayId: TeamId | string;
+};
 
-export type FixtureDTO = z.infer<typeof FixtureSchema>;
-export type ResultDTO = z.infer<typeof ResultSchema>;
-export type LeagueBundleDTO = z.infer<typeof LeagueBundleSchema>;
+export type TableEntryDTO = TableEntry & {
+  teamId: TeamId | string;
+};
+
+export type LeagueBundleDTO = LeagueBundle & {
+  league: LeagueId | string;
+  table: TableEntryDTO[];
+};
+
+/**
+ * Lightweight “schema” objects to preserve the old API.
+ * They currently just act as typed pass-throughs.
+ * If/when we need real runtime validation, we can bolt it
+ * back on here without touching the rest of the app.
+ */
+
+export const FixtureSchema = {
+  parse(input: unknown): FixtureDTO {
+    return input as FixtureDTO;
+  },
+};
+
+export const ResultSchema = {
+  parse(input: unknown): ResultDTO {
+    return input as ResultDTO;
+  },
+};
+
+export const TableEntrySchema = {
+  parse(input: unknown): TableEntryDTO {
+    return input as TableEntryDTO;
+  },
+};
+
+export const LeagueBundleSchema = {
+  parse(input: unknown): LeagueBundleDTO {
+    return input as LeagueBundleDTO;
+  },
+};

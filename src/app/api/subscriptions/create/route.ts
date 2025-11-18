@@ -22,7 +22,7 @@ export async function POST(req: Request) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
 
-  const stripe = new Stripe(stripeSecret, { apiVersion: "2024-06-20" });
+  const stripe = new Stripe(stripeSecret, { apiVersion: "2025-10-29.clover" });
   const price = plan === "premium" ? pricePremium : pricePro;
 
   const session = await stripe.checkout.sessions.create({

@@ -1,7 +1,8 @@
+// src/app/whats-on/create/page.tsx
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { supabaseBrowser } from "@/lib/supabase/client";
 import {
   WHATS_ON_CATEGORY_LABELS,
@@ -22,14 +23,12 @@ const CATEGORY_ORDER: WhatsOnCategorySlug[] = [
 export default function CreateEventPage() {
   const supabase = supabaseBrowser();
   const router = useRouter();
-  const searchParams = useSearchParams();
 
   const [loadingUser, setLoadingUser] = useState(true);
   const [userId, setUserId] = useState<string | null>(null);
 
   const [title, setTitle] = useState("");
-  const [category, setCategory] =
-    useState<WhatsOnCategorySlug>("community");
+  const [category, setCategory] = useState<WhatsOnCategorySlug>("community");
   const [description, setDescription] = useState("");
   const [venue, setVenue] = useState("");
   const [area, setArea] = useState("");
@@ -53,9 +52,8 @@ export default function CreateEventPage() {
       } = await supabase.auth.getUser();
 
       if (!user) {
-        const next =
-          searchParams.get("next") || "/whats-on/create";
-        router.replace(`/login?next=${encodeURIComponent(next)}`);
+        const next = encodeURIComponent("/whats-on/create");
+        router.replace(`/login?next=${next}`);
         return;
       }
 
@@ -137,9 +135,7 @@ export default function CreateEventPage() {
   if (loadingUser) {
     return (
       <main className="mx-auto max-w-3xl px-4 py-10">
-        <p className="text-sm text-gray-600">
-          Checking your account…
-        </p>
+        <p className="text-sm text-gray-600">Checking your account…</p>
       </main>
     );
   }
@@ -341,12 +337,8 @@ export default function CreateEventPage() {
           island-focused. By submitting you confirm the details are correct.
         </p>
 
-        {error && (
-          <p className="text-sm text-red-600">{error}</p>
-        )}
-        {ok && (
-          <p className="text-sm text-emerald-600">{ok}</p>
-        )}
+        {error && <p className="text-sm text-red-600">{error}</p>}
+        {ok && <p className="text-sm text-emerald-600">{ok}</p>}
 
         <button
           type="submit"

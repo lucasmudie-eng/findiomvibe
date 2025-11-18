@@ -8,6 +8,7 @@ import {
   CategorySlug,
   ItemCondition,
 } from "@/lib/marketplace/types";
+import Link from "next/link";
 
 const CATEGORY_ORDER: CategorySlug[] = [
   "electronics",

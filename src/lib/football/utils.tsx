@@ -84,3 +84,11 @@ export function formatScoreLine(
 
   return { left, score: "vs", right };
 }
+
+/**
+ * Compatibility helper for TeamBadge and legacy components.
+ * Just wraps formatTeamName.
+ */
+export function getTeamDisplayName(id: string): string {
+  return formatTeamName(id);
+}

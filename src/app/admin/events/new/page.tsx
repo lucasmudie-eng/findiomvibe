@@ -1,6 +1,7 @@
+// src/app/admin/events/new/page.tsx
 "use client";
 
-import { useState } from "react";
+import { useState, type ChangeEvent, type FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { supabaseBrowser } from "@/lib/supabase/client";
@@ -39,16 +40,26 @@ export default function AdminNewEventPage() {
   const [successId, setSuccessId] = useState<string | null>(null);
 
   function handleChange(
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+    e: ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
   ) {
-    const { name, value, type, checked } = e.target;
+    const target =
+      e.target as HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement;
+
+    const { name, value, type } = target;
+    const nextValue =
+      type === "checkbox"
+        ? (target as HTMLInputElement).checked
+        : value;
+
     setForm((prev) => ({
       ...prev,
-      [name]: type === "checkbox" ? checked : value,
+      [name]: nextValue,
     }));
   }
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setError(null);
     setSuccessId(null);

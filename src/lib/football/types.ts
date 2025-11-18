@@ -1,19 +1,29 @@
+// src/lib/football/types.ts
+
+// ---------- Core ID types ----------
+
+/**
+ * We keep LeagueId as a strict union because the set of leagues is small
+ * and stable. This gives you nice autocomplete and prevents typos.
+ */
 export type LeagueId =
   | "iom-premier-league"
   | "iom-division-2"
   | "iom-combination-1"
   | "iom-combination-2";
 
-export type TeamId =
-  | "st-georges"
-  | "peel"
-  | "rushen"
-  | "douglas-royal"
-  | "laxey"
-  | "ramsey"
-  | "st-georges-combi"
-  | "peel-combi"
-  | "rushen-combi";
+/**
+ * TeamId is a free string on purpose.
+ *
+ * Reason: team slugs / IDs can and will change (new teams, only-combi sides,
+ * renames, mergers, etc.), and we may later plug into live data.
+ *
+ * Keeping this as `string` avoids constantly fighting TypeScript every time
+ * a new team appears.
+ */
+export type TeamId = string;
+
+// ---------- Core entities ----------
 
 export interface Team {
   id: TeamId;
@@ -27,7 +37,7 @@ export interface Team {
 export interface Fixture {
   id: string;
   league: LeagueId;
-  date: string; // ISO
+  date: string; // ISO string
   homeId: TeamId;
   awayId: TeamId;
   venue?: string;
@@ -40,6 +50,8 @@ export interface Result extends Omit<Fixture, "status"> {
   awayGoals: number;
 }
 
+// ---------- Table ----------
+
 export interface TableEntry {
   teamId: TeamId;
   played: number;
@@ -50,8 +62,10 @@ export interface TableEntry {
   ga: number;
   gd: number;
   points: number;
-  pos?: number;
+  pos?: number; // position in table (1-based)
 }
+
+// ---------- Bundles ----------
 
 export interface LeagueBundle {
   league: LeagueId;
