@@ -11,14 +11,23 @@ const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY;
 const resendApiKey = process.env.RESEND_API_KEY;
 const adminEmail = process.env.ADMIN_EMAIL;
 
-if (!supabaseUrl || !supabaseServiceKey) {
-  throw new Error(
-    "Missing NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_KEY env vars for /api/events/submit."
-  );
-}
-
 export async function POST(req: Request) {
   try {
+    // ⛔️ If env vars are missing (e.g. on Vercel preview without config),
+    // return 501 instead of throwing at module load.
+    if (!supabaseUrl || !supabaseServiceKey) {
+      console.warn(
+        "[api/events/submit] Missing NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_KEY – endpoint disabled."
+      );
+      return NextResponse.json(
+        {
+          error:
+            "Event submission API is not configured on this environment. Please use the What's On submission form instead.",
+        },
+        { status: 501 }
+      );
+    }
+
     const contentType = req.headers.get("content-type") || "";
 
     let payload: any = {};
@@ -27,7 +36,7 @@ export async function POST(req: Request) {
       // JSON payload (if you ever call this route via fetch JSON)
       payload = await req.json();
     } else {
-      // FormData payload (what your submit page is using)
+      // FormData payload (what your submit page was using previously)
       const form = await req.formData();
       payload = {
         title: form.get("title") ?? "",
@@ -73,11 +82,11 @@ export async function POST(req: Request) {
       );
     }
 
-    const supabase = createClient(supabaseUrl!, supabaseServiceKey!, {
+    const supabase = createClient(supabaseUrl, supabaseServiceKey, {
       auth: { persistSession: false },
     });
 
-    // Insert event as pending approval (matches your old direct-insert fields)
+    // Insert event as pending approval
     const { data, error } = await supabase
       .from("events")
       .insert({
@@ -109,7 +118,7 @@ export async function POST(req: Request) {
       );
     }
 
-    // Optional admin email
+    // Optional admin email – only if keys are present
     if (resendApiKey && adminEmail) {
       try {
         const resend = new Resend(resendApiKey);
