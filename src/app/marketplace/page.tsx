@@ -1,7 +1,7 @@
 // src/app/marketplace/page.tsx
 import Link from "next/link";
 import { headers } from "next/headers";
-import { Tag, MapPin, Sparkles } from "lucide-react";
+import { Tag, MapPin, Sparkles, Search } from "lucide-react";
 import type { Metadata } from "next";
 import type { Listing, CategorySlug } from "@/lib/marketplace/types";
 import { CATEGORY_LABELS } from "@/lib/marketplace/types";
@@ -119,6 +119,13 @@ export default async function MarketplacePage({
     ? searchParams?.type[0]
     : searchParams?.type;
 
+  const searchParamRaw = Array.isArray(searchParams?.q)
+    ? searchParams?.q[0]
+    : searchParams?.q;
+  const searchQuery = (searchParamRaw ?? "").trim();
+  const hasSearch = searchQuery.length > 0;
+  const searchQueryLower = searchQuery.toLowerCase();
+
   const isMotorsView =
     (typeParam || "").toLowerCase() === "car" ||
     (categoryParam ? HIDE_MOTORS_SLUGS.has(categoryParam) : false);
@@ -166,7 +173,21 @@ export default async function MarketplacePage({
   const boostedListings = boostedListingsRaw.filter(filterReal);
   const allListings = allListingsRaw.filter(filterReal);
 
-  const mainListings = boostedOnly ? boostedListings : allListings;
+  // 🔎 Search filter (title, area, condition)
+  const matchesSearch = (item: Listing) => {
+    if (!hasSearch) return true;
+    const fields = [
+      item.title ?? "",
+      (item as any).area ?? "",
+      (item as any).condition ?? "",
+    ];
+    return fields.some((f) => f.toLowerCase().includes(searchQueryLower));
+  };
+
+  const boostedFiltered = boostedListings.filter(matchesSearch);
+  const allFiltered = allListings.filter(matchesSearch);
+
+  const mainListings = boostedOnly ? boostedFiltered : allFiltered;
 
   // Hide any category that corresponds to Motors from the normal list
   const categories = Object.entries(CATEGORY_LABELS).filter(
@@ -174,13 +195,17 @@ export default async function MarketplacePage({
       !HIDE_MOTORS_SLUGS.has(slug) && !HIDE_MOTORS_LABELS.has(label)
   );
 
-  const headingLabel = activeCategory
+  let headingLabel = activeCategory
     ? CATEGORY_LABELS[activeCategory] || "Listings"
     : boostedOnly
     ? "Boosted listings"
     : isMotorsView
     ? "Motors & Automotive"
     : "Latest listings";
+
+  if (hasSearch) {
+    headingLabel = "Search results";
+  }
 
   // Base params for helpers: DON'T bake in `boosted` so the toggle can remove it
   const baseParams = new URLSearchParams();
@@ -209,6 +234,14 @@ export default async function MarketplacePage({
     : // currently not filtered → click = add boosted=1
       hrefWith({ boosted: "1" });
 
+  // Clear search but keep other filters
+  const clearSearchHref = (() => {
+    const p = new URLSearchParams(baseParams);
+    if (boostedOnly) p.set("boosted", "1");
+    const qs = p.toString();
+    return qs ? `/marketplace?${qs}` : "/marketplace";
+  })();
+
   return (
     <main className="mx-auto max-w-6xl px-4 py-8 space-y-6">
       {/* Breadcrumb */}
@@ -219,13 +252,50 @@ export default async function MarketplacePage({
         / <span className="text-gray-800">Marketplace</span>
       </nav>
 
-      {/* Header / intro */}
+      {/* Header / intro + search */}
       <section className="flex flex-col gap-3 rounded-2xl border bg-white p-5 shadow-sm md:flex-row md:items-center md:justify-between">
-        <div>
+        <div className="space-y-1">
           <h1 className="text-xl font-semibold text-gray-900">
             ManxHive Marketplace
           </h1>
+          <p className="text-xs text-gray-500">
+            Browse local listings from across the Isle of Man.
+          </p>
         </div>
+
+        {/* Search bar */}
+        <form
+          action="/marketplace"
+          method="GET"
+          className="flex w-full max-w-xs items-center gap-2 rounded-full border bg-gray-50 px-3 py-1.5 text-xs md:max-w-sm"
+        >
+          {/* Preserve current filters */}
+          {activeCategory && !isMotorsView && (
+            <input type="hidden" name="category" value={activeCategory} />
+          )}
+          {isMotorsView && <input type="hidden" name="type" value="car" />}
+          {isMotorsView && sellerType !== "all" && (
+            <input type="hidden" name="sellerType" value={sellerType} />
+          )}
+          {boostedOnly && <input type="hidden" name="boosted" value="1" />}
+
+          <Search className="h-3.5 w-3.5 text-gray-400" />
+          <input
+            name="q"
+            defaultValue={searchQuery}
+            placeholder="Search marketplace..."
+            className="w-full border-none bg-transparent text-xs text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-0"
+          />
+          {hasSearch && (
+            <Link
+              href={clearSearchHref}
+              className="text-[10px] text-gray-500 hover:text-gray-800"
+            >
+              Clear
+            </Link>
+          )}
+        </form>
+
         <div className="flex flex-wrap gap-2 text-xs">
           <Link
             href={boostedToggleHref}
@@ -349,14 +419,14 @@ export default async function MarketplacePage({
           )}
 
           {/* Boosted section */}
-          {!boostedOnly && boostedListings.length > 0 && (
+          {!boostedOnly && boostedFiltered.length > 0 && (
             <div className="rounded-2xl border bg-[#FFF6F6] p-4 shadow-sm">
               <div className="mb-2 flex items-center gap-1.5 text-xs font-semibold text-[#D90429]">
                 <Sparkles className="h-3.5 w-3.5" />
                 Featured / boosted listings
               </div>
               <div className="grid gap-3 md:grid-cols-2">
-                {boostedListings.map((item) => (
+                {boostedFiltered.map((item) => (
                   <Link
                     key={item.id}
                     href={`/marketplace/item/${item.id}`}
@@ -387,7 +457,7 @@ export default async function MarketplacePage({
                       </div>
                       <div className="mt-auto flex items-center gap-2 text-[9px] text-gray-500">
                         <MapPin className="h-3 w-3" />
-                        {item.area}
+                        {(item as any).area}
                       </div>
                     </div>
                   </Link>
@@ -401,8 +471,17 @@ export default async function MarketplacePage({
             <div className="flex items-baseline justify-between gap-2">
               <h2 className="text-sm font-semibold text-gray-900">
                 {headingLabel}
+                {hasSearch && (
+                  <span className="ml-1 text-[11px] font-normal text-gray-500">
+                    for “{searchQuery}”
+                  </span>
+                )}
               </h2>
-              {(activeCategory || boostedOnly || isMotorsView || sellerType !== "all") && (
+              {(activeCategory ||
+                boostedOnly ||
+                isMotorsView ||
+                sellerType !== "all" ||
+                hasSearch) && (
                 <Link
                   href="/marketplace"
                   className="text-[10px] text-[#D90429] hover:underline"
@@ -415,7 +494,7 @@ export default async function MarketplacePage({
             {mainListings.length === 0 ? (
               <p className="rounded-2xl border bg-white p-4 text-xs text-gray-500">
                 No listings found for this view yet. Try another category or
-                check back soon.
+                search term, or check back soon.
               </p>
             ) : (
               <ul className="space-y-2">
@@ -449,29 +528,29 @@ export default async function MarketplacePage({
                           </p>
                         </div>
                         <p className="line-clamp-1 text-[10px] text-gray-500">
-                          {item.condition || "—"} •{" "}
+                          {(item as any).condition || "—"} •{" "}
                           {new Date(
-                            item.dateListed
+                            (item as any).dateListed
                           ).toLocaleDateString("en-GB")}
                         </p>
                         <div className="mt-auto flex flex-wrap items-center gap-2 text-[9px] text-gray-500">
                           <span className="inline-flex items-center gap-1">
                             <MapPin className="h-3 w-3" />
-                            {item.area}
+                            {(item as any).area}
                           </span>
-                          {item.negotiable && (
+                          {(item as any).negotiable && (
                             <span className="rounded-full bg-green-50 px-2 py-0.5 text-[9px] text-green-700">
                               Negotiable
                             </span>
                           )}
-                          {item.boosted && !boostedOnly && (
+                          {(item as any).boosted && !boostedOnly && (
                             <span className="rounded-full bg-[#FFF6F6] px-2 py-0.5 text-[9px] text-[#D90429]">
                               Boosted
                             </span>
                           )}
                           {isMotorsView && (
                             <span className="ml-auto rounded-full bg-slate-100 px-2 py-0.5 text-[9px] text-slate-700">
-                              {item.businessId ? "Dealer" : "Private"}
+                              {(item as any).businessId ? "Dealer" : "Private"}
                             </span>
                           )}
                         </div>

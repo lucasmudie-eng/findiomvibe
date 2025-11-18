@@ -8,6 +8,7 @@ import {
   Sparkles,
   Filter,
   ChevronRight,
+  Search,
 } from "lucide-react";
 
 type EventCategory = "family" | "sports" | "nightlife" | "community" | "other";
@@ -381,6 +382,13 @@ export default async function WhatsOnPage({
     ? searchParams?.on[0]
     : searchParams?.on;
 
+  const searchParamRaw = Array.isArray(searchParams?.q)
+    ? searchParams?.q[0]
+    : searchParams?.q;
+  const searchQuery = (searchParamRaw ?? "").trim();
+  const hasSearch = searchQuery.length > 0;
+  const searchQueryLower = searchQuery.toLowerCase();
+
   const activeCategory =
     categoryParam && categoryParam !== "all"
       ? (categoryParam as EventCategory)
@@ -402,12 +410,22 @@ export default async function WhatsOnPage({
     onDate: activeDay,
   });
 
-  const featured = events.filter((e) => e.featured);
-  const regular = events.filter((e) => !e.featured);
+  // Search filter (title, summary, location)
+  const matchesSearch = (ev: EventItem) => {
+    if (!hasSearch) return true;
+    const fields = [ev.title ?? "", ev.summary ?? "", ev.location ?? ""];
+    return fields.some((f) => f.toLowerCase().includes(searchQueryLower));
+  };
 
+  const filteredEvents = events.filter(matchesSearch);
+
+  const featured = filteredEvents.filter((e) => e.featured);
+  const regular = filteredEvents.filter((e) => !e.featured);
+
+  // Calendar still reflects all upcoming events (not just search results)
   const eventsByDay = buildEventsByDay(events);
 
-  // build href helper that keeps/overrides filters
+  // build href helper that keeps/overrides filters (not search; search is separate)
   const makeHref = ({
     category,
     date,
@@ -437,13 +455,27 @@ export default async function WhatsOnPage({
   };
 
   const headingLabelBase = "Upcoming events";
-  const headingLabel =
-    activeDay && events.length
-      ? `${headingLabelBase} on ${new Date(activeDay).toLocaleDateString(
-          "en-GB",
-          { weekday: "short", day: "numeric", month: "short" }
-        )}`
+  let headingLabel =
+    activeDay && filteredEvents.length
+      ? `${headingLabelBase} on ${new Date(
+          activeDay
+        ).toLocaleDateString("en-GB", {
+          weekday: "short",
+          day: "numeric",
+          month: "short",
+        })}`
       : headingLabelBase;
+
+  if (hasSearch) {
+    headingLabel = "Search results";
+  }
+
+  // Clear search URL but keep category/date/on
+  const clearSearchHref = makeHref({
+    category: activeCategory ?? "all",
+    date: activeDay ? "all" : activeDateFilter,
+    on: activeDay,
+  });
 
   return (
     <main className="mx-auto max-w-6xl px-4 py-8 space-y-6">
@@ -455,8 +487,8 @@ export default async function WhatsOnPage({
         / <span className="text-gray-800">What&apos;s On</span>
       </nav>
 
-      {/* Page header */}
-      <header className="flex flex-col gap-3 rounded-2xl border bg-white p-5 shadow-sm md:flex-row md:items-center md:justify-between">
+      {/* Page header + search */}
+      <header className="flex flex-col gap-4 rounded-2xl border bg-white p-5 shadow-sm md:flex-row md:items-center md:justify-between">
         <div>
           <div className="inline-flex items-center gap-1.5 rounded-full bg-[#FFF6F6] px-2 py-1 text-[10px] font-medium text-[#D90429]">
             <Calendar className="h-3 w-3" />
@@ -469,9 +501,8 @@ export default async function WhatsOnPage({
             A clean view of upcoming events, fixtures, family days, gigs and
             community moments across the island.
           </p>
-        </div>
-        <div className="flex flex-col items-start gap-2 text-xs md:items-end">
-          <p className="text-gray-500">
+
+          <div className="mt-2 text-xs text-gray-500">
             Listing something?{" "}
             <Link
               href="/whats-on/submit"
@@ -479,10 +510,46 @@ export default async function WhatsOnPage({
             >
               Send us your event
             </Link>
-          </p>
+          </div>
+        </div>
+
+        <div className="flex w-full flex-col items-stretch gap-2 text-xs md:w-auto md:items-end">
+          {/* Search bar (page-local search) */}
+          <form
+            action="/whats-on"
+            method="GET"
+            className="flex w-full max-w-xs items-center gap-2 rounded-full border bg-gray-50 px-3 py-1.5 text-xs md:max-w-sm"
+          >
+            {/* Preserve current filters */}
+            {activeCategory && (
+              <input type="hidden" name="category" value={activeCategory} />
+            )}
+            {activeDay && <input type="hidden" name="on" value={activeDay} />}
+            {!activeDay &&
+              activeDateFilter &&
+              activeDateFilter !== "all" && (
+                <input type="hidden" name="date" value={activeDateFilter} />
+              )}
+
+            <Search className="h-3.5 w-3.5 text-gray-400" />
+            <input
+              name="q"
+              defaultValue={searchQuery}
+              placeholder="Search events (title, location, summary)..."
+              className="w-full border-none bg-transparent text-xs text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-0"
+            />
+            {hasSearch && (
+              <Link
+                href={clearSearchHref}
+                className="text-[10px] text-gray-500 hover:text-gray-800"
+              >
+                Clear
+              </Link>
+            )}
+          </form>
+
           <p className="text-[10px] text-gray-400">
-            For launch this is curated by the ManxHive team. Self-serve tools
-            coming soon.
+            Search applies only to What&apos;s On events.
           </p>
         </div>
       </header>
@@ -561,7 +628,7 @@ export default async function WhatsOnPage({
 
       {/* Featured strip */}
       {featured.length > 0 && (
-        <section className="rounded-2xl border bg-[#FFF6F6] p-4 shadow-sm space-y-2">
+        <section className="space-y-2 rounded-2xl border bg-[#FFF6F6] p-4 shadow-sm">
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-1.5 text-[10px] font-semibold text-[#D90429]">
               <Sparkles className="h-3.5 w-3.5" />
@@ -629,16 +696,22 @@ export default async function WhatsOnPage({
         <div className="mb-3 flex items-baseline justify-between gap-2">
           <h2 className="text-sm font-semibold text-gray-900">
             {headingLabel}
+            {hasSearch && (
+              <span className="ml-1 text-[11px] font-normal text-gray-500">
+                for “{searchQuery}”
+              </span>
+            )}
           </h2>
           <p className="text-[9px] text-gray-500">
             Showing the most recent upcoming first.
           </p>
         </div>
 
-        {events.length === 0 ? (
+        {filteredEvents.length === 0 ? (
           <p className="text-xs text-gray-500">
-            Nothing in this view yet. Try adjusting your filters or check back
-            soon.
+            No events found for this view
+            {hasSearch ? " and search term." : "."} Try adjusting your filters or
+            search.
           </p>
         ) : (
           <ul className="space-y-2 text-xs">

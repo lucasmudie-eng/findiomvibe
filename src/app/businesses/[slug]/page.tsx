@@ -11,7 +11,7 @@ const supabase = createClient(
 );
 
 type Service = { name?: string; price?: string | number };
-type Review  = { rating?: number; text?: string; author?: string };
+type Review = { rating?: number; text?: string; author?: string };
 
 type Biz = {
   id: string;
@@ -85,14 +85,24 @@ function StarRow({ avg }: { avg?: number | null }) {
   const empty = 5 - full - (half ? 1 : 0);
   return (
     <div className="flex items-center gap-1 text-amber-500">
-      {Array.from({ length: full }).map((_, i) => <span key={`f${i}`}>★</span>)}
+      {Array.from({ length: full }).map((_, i) => (
+        <span key={`f${i}`}>★</span>
+      ))}
       {half && <span>☆</span>}
-      {Array.from({ length: empty }).map((_, i) => <span key={`e${i}`} className="text-slate-300">★</span>)}
+      {Array.from({ length: empty }).map((_, i) => (
+        <span key={`e${i}`} className="text-slate-300">
+          ★
+        </span>
+      ))}
     </div>
   );
 }
 
-export default async function BusinessPage({ params }: { params: { slug: string } }) {
+export default async function BusinessPage({
+  params,
+}: {
+  params: { slug: string };
+}) {
   const biz = await getBusiness(params.slug);
   if (!biz) notFound();
 
@@ -100,7 +110,8 @@ export default async function BusinessPage({ params }: { params: { slug: string 
 
   // Gallery: max 3 tiles
   const gallery: string[] = [];
-  if (Array.isArray(biz.images) && biz.images.length) gallery.push(...biz.images.slice(0, 3));
+  if (Array.isArray(biz.images) && biz.images.length)
+    gallery.push(...biz.images.slice(0, 3));
   else if (biz.hero_url) gallery.push(biz.hero_url);
   else if (biz.logo_url) gallery.push(biz.logo_url);
 
@@ -109,53 +120,95 @@ export default async function BusinessPage({ params }: { params: { slug: string 
     const raw = (biz as any).services_json;
     if (!raw) return [];
     if (Array.isArray(raw)) return raw;
-    try { return JSON.parse(raw as string); } catch { return []; }
+    try {
+      return JSON.parse(raw as string);
+    } catch {
+      return [];
+    }
   })();
 
   const reviews: Review[] = (() => {
     const raw = (biz as any).reviews_json;
     if (!raw) return [];
     if (Array.isArray(raw)) return raw;
-    try { return JSON.parse(raw as string); } catch { return []; }
+    try {
+      return JSON.parse(raw as string);
+    } catch {
+      return [];
+    }
   })();
 
   return (
-    <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+    <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
       {/* Breadcrumbs */}
-      <nav className="mb-4 text-xs text-slate-500">
-        <Link href="/businesses" className="hover:underline">Businesses</Link>
+      <nav className="mb-3 text-xs text-slate-500">
+        <Link href="/businesses" className="hover:underline">
+          Businesses
+        </Link>
         <span> / </span>
         <span className="text-slate-700">{biz.name}</span>
       </nav>
 
-      {/* Header */}
-      <header className="mb-5">
-        <h1 className="text-3xl font-semibold text-slate-900">{biz.name}</h1>
-        {biz.tagline && <p className="mt-1 text-slate-700">{biz.tagline}</p>}
+      {/* Header (top-left, tight to breadcrumb) */}
+      <header className="mb-4">
+        <h1 className="text-3xl font-semibold text-slate-900">
+          {biz.name}
+        </h1>
+        {biz.tagline && (
+          <p className="mt-1 text-base text-slate-700">{biz.tagline}</p>
+        )}
         <div className="mt-2 flex flex-wrap items-center gap-2 text-sm text-slate-500">
-          {biz.category && <span className="rounded-full bg-slate-100 px-2 py-0.5">{fmtCategoryLabel(biz.category)}</span>}
-          {biz.subcategory && <span className="rounded-full bg-slate-100 px-2 py-0.5">{biz.subcategory}</span>}
-          {biz.area && <span className="rounded-full bg-slate-100 px-2 py-0.5">{biz.area}</span>}
+          {biz.category && (
+            <span className="rounded-full bg-slate-100 px-3 py-1">
+              {fmtCategoryLabel(biz.category)}
+            </span>
+          )}
+          {biz.subcategory && (
+            <span className="rounded-full bg-slate-100 px-3 py-1">
+              {biz.subcategory}
+            </span>
+          )}
+          {biz.area && (
+            <span className="rounded-full bg-slate-100 px-3 py-1">
+              {biz.area}
+            </span>
+          )}
         </div>
+        {(biz.reviews_avg || 0) > 0 && (
+          <div className="mt-2 flex items-center gap-2 text-sm text-slate-600">
+            <StarRow avg={biz.reviews_avg} />
+            <span>
+              {(biz.reviews_avg ?? 0).toFixed(1)} / 5
+              {biz.reviews_count ? ` • ${biz.reviews_count} reviews` : ""}
+            </span>
+          </div>
+        )}
       </header>
 
-      {/* Gallery */}
+      {/* Full-width gallery row */}
       <section className="mb-8">
-        <div className="grid gap-3 md:grid-cols-3">
+        <div className="grid gap-3 sm:grid-cols-3">
           {gallery.length ? (
             gallery.map((src, i) => (
-              <div key={i} className="relative h-44 w-full overflow-hidden rounded-xl bg-slate-100 md:h-52">
+              <div
+                key={i}
+                className="relative h-52 w-full overflow-hidden rounded-2xl bg-slate-100 sm:h-56 lg:h-64"
+              >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={src} alt={`${biz.name} ${i + 1}`} className="h-full w-full object-cover" />
+                <img
+                  src={src}
+                  alt={`${biz.name} ${i + 1}`}
+                  className="h-full w-full object-cover"
+                />
               </div>
             ))
           ) : (
             <>
-              <div className="flex h-44 items-center justify-center rounded-xl bg-slate-50 text-sm text-slate-400 md:h-52">
+              <div className="flex h-52 items-center justify-center rounded-2xl bg-slate-50 text-sm text-slate-400 sm:h-56 lg:h-64">
                 No images yet
               </div>
-              <div className="hidden h-44 rounded-xl bg-slate-50 md:block md:h-52" />
-              <div className="hidden h-44 rounded-xl bg-slate-50 md:block md:h-52" />
+              <div className="hidden h-52 rounded-2xl bg-slate-50 sm:block sm:h-56 lg:h-64" />
+              <div className="hidden h-52 rounded-2xl bg-slate-50 sm:block sm:h-56 lg:h-64" />
             </>
           )}
         </div>
@@ -166,36 +219,56 @@ export default async function BusinessPage({ params }: { params: { slug: string 
         {/* LEFT */}
         <div className="space-y-6">
           <div className="rounded-2xl border border-slate-200 bg-white p-5">
-            <h2 className="mb-2 text-lg font-semibold text-slate-900">About</h2>
+            <h2 className="mb-2 text-lg font-semibold text-slate-900">
+              About
+            </h2>
             <p className="whitespace-pre-line text-sm text-slate-700">
               {biz.description || "Profile coming soon."}
             </p>
           </div>
 
           <div className="rounded-2xl border border-slate-200 bg-white p-5">
-            <h3 className="mb-2 text-base font-semibold text-slate-900">Services & Prices</h3>
+            <h3 className="mb-2 text-base font-semibold text-slate-900">
+              Services &amp; Prices
+            </h3>
             {services.length ? (
               <ul className="space-y-2 text-sm text-slate-700">
                 {services.map((s, i) => (
-                  <li key={i} className="flex items-baseline justify-between gap-3">
+                  <li
+                    key={i}
+                    className="flex items-baseline justify-between gap-3"
+                  >
                     <span>{s.name || "Service"}</span>
-                    {s.price ? <span className="text-slate-900">{s.price}</span> : <span />}
+                    {s.price ? (
+                      <span className="text-slate-900">{s.price}</span>
+                    ) : (
+                      <span />
+                    )}
                   </li>
                 ))}
               </ul>
             ) : (
-              <p className="text-sm text-slate-500">Services will appear here once added.</p>
+              <p className="text-sm text-slate-500">
+                Services will appear here once added.
+              </p>
             )}
           </div>
 
           {(website || biz.opening_hours) && (
             <div className="rounded-2xl border border-slate-200 bg-white p-5">
-              <h3 className="mb-2 text-base font-semibold text-slate-900">Info</h3>
+              <h3 className="mb-2 text-base font-semibold text-slate-900">
+                Info
+              </h3>
               <div className="space-y-2 text-sm">
                 {website && (
                   <div>
                     <span className="text-slate-500">Website: </span>
-                    <a href={website} target="_blank" rel="noopener noreferrer" className="text-[#D90429] hover:underline">
+                    <a
+                      href={website}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[#D90429] hover:underline"
+                    >
                       {website.replace(/^https?:\/\//i, "")}
                     </a>
                   </div>
@@ -203,7 +276,9 @@ export default async function BusinessPage({ params }: { params: { slug: string 
                 {biz.opening_hours && (
                   <div>
                     <div className="text-slate-500">Opening hours</div>
-                    <pre className="whitespace-pre-wrap text-sm text-slate-700">{biz.opening_hours}</pre>
+                    <pre className="whitespace-pre-wrap text-sm text-slate-700">
+                      {biz.opening_hours}
+                    </pre>
                   </div>
                 )}
               </div>
@@ -214,11 +289,18 @@ export default async function BusinessPage({ params }: { params: { slug: string 
         {/* RIGHT */}
         <aside className="space-y-6">
           <div className="rounded-2xl border border-slate-200 bg-white p-5">
-            <h3 className="mb-3 text-base font-semibold text-slate-900">Contact</h3>
+            <h3 className="mb-3 text-base font-semibold text-slate-900">
+              Contact
+            </h3>
             <div className="space-y-2 text-sm">
               {website && (
                 <div>
-                  <a href={website} target="_blank" rel="noopener noreferrer" className="text-[#D90429] hover:underline">
+                  <a
+                    href={website}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[#D90429] hover:underline"
+                  >
                     Visit website
                   </a>
                 </div>
@@ -226,13 +308,20 @@ export default async function BusinessPage({ params }: { params: { slug: string 
               {biz.email && (
                 <div>
                   <span className="text-slate-500">Email: </span>
-                  <a href={`mailto:${biz.email}`} className="hover:underline">{biz.email}</a>
+                  <a
+                    href={`mailto:${biz.email}`}
+                    className="hover:underline"
+                  >
+                    {biz.email}
+                  </a>
                 </div>
               )}
               {biz.phone && (
                 <div>
                   <span className="text-slate-500">Phone: </span>
-                  <a href={`tel:${biz.phone}`} className="hover:underline">{biz.phone}</a>
+                  <a href={`tel:${biz.phone}`} className="hover:underline">
+                    {biz.phone}
+                  </a>
                 </div>
               )}
               {biz.address && (
@@ -245,7 +334,9 @@ export default async function BusinessPage({ params }: { params: { slug: string 
 
             <div className="mt-4">
               <Link
-                href={`/contact?business=${encodeURIComponent(biz.slug || biz.id)}&name=${encodeURIComponent(biz.name)}`}
+                href={`/contact?business=${encodeURIComponent(
+                  biz.slug || biz.id
+                )}&name=${encodeURIComponent(biz.name)}`}
                 className="inline-flex w-full items-center justify-center rounded-full bg-[#D90429] px-4 py-2 text-sm font-semibold text-white hover:bg-[#b50322]"
               >
                 Contact ManxHive about this business
@@ -254,24 +345,37 @@ export default async function BusinessPage({ params }: { params: { slug: string 
           </div>
 
           <div className="rounded-2xl border border-slate-200 bg-white p-5">
-            <h3 className="mb-2 text-base font-semibold text-slate-900">Customer reviews</h3>
+            <h3 className="mb-2 text-base font-semibold text-slate-900">
+              Customer reviews
+            </h3>
             {(biz.reviews_avg || 0) > 0 ? (
               <>
                 <div className="mb-2 flex items-center gap-2">
                   <StarRow avg={biz.reviews_avg} />
                   <span className="text-sm text-slate-600">
                     {(biz.reviews_avg ?? 0).toFixed(1)} / 5
-                    {biz.reviews_count ? ` • ${biz.reviews_count} reviews` : ""}
+                    {biz.reviews_count
+                      ? ` • ${biz.reviews_count} reviews`
+                      : ""}
                   </span>
                 </div>
                 {(reviews || []).slice(0, 3).map((r, i) => (
-                  <div key={i} className="mt-3 rounded-lg bg-slate-50 p-3 text-sm">
+                  <div
+                    key={i}
+                    className="mt-3 rounded-lg bg-slate-50 p-3 text-sm"
+                  >
                     {r.text || "No comment provided."}
-                    {r.author && <div className="mt-1 text-xs text-slate-500">— {r.author}</div>}
+                    {r.author && (
+                      <div className="mt-1 text-xs text-slate-500">
+                        — {r.author}
+                      </div>
+                    )}
                   </div>
                 ))}
                 {!reviews?.length && (
-                  <p className="text-sm text-slate-500">No written reviews yet.</p>
+                  <p className="text-sm text-slate-500">
+                    No written reviews yet.
+                  </p>
                 )}
               </>
             ) : (

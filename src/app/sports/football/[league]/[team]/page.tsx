@@ -55,16 +55,83 @@ const TEAM_COLOURS: Record<string, { from: string; to: string }> = {
   douglasathleticfc: { from: "#EC4899", to: "#111827" }, // pink & black
 };
 
+// ---------- Team bios ----------
+
+const TEAM_BIOS: Record<string, string> = {
+  corinthians:
+    "Corinthians A.F.C. are based in Douglas and play their home games at Noble’s Park. The club have become one of the stronger sides in Manx football in recent decades, regularly competing in the top division and local cups. They’re known for a strong youth setup and a steady production line of first-team players.",
+  laxey:
+    "Laxey A.F.C. are based in the village of Laxey on the east coast of the Isle of Man and play at Glen Road. The club famously won a domestic ‘grand slam’ in 2005–06, taking the league title and all three major cups in the same season. They have a passionate local following and a history of producing technically gifted players.",
+  onchan:
+    "Onchan A.F.C. represent the village of Onchan just north of Douglas and play their home matches at Onchan Stadium. The club has moved between the divisions over the years but are a well-established part of the Manx football scene. They’re known for a strong junior section feeding into the senior sides.",
+  onchanfirst:
+    "Onchan A.F.C. represent the village of Onchan just north of Douglas and play their home matches at Onchan Stadium. The club has moved between the divisions over the years but are a well-established part of the Manx football scene. They’re known for a strong junior section feeding into the senior sides.",
+  rushenunited:
+    "Rushen United A.F.C. are based in Port Erin in the south of the island and play at Croit Lowey. They’re one of the most successful Manx clubs historically, with multiple Division One titles and Railway Cup and FA Cup wins. The club has a big local following and a tradition of tough, competitive sides.",
+  rushen:
+    "Rushen United A.F.C. are based in Port Erin in the south of the island and play at Croit Lowey. They’re one of the most successful Manx clubs historically, with multiple Division One titles and Railway Cup and FA Cup wins. The club has a big local following and a tradition of tough, competitive sides.",
+  peel:
+    "Peel A.F.C. are one of the oldest and most decorated clubs on the Isle of Man, based at Douglas Road in Peel. They’ve won a long list of league titles and cup competitions, and are traditionally seen as one of the island’s big powerhouses. The club enjoys strong support from the town and surrounding west of the island.",
+  stmarys:
+    "St Mary’s A.F.C. are based in Douglas and typically play at The Bowl or adjacent facilities in the capital. They’ve enjoyed spells of dominance in the Manx Premier League era, picking up league titles and major cups. St Mary’s sides are often known for expansive, attacking football.",
+  stjohns:
+    "St John’s United A.F.C. represent the village of St John’s and play their home games at Mullen-e-Clogh. The club has spent time in both the top and second tiers of Manx football and have lifted local cups over the years. They’re closely tied into the local community and are a regular fixture on the island’s football map.",
+  ayreunited:
+    "Ayre United A.F.C. are based in Andreas in the north of the island and play at Andreas Playing Fields. The club has traditionally moved between divisions but has enjoyed cup success and strong league campaigns at various points. They draw players from the wider northern parishes and have a reputation for being hard to beat at home.",
+  ramsey:
+    "Ramsey A.F.C. are a historic club from the northern town of Ramsey, playing at Ballacloan Stadium near the harbour. They’ve been regulars in the top division and have collected league and cup honours across different eras. The ground is also used as a popular campsite during TT, adding to the club’s profile beyond football.",
+  ramseyfirst:
+    "Ramsey A.F.C. are a historic club from the northern town of Ramsey, playing at Ballacloan Stadium near the harbour. They’ve been regulars in the top division and have collected league and cup honours across different eras. The ground is also used as a popular campsite during TT, adding to the club’s profile beyond football.",
+  unionmills:
+    "Union Mills F.C. are based at Garey Mooar in Braddan on the outskirts of Douglas. The club has bounced between the divisions but remains a well-supported village side with a strong community feel. Their ground is also used as a TT campsite, giving the club extra visibility during the racing calendar.",
+  braddan:
+    "Braddan A.F.C. represent the parish of Braddan and play their home games at Victoria Road. They have a long history in Manx football, competing in both top and lower divisions over time. Braddan are known for solid, hard-working teams and a strong local identity.",
+  dhsob:
+    "Douglas High School Old Boys A.F.C. (DHSOB) are based in Douglas and were originally formed by former pupils of Douglas High School. They’ve been a regular presence in the top two tiers and have enjoyed cup success and strong league finishes in different periods. The club typically fields multiple senior sides and has a strong social side to its identity.",
+  foxdale:
+    "Foxdale A.F.C. are based in the former mining village of Foxdale in the island’s interior. The club has historically competed in the lower divisions, but has collected divisional honours and cup wins such as the Woods Cup and Miners’ Cup. They’re known for their distinctive maroon and navy colours and tight-knit community support.",
+  castletown:
+    "Castletown Metropolitan F.C. are based in Castletown in the south and play at the historic Malew Road ground. One of the island’s older clubs, they’ve picked up league and cup honours across different eras and are traditionally seen as a strong footballing town. Their red and white colours are well recognised in Manx football.",
+  colby:
+    "Colby A.F.C. represent the village of Colby in the south and play at Station Fields, close to the railway line. The club has spent time in both divisions and has achieved divisional titles and cup runs at various points. They are known as a resilient village side with strong local backing.",
+  rycob:
+    "Ramsey Youth Centre and Old Boys F.C. (RYCOB) are based in Ramsey and grew out of the town’s youth centre setup. The club typically competes in the lower divisions but has earned promotions and trophy wins in junior cups. They play an important role in offering football opportunities to younger players in the town.",
+  marown:
+    "Marown A.F.C. are based in Crosby in the central valley and play at Crosby Playing Fields. The club has moved up and down the league structure, with spells of success in the second tier and cup competitions. Marown sides are often noted for being physically strong and competitive, especially at home.",
+  pulroseunited:
+    "Pulrose United A.F.C. are based in the Pulrose area of Douglas and play at Groves Road. They’ve been a long-standing club in Manx football, regularly competing in the second tier with occasional spells higher up. Pulrose have a reputation for passionate local support and tough home fixtures.",
+  douglasroyal:
+    "Douglas Royal F.C. are a Douglas-based club who play at Ballafletcher. Formed from a merger of earlier local sides, they’ve established themselves as a stable club with teams in several divisions. Douglas Royal have been involved in top-flight campaigns and have picked up silverware at various points.",
+  malew:
+    "Malew A.F.C. represent Ballasalla and the surrounding Malew parish in the south of the island, playing at Clagh Vane. They’ve traditionally featured in the lower divisions but have achieved divisional titles and deep cup runs in local competitions. The club provides a key football outlet for players from the area.",
+  stgeorges:
+    "St George’s A.F.C. are based in Douglas and play at Glencrutchery Road near the TT Grandstand. They are the dominant Manx club of the modern era, winning multiple top-flight titles and ‘grand slam’ seasons where they swept all major trophies. St George’s have produced numerous island internationals and are widely seen as the benchmark side.",
+  governorsathletic:
+    "Governor’s Athletic F.C. are a relatively new club in Manx terms, formed in the 1990s and representing the Governor’s Hill / Douglas area. They’ve generally competed in the lower divisions, providing competitive football for a wide squad base. The club is known for its social side and inclusive, open approach.",
+  douglasdistrict:
+    "Douglas District F.C. are based in Douglas and typically compete in the lower tiers of the Manx league. The club offers local players regular football and has put together competitive sides challenging for promotion spots and cup runs. They add depth to the capital’s football scene alongside the more established names.",
+  michaelunited:
+    "Michael United A.F.C. represent the rural parish of Michael on the island’s west coast and play at Balleira Road. Traditionally they have spent much of their time outside the top flight, but they’ve enjoyed success in the second tier and junior cups. The club is closely tied to the local community and relies heavily on home-grown players.",
+  douglasathleticfc:
+    "Douglas Athletic F.C. are a relatively recent addition to the Manx league, based in Douglas and often associated with a modern, social-club feel. They’ve quickly become known for their distinctive pink and black colours and for fielding multiple senior sides. Douglas Athletic have already picked up divisional honours and cup runs despite their short history.",
+};
+
 function normaliseName(name: string) {
-  return name.toLowerCase().replace(/[^a-z]/g, ""); // strip spaces, & etc.
+  return name.toLowerCase().replace(/[^a-z]/g, "");
 }
 
 function getTeamGradient(teamSlug: string, explicitName?: string) {
-  // Prefer an explicit nice name if we have one, otherwise use the slug → formatted
   const pretty =
     explicitName || formatTeamName(teamSlug || "").trim() || teamSlug;
   const key = normaliseName(pretty);
   return TEAM_COLOURS[key] ?? DEFAULT_GRADIENT;
+}
+
+function getTeamBio(teamSlug: string, explicitName?: string): string | null {
+  const pretty =
+    explicitName || formatTeamName(teamSlug || "").trim() || teamSlug;
+  const key = normaliseName(pretty);
+  return TEAM_BIOS[key] ?? null;
 }
 
 // ---------- helpers ----------
@@ -126,6 +193,7 @@ export default async function TeamPage({
   });
 
   const gradient = getTeamGradient(team, data.team.name);
+  const bio = getTeamBio(team, data.team.name);
 
   return (
     <main className="mx-auto max-w-6xl space-y-8 px-4 py-8">
@@ -245,6 +313,16 @@ export default async function TeamPage({
             : "Recently"}
         </div>
       </section>
+
+      {/* Club history / about */}
+      {bio && (
+        <section className="rounded-2xl border bg-white p-4 text-sm text-gray-700 shadow-sm">
+          <h2 className="mb-1 text-sm font-semibold text-gray-900">
+            About {teamName}
+          </h2>
+          <p>{bio}</p>
+        </section>
+      )}
 
       {/* Grid: last 3, next 3, mini table */}
       <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
