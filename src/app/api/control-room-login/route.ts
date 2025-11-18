@@ -1,57 +1,59 @@
 // src/app/api/control-room-login/route.ts
-import { cookies } from "next/headers";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
-const rawAdminPass = process.env.ADMIN_BASIC_PASS ?? "";
-const ADMIN_PASS = rawAdminPass.trim();
+export const runtime = "nodejs";
 
-if (!ADMIN_PASS) {
-  throw new Error(
-    "ADMIN_BASIC_PASS env var is not set for /api/control-room-login."
-  );
-}
+const ADMIN_BASIC_PASS = process.env.ADMIN_BASIC_PASS;
 
-export async function POST(req: Request) {
-  const formData = await req.formData();
-  const password = String(formData.get("password") ?? "").trim();
-
-  // Wrong password → back to login with error flag
-  if (password !== ADMIN_PASS) {
-    const url = new URL("/control-room?error=1", req.url);
-    return NextResponse.redirect(url);
+/**
+ * Simple admin “control room” login.
+ * Expects JSON body: { password: string }
+ * On success, sets a short-lived admin cookie.
+ */
+export async function POST(req: NextRequest) {
+  if (!ADMIN_BASIC_PASS) {
+    console.warn(
+      "[api/control-room-login] ADMIN_BASIC_PASS env var is not set – admin login not configured."
+    );
+    return NextResponse.json(
+      { error: "Admin login not configured." },
+      { status: 500 }
+    );
   }
 
-  const now = new Date();
-  const expires = new Date(now.getTime() + 4 * 60 * 60 * 1000); // +4 hours
+  let password: string | undefined;
+  try {
+    const body = await req.json();
+    password = body?.password;
+  } catch {
+    // no/invalid JSON
+  }
 
-  const res = NextResponse.redirect(new URL("/control-room", req.url));
+  if (!password || password !== ADMIN_BASIC_PASS) {
+    return NextResponse.json(
+      { error: "Invalid password." },
+      { status: 401 }
+    );
+  }
 
-  // Auth cookie (used for gate)
-  res.cookies.set("mh_cr_auth", "yes", {
+  const res = NextResponse.json({ ok: true });
+
+  // Basic admin flag cookie – adjust name/maxAge as you like
+  res.cookies.set("mh-admin", "1", {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    path: "/control-room",
-    maxAge: 60 * 60 * 4,
     sameSite: "lax",
-  });
-
-  // Last login time (for display only)
-  res.cookies.set("mh_cr_login_at", now.toISOString(), {
-    httpOnly: false,
-    secure: process.env.NODE_ENV === "production",
-    path: "/control-room",
-    maxAge: 60 * 60 * 4,
-    sameSite: "lax",
-  });
-
-  // Session expiry time (for display only)
-  res.cookies.set("mh_cr_expires_at", expires.toISOString(), {
-    httpOnly: false,
-    secure: process.env.NODE_ENV === "production",
-    path: "/control-room",
-    maxAge: 60 * 60 * 4,
-    sameSite: "lax",
+    secure: true,
+    path: "/",
+    maxAge: 60 * 60 * 6, // 6 hours
   });
 
   return res;
+}
+
+// (Optional) guard GET so calling it doesn’t do anything special
+export async function GET() {
+  return NextResponse.json(
+    { ok: false, error: "Use POST with password." },
+    { status: 405 }
+  );
 }
