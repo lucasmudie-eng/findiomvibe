@@ -345,6 +345,12 @@ export default function HomePageClient() {
 
   const highlightedCommunity = community.slice(0, 3);
 
+  const tickerItems = [
+    `Event: ${primaryEvent.name}`,
+    `Sports: ${primarySport.title}`,
+    `Deal: ${primaryDeal.title}`,
+  ];
+
   console.log("[home] featuredBusiness state", {
     featuredBusinesses,
     featuredIndex,
@@ -353,11 +359,11 @@ export default function HomePageClient() {
 
   // ---- RENDER ----
   return (
-    <div className="relative">
-      {/* Soft hero wash */}
+    <div className="relative bg-slate-50">
+      {/* Soft hero wash – now fades cleanly into bg-slate-50 */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 top-[64px] h-[340px] -z-10 bg-[radial-gradient(circle_at_top,_rgba(255,223,214,0.55),_rgba(255,255,255,0))]"
+        className="pointer-events-none absolute inset-x-0 top-0 h-[420px] -z-10 bg-[radial-gradient(circle_at_top,_rgba(217,4,41,0.14)_0%,_rgba(249,250,251,1)_65%,_rgba(249,250,251,1)_100%)]"
       />
 
       <main className="mx-auto max-w-7xl px-4 pb-16 pt-8 sm:px-6 lg:px-8">
@@ -389,19 +395,19 @@ export default function HomePageClient() {
             <div className="flex flex-wrap gap-3 pt-1 text-sm">
               <Link
                 href="/whats-on"
-                className="inline-flex items-center rounded-full bg-[#D90429] px-6 py-3 font-semibold text-white shadow-sm transition hover:bg-[#b80321]"
+                className="inline-flex items-center rounded-full bg-[#D90429] px-6 py-3 font-semibold text-white shadow-sm transition-transform transition-colors hover:-translate-y-0.5 hover:bg-[#b80321]"
               >
                 Browse What&apos;s On
               </Link>
               <Link
                 href="/marketplace"
-                className="inline-flex items-center rounded-full bg-slate-900 px-6 py-3 font-semibold text-white shadow-sm transition hover:bg-slate-800"
+                className="inline-flex items-center rounded-full bg-slate-900 px-6 py-3 font-semibold text-white shadow-sm transition-transform transition-colors hover:-translate-y-0.5 hover:bg-slate-800"
               >
                 View Marketplace
               </Link>
               <Link
                 href="/deals"
-                className="inline-flex items-center rounded-full bg-rose-50 px-6 py-3 font-semibold text-[#D90429] transition hover:bg-rose-100"
+                className="inline-flex items-center rounded-full bg-rose-50 px-6 py-3 font-semibold text-[#D90429] shadow-sm transition-transform transition-colors hover:-translate-y-0.5 hover:bg-rose-100"
               >
                 See Local Deals
               </Link>
@@ -428,96 +434,111 @@ export default function HomePageClient() {
           </div>
 
           {/* Featured this week card: 2 events + 2 deals */}
-          <div className="relative w-full max-w-md rounded-3xl bg-white shadow-[0_16px_60px_rgba(15,23,42,0.16)]">
-            <div className="rounded-3xl border border-slate-100 bg-white px-6 py-5">
-              <p className="text-[11px] font-semibold uppercase tracking-wide text-[#D90429]">
-                Featured this week
-              </p>
-
-              {/* Events */}
-              <div className="mt-3 border-t border-slate-100 pt-3">
-                <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
-                  Events
+          <div className="relative w-full max-w-md">
+            <div className="rounded-3xl bg-gradient-to-br from-white/60 via-slate-100 to-slate-200 p-[1px] shadow-[0_18px_60px_rgba(15,23,42,0.20)]">
+              <div className="rounded-[1.4rem] border border-white/70 bg-white/80 px-6 py-5 backdrop-blur-md">
+                <p className="text-[11px] font-semibold uppercase tracking-wide text-[#D90429]">
+                  Featured this week
                 </p>
-                <ul className="mt-1 space-y-1">
-                  {featuredEvents.map((e) => {
-                    const href = e.id.startsWith("mock-")
-                      ? "/whats-on"
-                      : `/whats-on/${e.id}`;
-                    return (
-                      <li key={e.id}>
-                        <Link
-                          href={href}
-                          className="block text-sm font-semibold text-slate-900 hover:text-[#D90429]"
-                        >
-                          {e.name}
-                        </Link>
-                        {e.meta && (
-                          <p className="text-xs text-slate-500">{e.meta}</p>
-                        )}
-                      </li>
-                    );
-                  })}
-                </ul>
-              </div>
 
-              {/* Deals */}
-              <div className="mt-4 border-t border-slate-100 pt-3">
-                <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
-                  Deals
+                {/* Events */}
+                <div className="mt-3 border-t border-slate-100 pt-3">
+                  <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+                    Events
+                  </p>
+                  <ul className="mt-1 space-y-1">
+                    {featuredEvents.map((e) => {
+                      const href = e.id.startsWith("mock-")
+                        ? "/whats-on"
+                        : `/whats-on/${e.id}`;
+                      return (
+                        <li key={e.id}>
+                          <Link
+                            href={href}
+                            className="block text-sm font-semibold text-slate-900 hover:text-[#D90429]"
+                          >
+                            {e.name}
+                          </Link>
+                          {e.meta && (
+                            <p className="text-xs text-slate-500">{e.meta}</p>
+                          )}
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
+
+                {/* Deals */}
+                <div className="mt-4 border-t border-slate-100 pt-3">
+                  <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+                    Deals
+                  </p>
+                  <ul className="mt-1 space-y-1">
+                    {featuredDeals.map((d) => {
+                      const href = d.id.startsWith("mock-")
+                        ? "/deals"
+                        : `/deals/${d.id}`;
+                      return (
+                        <li key={d.id}>
+                          <Link
+                            href={href}
+                            className="block text-sm font-semibold text-slate-900 hover:text-[#D90429]"
+                          >
+                            {d.title}
+                          </Link>
+                          {d.meta && (
+                            <p className="text-xs text-slate-500">{d.meta}</p>
+                          )}
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
+
+                <p className="mt-4 text-[11px] text-slate-500">
+                  These placements also appear in their main sections below.
                 </p>
-                <ul className="mt-1 space-y-1">
-                  {featuredDeals.map((d) => {
-                    const href = d.id.startsWith("mock-")
-                      ? "/deals"
-                      : `/deals/${d.id}`;
-                    return (
-                      <li key={d.id}>
-                        <Link
-                          href={href}
-                          className="block text-sm font-semibold text-slate-900 hover:text-[#D90429]"
-                        >
-                          {d.title}
-                        </Link>
-                        {d.meta && (
-                          <p className="text-xs text-slate-500">{d.meta}</p>
-                        )}
-                      </li>
-                    );
-                  })}
-                </ul>
               </div>
-
-              <p className="mt-4 text-[11px] text-slate-500">
-                These placements also appear in their main sections below.
-              </p>
             </div>
           </div>
         </section>
 
         {/* Live ticker */}
         <section className="mt-10">
-          <div className="flex flex-wrap items-center gap-3 rounded-3xl border border-slate-100 bg-white px-4 py-3 text-xs shadow-sm sm:px-6">
+          <div className="flex flex-wrap items-center gap-3 rounded-3xl border border-slate-100 bg-white/90 px-4 py-3 text-xs shadow-sm backdrop-blur-sm sm:px-6">
             <div className="flex items-center gap-2 text-xs font-semibold text-slate-900">
-              <span className="h-2 w-2 rounded-full bg-red-500" />
+              <span className="relative flex h-3 w-3">
+                <span className="absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75 animate-ping" />
+                <span className="relative inline-flex h-3 w-3 rounded-full bg-red-500" />
+              </span>
               <span>Live on the island right now</span>
             </div>
+
             <div className="hidden h-4 w-px bg-slate-200 sm:block" />
-            <div className="flex flex-wrap gap-3 text-xs text-slate-600">
-              <span>
-                <span className="font-semibold">Event:</span>{" "}
-                {primaryEvent.name}
-              </span>
-              <span className="hidden text-slate-300 sm:inline">•</span>
-              <span>
-                <span className="font-semibold">Sports:</span>{" "}
-                {primarySport.title}
-              </span>
-              <span className="hidden text-slate-300 sm:inline">•</span>
-              <span>
-                <span className="font-semibold">Deal:</span>{" "}
-                {primaryDeal.title}
-              </span>
+
+            {/* Ticker strip */}
+            <div className="relative flex-1 overflow-hidden">
+              <div className="flex gap-6 whitespace-nowrap text-xs text-slate-600 animate-ticker">
+                {tickerItems.map((t, idx) => (
+                  <span key={idx} className="flex items-center gap-1">
+                    {idx > 0 && (
+                      <span className="hidden text-slate-300 sm:inline">•</span>
+                    )}
+                    <span>{t}</span>
+                  </span>
+                ))}
+                {/* Duplicate content for seamless loop */}
+                {tickerItems.map((t, idx) => (
+                  <span
+                    key={`dup-${idx}`}
+                    aria-hidden="true"
+                    className="flex items-center gap-1"
+                  >
+                    <span className="hidden text-slate-300 sm:inline">•</span>
+                    <span>{t}</span>
+                  </span>
+                ))}
+              </div>
             </div>
           </div>
         </section>
@@ -581,7 +602,7 @@ export default function HomePageClient() {
                 {featuredHref && (
                   <Link
                     href={featuredHref}
-                    className="inline-flex items-center rounded-full bg-slate-900 px-5 py-2 text-xs font-semibold text-white hover:bg-slate-800"
+                    className="inline-flex items-center rounded-full bg-slate-900 px-5 py-2 text-xs font-semibold text-white transition hover:bg-slate-800"
                   >
                     {featuredBusiness.ctaLabel || "View business"} →
                   </Link>
@@ -603,7 +624,7 @@ export default function HomePageClient() {
                 </div>
                 <Link
                   href="/promote"
-                  className="inline-flex items-center rounded-full bg-slate-900 px-5 py-2 text-xs font-semibold text-white hover:bg-slate-800"
+                  className="inline-flex items-center rounded-full bg-slate-900 px-5 py-2 text-xs font-semibold text-white transition hover:bg-slate-800"
                 >
                   Enquire about featured slot →
                 </Link>
@@ -891,13 +912,13 @@ export default function HomePageClient() {
               <div className="mt-4 flex flex-wrap gap-3 text-xs">
                 <Link
                   href="/providers"
-                  className="inline-flex items-center rounded-full bg-white px-4 py-2 font-semibold text-slate-900 hover:bg-slate-100"
+                  className="inline-flex items-center rounded-full bg-white px-4 py-2 font-semibold text-slate-900 transition hover:bg-slate-100"
                 >
                   Browse providers
                 </Link>
                 <Link
                   href="/list-business"
-                  className="inline-flex items-center rounded-full bg-slate-800 px-4 py-2 font-semibold text-white hover:bg-slate-700"
+                  className="inline-flex items-center rounded-full bg-slate-800 px-4 py-2 font-semibold text-white transition hover:bg-slate-700"
                 >
                   List your business
                 </Link>
@@ -908,18 +929,19 @@ export default function HomePageClient() {
 
         {/* BOTTOM SECTION – Ending soon + Community highlights */}
         <section className="mt-16 space-y-8">
-          <div className="flex items-baseline justify-between gap-2">
-            <h2 className="text-lg font-semibold text-slate-900">
+          {/* Heading row – “New” pill removed */}
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+            <h2 className="text-2xl font-semibold text-slate-900">
               What to catch next
             </h2>
-            <p className="text-xs text-slate-500">
+            <p className="text-sm text-slate-600">
               Don&apos;t miss these limited-time deals and community stories.
             </p>
           </div>
 
           <div className="grid gap-6 md:grid-cols-2">
             {/* Ending soon deals */}
-            <div className="rounded-3xl border border-slate-100 bg-white px-6 py-5 shadow-sm">
+            <div className="rounded-3xl border border-slate-100 bg-white/95 px-6 py-5 shadow-sm backdrop-blur-sm">
               <p className="text-[11px] font-semibold uppercase tracking-wide text-[#D90429]">
                 Ending soon – deals
               </p>
@@ -971,7 +993,7 @@ export default function HomePageClient() {
             </div>
 
             {/* Community highlights */}
-            <div className="rounded-3xl border border-slate-100 bg-white px-6 py-5 shadow-sm">
+            <div className="rounded-3xl border border-slate-100 bg-white/95 px-6 py-5 shadow-sm backdrop-blur-sm">
               <p className="text-[11px] font-semibold uppercase tracking-wide text-[#D90429]">
                 Community highlights
               </p>
@@ -1020,13 +1042,28 @@ export default function HomePageClient() {
             </p>
             <Link
               href="/promote"
-              className="mt-5 inline-flex items-center rounded-full bg-white px-5 py-2 text-xs font-semibold text-slate-900 hover:bg-slate-100"
+              className="mt-5 inline-flex items-center rounded-full bg-white px-5 py-2 text-xs font-semibold text-slate-900 transition hover:bg-slate-100"
             >
               Enquire about boosted slots →
             </Link>
           </div>
         </section>
       </main>
+
+      {/* Local CSS for ticker animation */}
+      <style jsx>{`
+        @keyframes ticker {
+          0% {
+            transform: translateX(0);
+          }
+          100% {
+            transform: translateX(-50%);
+          }
+        }
+        .animate-ticker {
+          animation: ticker 28s linear infinite;
+        }
+      `}</style>
     </div>
   );
 }
