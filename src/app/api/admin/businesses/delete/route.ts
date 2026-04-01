@@ -1,6 +1,7 @@
 // src/app/api/admin/businesses/delete/route.ts
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { requireAdminBasicAuth } from "@/lib/auth/admin";
 
 export const dynamic = "force-dynamic";
 
@@ -21,6 +22,9 @@ function getAdminClient() {
 }
 
 export async function POST(req: Request) {
+  const unauthorized = requireAdminBasicAuth(req);
+  if (unauthorized) return unauthorized;
+
   const supabase = getAdminClient();
 
   // If env vars missing → avoid deploy crash

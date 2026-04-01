@@ -1,18 +1,19 @@
 // src/app/dashboard/page.tsx
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import {
   PlusCircle,
   Mail,
   Edit3,
   BarChart3,
   TrendingUp,
-  Megaphone,
+  Zap,
   HelpCircle,
   User,
-  CreditCard,
   ShieldCheck,
   Settings,
 } from "lucide-react";
+import { supabaseServer } from "@/lib/supabase/server";
 import ProfileCompletion from "@/app/components/ProfileCompletion";
 
 // Minimal local shape of a provider row for type-safety
@@ -100,31 +101,49 @@ function computeCompletion(p: ProviderRow | null) {
 }
 
 export default async function DashboardPage() {
-  const userName = "Lucas"; // TODO: wire up auth + real provider
-  const provider: ProviderRow | null = null; // placeholder so build works
+  const supabase = supabaseServer();
+  let userName = "there";
+
+  if (supabase) {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) redirect("/login?next=/dashboard");
+
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("display_name")
+      .eq("id", user.id)
+      .maybeSingle();
+
+    userName = profile?.display_name || user.email?.split("@")[0] || "there";
+  }
+
+  const provider: ProviderRow | null = null;
   const completion = computeCompletion(provider);
 
   return (
     <main className="mx-auto max-w-6xl space-y-8 px-4 py-10">
-      {/* Welcome banner with avatar */}
+      {/* Welcome banner */}
       <section
         aria-label="Welcome"
-        className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-[#D90429] via-[#E63946] to-[#D90429] text-white shadow-md"
+        className="relative overflow-hidden rounded-3xl bg-slate-950 text-white shadow-md"
       >
+        <div className="pointer-events-none absolute -left-12 -top-12 h-48 w-48 rounded-full bg-[#D90429]/20 blur-3xl" />
+        <div className="pointer-events-none absolute bottom-0 right-0 h-40 w-40 rounded-full bg-slate-700/30 blur-2xl" />
         <div className="relative flex flex-col items-start justify-between gap-6 p-8 sm:flex-row sm:items-center">
           <div>
-            <h1 className="text-2xl font-semibold sm:text-3xl">
-              Welcome back, {userName}! 👋
+            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-400">
+              Dashboard
+            </p>
+            <h1 className="mt-1 font-playfair text-3xl font-bold sm:text-4xl">
+              Welcome back, {userName}<span className="text-[#D90429]">.</span>
             </h1>
-            <p className="mt-2 text-white/90">
-              Manage your listings, track performance, and grow your reach on
-              ManxHive.
+            <p className="mt-2 text-sm text-slate-300">
+              Manage your listings, track performance, and grow your reach on ManxHive.
             </p>
           </div>
           <div className="shrink-0">
-            <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-full bg-white/20">
-              {/* Placeholder avatar for now */}
-              <User className="h-8 w-8 text-white" />
+            <div className="flex h-14 w-14 items-center justify-center overflow-hidden rounded-full bg-white/10">
+              <User className="h-6 w-6 text-white/70" />
             </div>
           </div>
         </div>
@@ -146,37 +165,37 @@ export default async function DashboardPage() {
             href="/list-business"
             icon={<PlusCircle className="h-5 w-5 text-[#D90429]" />}
             title="List your business"
-            desc="Create a new listing."
+            desc="Create a new business listing."
           />
           <DashLink
-            href="/dashboard/leads"
+            href="/account/enquiries"
             icon={<Mail className="h-5 w-5 text-green-600" />}
             title="Enquiries"
             desc="View and manage incoming leads."
           />
           <DashLink
-            href="/providers/manage"
+            href="/provider-dashboard"
             icon={<Edit3 className="h-5 w-5 text-yellow-600" />}
-            title="Edit profile"
-            desc="Update your business info, images, and details."
+            title="Provider dashboard"
+            desc="Manage your provider profile, listings, and analytics."
           />
           <DashLink
-            href="/dashboard/analytics"
+            href="/provider-dashboard"
             icon={<BarChart3 className="h-5 w-5 text-blue-600" />}
             title="Analytics"
-            desc="Track performance (coming soon)."
+            desc="Track impressions, views, and enquiries."
           />
           <DashLink
-            href="/dashboard/billing"
-            icon={<CreditCard className="h-5 w-5 text-purple-600" />}
-            title="Billing & plan"
-            desc="Manage plan and invoices."
+            href="/promote"
+            icon={<Zap className="h-5 w-5 text-amber-500" />}
+            title="Boost a listing"
+            desc="Pay once to push your listing higher in results."
           />
           <DashLink
             href="/dashboard/settings"
-            icon={<Settings className="h-5 w-5 text-gray-700" />}
+            icon={<Settings className="h-5 w-5 text-slate-600" />}
             title="Settings"
-            desc="Notifications, team, preferences."
+            desc="Notifications, preferences, and account details."
           />
         </div>
       </section>
@@ -226,22 +245,22 @@ export default async function DashboardPage() {
         </h2>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           <ResourceLink
-            href="#"
+            href="/provider-dashboard"
             icon={<TrendingUp className="h-5 w-5 text-emerald-600" />}
             title="Get more enquiries"
-            desc="Optimise your profile to attract more customers."
+            desc="Optimise your provider profile to attract more customers."
           />
           <ResourceLink
-            href="#"
-            icon={<Megaphone className="h-5 w-5 text-indigo-600" />}
+            href="/promote"
+            icon={<Zap className="h-5 w-5 text-amber-500" />}
             title="Promote your listing"
-            desc="Boost your visibility with featured placement."
+            desc="Pay once to boost visibility — no subscription needed."
           />
           <ResourceLink
-            href="#"
+            href="/contact"
             icon={<HelpCircle className="h-5 w-5 text-orange-600" />}
             title="Need help?"
-            desc="Visit our help centre or contact support."
+            desc="Contact the ManxHive team for support or feedback."
           />
         </div>
       </section>

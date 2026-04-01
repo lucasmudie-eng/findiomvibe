@@ -26,7 +26,6 @@ const RECURRENCE_OPTIONS: { value: RecurrenceFrequency; label: string }[] = [
 ];
 
 export default function SubmitEventPage() {
-  const [showForm, setShowForm] = useState(false);
   const [loading, setLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -168,18 +167,10 @@ export default function SubmitEventPage() {
           </Link>
           .
         </p>
-        <button
-          type="button"
-          onClick={() => setShowForm((v) => !v)}
-          className="mt-3 inline-flex items-center gap-2 rounded-full bg-slate-900 px-4 py-2 text-xs font-semibold text-white hover:bg-slate-800"
-        >
-          {showForm ? "Hide event form" : "Open event form"}
-        </button>
       </header>
 
       {/* Form */}
-      {showForm && (
-        <section className="rounded-2xl border bg-white p-5 shadow-sm">
+      <section className="rounded-2xl border bg-white p-5 shadow-sm">
           <form onSubmit={handleSubmit} className="space-y-4 text-sm">
             {/* Organiser */}
             <div className="grid gap-3 sm:grid-cols-2">
@@ -427,7 +418,6 @@ export default function SubmitEventPage() {
             </div>
           </form>
         </section>
-      )}
     </main>
   );
 }

@@ -34,3 +34,43 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+## Billing Guardrails
+
+- DB migration: `supabase/migrations/20260205_wallet_guardrails.sql`
+- Adds:
+  - RLS policies for wallet/billing tables
+  - unique idempotency index on `billing_transactions.paypal_order_id`
+  - atomic wallet RPC: `wallet_apply_credit_delta(...)`
+
+## API Smoke Tests
+
+Run quick auth + billing guard checks against a running local app:
+
+```bash
+npm run test:api-smoke
+```
+
+Optional authenticated checks:
+
+```bash
+AUTH_COOKIE="sb-access-token=..." TEST_USER_ID="<uuid>" npm run test:api-smoke
+```
+
+Optional idempotency replay check (requires schema/env setup):
+
+```bash
+AUTH_COOKIE="sb-access-token=..." TEST_USER_ID="<uuid>" RUN_IDEMPOTENCY=1 npm run test:api-smoke
+```
+
+Run admin route auth checks:
+
+```bash
+npm run test:api-admin-smoke
+```
+
+With authenticated admin checks:
+
+```bash
+ADMIN_BASIC_USER="..." ADMIN_BASIC_PASS="..." npm run test:api-admin-smoke
+```

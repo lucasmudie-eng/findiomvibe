@@ -34,6 +34,10 @@ const nextConfig = {
         protocol: "https",
         hostname: "loilmtqszazyhnzgbudz.supabase.co", // ✅ your Supabase bucket
       },
+      {
+        protocol: "https",
+        hostname: "images.unsplash.com", // ✅ temporary fallback images
+      },
     ],
     formats: ["image/avif", "image/webp"],
   },

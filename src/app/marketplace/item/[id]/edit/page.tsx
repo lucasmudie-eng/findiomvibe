@@ -42,6 +42,22 @@ type Listing = {
   description: string;
   images: string[] | null;
   approved: boolean;
+  type?: string | null;
+  attrs?: {
+    make?: string;
+    model?: string;
+    year?: number;
+    mileage?: number;
+    fuel?: string;
+    transmission?: string;
+    engine?: string;
+    colour?: string;
+    doors?: number;
+    owners?: number;
+    taxed_until?: string;
+    service_history?: string;
+    features?: string[];
+  } | null;
 };
 
 export default function EditListingPage() {
@@ -56,6 +72,7 @@ export default function EditListingPage() {
 
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState<CategorySlug>("electronics");
+  const [listingType, setListingType] = useState<"general" | "car">("general");
   const [price, setPrice] = useState("");
   const [negotiable, setNegotiable] = useState(false);
   const [condition, setCondition] =
@@ -63,6 +80,22 @@ export default function EditListingPage() {
   const [area, setArea] = useState("");
   const [description, setDescription] = useState("");
   const [imageUrls, setImageUrls] = useState("");
+  const [uploadedUrls, setUploadedUrls] = useState<string[]>([]);
+  const [uploading, setUploading] = useState(false);
+
+  const [carMake, setCarMake] = useState("");
+  const [carModel, setCarModel] = useState("");
+  const [carYear, setCarYear] = useState("");
+  const [carMileage, setCarMileage] = useState("");
+  const [carFuel, setCarFuel] = useState("");
+  const [carTransmission, setCarTransmission] = useState("");
+  const [carEngine, setCarEngine] = useState("");
+  const [carColour, setCarColour] = useState("");
+  const [carDoors, setCarDoors] = useState("");
+  const [carOwners, setCarOwners] = useState("");
+  const [carTaxedUntil, setCarTaxedUntil] = useState("");
+  const [carServiceHistory, setCarServiceHistory] = useState("");
+  const [carFeatures, setCarFeatures] = useState("");
 
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -96,7 +129,7 @@ export default function EditListingPage() {
       const { data, error: lErr } = await supabase
         .from("marketplace_listings")
         .select(
-          "id, seller_user_id, title, category, price_pence, negotiable, condition, area, description, images, approved"
+          "id, seller_user_id, title, category, price_pence, negotiable, condition, area, description, images, approved, type, attrs"
         )
         .eq("id", id)
         .maybeSingle<Listing>();
@@ -118,6 +151,7 @@ export default function EditListingPage() {
 
       setTitle(data.title);
       setCategory(data.category);
+      setListingType((data.type || "general") === "car" ? "car" : "general");
       setPrice((data.price_pence / 100).toString());
       setNegotiable(data.negotiable);
       setCondition(data.condition);
@@ -125,10 +159,77 @@ export default function EditListingPage() {
       setDescription(data.description);
       setImageUrls((data.images || []).join("\n"));
 
+      const attrs = data.attrs || {};
+      setCarMake(attrs.make || "");
+      setCarModel(attrs.model || "");
+      setCarYear(attrs.year ? String(attrs.year) : "");
+      setCarMileage(attrs.mileage ? String(attrs.mileage) : "");
+      setCarFuel(attrs.fuel || "");
+      setCarTransmission(attrs.transmission || "");
+      setCarEngine(attrs.engine || "");
+      setCarColour(attrs.colour || "");
+      setCarDoors(attrs.doors ? String(attrs.doors) : "");
+      setCarOwners(attrs.owners ? String(attrs.owners) : "");
+      setCarTaxedUntil(attrs.taxed_until || "");
+      setCarServiceHistory(attrs.service_history || "");
+      setCarFeatures(Array.isArray(attrs.features) ? attrs.features.join(", ") : "");
+
       setLoading(false);
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
+
+  useEffect(() => {
+    if (category === "automotive") {
+      setListingType("car");
+    } else if (listingType === "car") {
+      setListingType("general");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [category]);
+
+  async function handleUpload(files: FileList | null) {
+    if (!files || files.length === 0) return;
+    if (!supabase || !authUserId) return;
+
+    const maxAllowed = Math.max(0, 5 - uploadedUrls.length);
+    const list = Array.from(files).slice(0, maxAllowed);
+    if (!list.length) {
+      setError("You can upload a maximum of 5 images.");
+      return;
+    }
+
+    setUploading(true);
+    setError(null);
+
+    const newUrls: string[] = [];
+    for (const file of list) {
+      const fileExt = file.name.split(".").pop() || "jpg";
+      const fileName = `${Date.now()}-${Math.random()
+        .toString(36)
+        .slice(2)}.${fileExt}`;
+      const filePath = `marketplace/${authUserId}/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("marketplace")
+        .upload(filePath, file, { upsert: false });
+
+      if (uploadError) {
+        console.error(uploadError);
+        setError("Upload failed. Please try again.");
+        setUploading(false);
+        return;
+      }
+
+      const { data } = supabase.storage
+        .from("marketplace")
+        .getPublicUrl(filePath);
+      if (data?.publicUrl) newUrls.push(data.publicUrl);
+    }
+
+    setUploadedUrls((prev) => [...prev, ...newUrls].slice(0, 5));
+    setUploading(false);
+  }
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -153,11 +254,45 @@ export default function EditListingPage() {
       return;
     }
 
-    const urls = imageUrls
-      .split("\n")
-      .map((u) => u.trim())
+    if (listingType === "car") {
+      if (!carMake.trim() || !carModel.trim() || !carYear.trim()) {
+        setError("Please add make, model and year for vehicle listings.");
+        setSubmitting(false);
+        return;
+      }
+    }
+
+    const urls = [
+      ...uploadedUrls,
+      ...imageUrls
+        .split(/[\n,]+/g)
+        .map((u) => u.trim())
+        .filter(Boolean),
+    ]
       .filter(Boolean)
       .slice(0, 5);
+
+    const attrs =
+      listingType === "car"
+        ? {
+            make: carMake.trim() || null,
+            model: carModel.trim() || null,
+            year: Number(carYear) || null,
+            mileage: Number(carMileage) || null,
+            fuel: carFuel.trim() || null,
+            transmission: carTransmission.trim() || null,
+            engine: carEngine.trim() || null,
+            colour: carColour.trim() || null,
+            doors: Number(carDoors) || null,
+            owners: Number(carOwners) || null,
+            taxed_until: carTaxedUntil.trim() || null,
+            service_history: carServiceHistory.trim() || null,
+            features: carFeatures
+              .split(/[,\\n]+/g)
+              .map((f) => f.trim())
+              .filter(Boolean),
+          }
+        : null;
 
     const { error: uErr } = await supabase
       .from("marketplace_listings")
@@ -170,6 +305,8 @@ export default function EditListingPage() {
         condition,
         description: trimmedDesc,
         images: urls.length ? urls : null,
+        type: listingType,
+        attrs,
         approved: false, // require re-approval on edit
       })
       .eq("id", listing.id)
@@ -277,6 +414,22 @@ export default function EditListingPage() {
           </div>
         </div>
 
+        {/* Listing type */}
+        <div>
+          <label className="mb-1 block text-sm font-medium text-gray-900">
+            Listing type
+          </label>
+          <select
+            className="w-full rounded-lg border px-3 py-2 text-sm"
+            value={listingType}
+            onChange={(e) =>
+              setListingType(e.target.value as "general" | "car")
+            }
+          >
+            <option value="general">General item</option>
+            <option value="car">Vehicle / car</option>
+          </select>
+        </div>
         {/* Price + Negotiable */}
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
@@ -339,10 +492,184 @@ export default function EditListingPage() {
           />
         </div>
 
+        {listingType === "car" && (
+          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+            <h3 className="mb-3 text-sm font-semibold text-gray-900">
+              Vehicle details
+            </h3>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div>
+                <label className="mb-1 block text-xs font-medium text-gray-900">
+                  Make
+                </label>
+                <input
+                  className="w-full rounded-lg border px-3 py-2 text-sm"
+                  value={carMake}
+                  onChange={(e) => setCarMake(e.target.value)}
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-medium text-gray-900">
+                  Model
+                </label>
+                <input
+                  className="w-full rounded-lg border px-3 py-2 text-sm"
+                  value={carModel}
+                  onChange={(e) => setCarModel(e.target.value)}
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-medium text-gray-900">
+                  Year
+                </label>
+                <input
+                  type="number"
+                  className="w-full rounded-lg border px-3 py-2 text-sm"
+                  value={carYear}
+                  onChange={(e) => setCarYear(e.target.value)}
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-medium text-gray-900">
+                  Mileage
+                </label>
+                <input
+                  type="number"
+                  className="w-full rounded-lg border px-3 py-2 text-sm"
+                  value={carMileage}
+                  onChange={(e) => setCarMileage(e.target.value)}
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-medium text-gray-900">
+                  Fuel
+                </label>
+                <input
+                  className="w-full rounded-lg border px-3 py-2 text-sm"
+                  value={carFuel}
+                  onChange={(e) => setCarFuel(e.target.value)}
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-medium text-gray-900">
+                  Transmission
+                </label>
+                <input
+                  className="w-full rounded-lg border px-3 py-2 text-sm"
+                  value={carTransmission}
+                  onChange={(e) => setCarTransmission(e.target.value)}
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-medium text-gray-900">
+                  Engine
+                </label>
+                <input
+                  className="w-full rounded-lg border px-3 py-2 text-sm"
+                  value={carEngine}
+                  onChange={(e) => setCarEngine(e.target.value)}
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-medium text-gray-900">
+                  Colour
+                </label>
+                <input
+                  className="w-full rounded-lg border px-3 py-2 text-sm"
+                  value={carColour}
+                  onChange={(e) => setCarColour(e.target.value)}
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-medium text-gray-900">
+                  Doors
+                </label>
+                <input
+                  type="number"
+                  className="w-full rounded-lg border px-3 py-2 text-sm"
+                  value={carDoors}
+                  onChange={(e) => setCarDoors(e.target.value)}
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-medium text-gray-900">
+                  Owners
+                </label>
+                <input
+                  type="number"
+                  className="w-full rounded-lg border px-3 py-2 text-sm"
+                  value={carOwners}
+                  onChange={(e) => setCarOwners(e.target.value)}
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-medium text-gray-900">
+                  Taxed until
+                </label>
+                <input
+                  className="w-full rounded-lg border px-3 py-2 text-sm"
+                  placeholder="e.g. Dec 2026"
+                  value={carTaxedUntil}
+                  onChange={(e) => setCarTaxedUntil(e.target.value)}
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-medium text-gray-900">
+                  Service history
+                </label>
+                <input
+                  className="w-full rounded-lg border px-3 py-2 text-sm"
+                  value={carServiceHistory}
+                  onChange={(e) => setCarServiceHistory(e.target.value)}
+                />
+              </div>
+            </div>
+
+            <div className="mt-4">
+              <label className="mb-1 block text-xs font-medium text-gray-900">
+                Features (comma separated)
+              </label>
+              <textarea
+                className="min-h-[70px] w-full rounded-lg border px-3 py-2 text-sm"
+                value={carFeatures}
+                onChange={(e) => setCarFeatures(e.target.value)}
+              />
+            </div>
+          </div>
+        )}
+
         {/* Images */}
         <div>
           <label className="mb-1 block text-sm font-medium text-gray-900">
-            Image URLs
+            Upload images
+          </label>
+          <input
+            type="file"
+            accept="image/*"
+            multiple
+            onChange={(e) => handleUpload(e.target.files)}
+            className="w-full rounded-lg border px-3 py-2 text-xs"
+          />
+          {uploading && (
+            <p className="mt-2 text-xs text-gray-500">Uploading…</p>
+          )}
+          {uploadedUrls.length > 0 && (
+            <div className="mt-2 flex flex-wrap gap-2 text-[11px] text-gray-600">
+              {uploadedUrls.map((url) => (
+                <span
+                  key={url}
+                  className="rounded-full border border-slate-200 bg-white px-2 py-1"
+                >
+                  Uploaded
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div>
+          <label className="mb-1 block text-sm font-medium text-gray-900">
+            Image URLs (optional)
           </label>
           <textarea
             className="min-h-[80px] w-full rounded-lg border px-3 py-2 text-xs"

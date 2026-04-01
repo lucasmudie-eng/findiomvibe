@@ -8,11 +8,17 @@ const uuidish =
 
 export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
+  const isControlRoomPath =
+    pathname === "/control-room" || pathname.startsWith("/control-room/");
+  const isAdminApiPath =
+    pathname === "/api/admin" || pathname.startsWith("/api/admin/");
+  const isAdminPagePath =
+    pathname === "/admin" || pathname.startsWith("/admin/");
 
   // ---------------------------------------------------------
   // 1) BASIC AUTH FOR CONTROL ROOM
   // ---------------------------------------------------------
-  if (pathname === "/control-room" || pathname.startsWith("/control-room/")) {
+  if (isControlRoomPath || isAdminApiPath || isAdminPagePath) {
     const username = process.env.ADMIN_BASIC_USER;
     const password = process.env.ADMIN_BASIC_PASS;
 
@@ -87,5 +93,7 @@ export const config = {
     "/marketplace/:path*",
     "/control-room",
     "/control-room/:path*",
+    "/admin/:path*",
+    "/api/admin/:path*",
   ],
 };

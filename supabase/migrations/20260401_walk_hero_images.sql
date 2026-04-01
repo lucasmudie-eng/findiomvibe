@@ -1,0 +1,45 @@
+-- Wire hero_image_url for all walks from Supabase Storage
+-- Run in Supabase SQL editor
+-- Images expected at: images/walks/{slug}.jpg in the "images" bucket
+
+UPDATE public.heritage_walks SET hero_image_url = 'https://loilmtqszazyhnzgbudz.supabase.co/storage/v1/object/public/images/walks/baldwin-bluebell-walk.jpg' WHERE slug = 'baldwin-bluebell-walk';
+UPDATE public.heritage_walks SET hero_image_url = 'https://loilmtqszazyhnzgbudz.supabase.co/storage/v1/object/public/images/walks/railway-ramble-castletown-derbyhaven-langness-st-michaels-island.jpg' WHERE slug = 'railway-ramble-castletown-derbyhaven-langness-st-michaels-island';
+UPDATE public.heritage_walks SET hero_image_url = 'https://loilmtqszazyhnzgbudz.supabase.co/storage/v1/object/public/images/walks/railway-ramble-ballasalla-rushen-abbey-silverdale-glen-grenaby.jpg' WHERE slug = 'railway-ramble-ballasalla-rushen-abbey-silverdale-glen-grenaby';
+UPDATE public.heritage_walks SET hero_image_url = 'https://loilmtqszazyhnzgbudz.supabase.co/storage/v1/object/public/images/walks/railway-ramble-ballure-reservoir-albert-tower-ramsey.jpg' WHERE slug = 'railway-ramble-ballure-reservoir-albert-tower-ramsey';
+UPDATE public.heritage_walks SET hero_image_url = 'https://loilmtqszazyhnzgbudz.supabase.co/storage/v1/object/public/images/walks/archibald-knox-trail.jpg' WHERE slug = 'archibald-knox-trail';
+UPDATE public.heritage_walks SET hero_image_url = 'https://loilmtqszazyhnzgbudz.supabase.co/storage/v1/object/public/images/walks/walk-around-castletown.jpg' WHERE slug = 'walk-around-castletown';
+UPDATE public.heritage_walks SET hero_image_url = 'https://loilmtqszazyhnzgbudz.supabase.co/storage/v1/object/public/images/walks/railway-ramble-glen-mona-maughold-brooghs-ramsey.jpg' WHERE slug = 'railway-ramble-glen-mona-maughold-brooghs-ramsey';
+UPDATE public.heritage_walks SET hero_image_url = 'https://loilmtqszazyhnzgbudz.supabase.co/storage/v1/object/public/images/walks/railway-ramble-colby-station-colby-glen-cronk-e-dhooney.jpg' WHERE slug = 'railway-ramble-colby-station-colby-glen-cronk-e-dhooney';
+UPDATE public.heritage_walks SET hero_image_url = 'https://loilmtqszazyhnzgbudz.supabase.co/storage/v1/object/public/images/walks/railway-ramble-glen-mona-snaefell-mines-laxey-valley.jpg' WHERE slug = 'railway-ramble-glen-mona-snaefell-mines-laxey-valley';
+UPDATE public.heritage_walks SET hero_image_url = 'https://loilmtqszazyhnzgbudz.supabase.co/storage/v1/object/public/images/walks/glen-mooar-and-glen-wyllin.jpg' WHERE slug = 'glen-mooar-and-glen-wyllin';
+UPDATE public.heritage_walks SET hero_image_url = 'https://loilmtqszazyhnzgbudz.supabase.co/storage/v1/object/public/images/walks/derbyhaven-and-langness-nature-walk.jpg' WHERE slug = 'derbyhaven-and-langness-nature-walk';
+UPDATE public.heritage_walks SET hero_image_url = 'https://loilmtqszazyhnzgbudz.supabase.co/storage/v1/object/public/images/walks/douglas-heritage-and-nature-walk.jpg' WHERE slug = 'douglas-heritage-and-nature-walk';
+UPDATE public.heritage_walks SET hero_image_url = 'https://loilmtqszazyhnzgbudz.supabase.co/storage/v1/object/public/images/walks/railway-ramble-port-st-mary-the-chasms-cregneash-port-erin.jpg' WHERE slug = 'railway-ramble-port-st-mary-the-chasms-cregneash-port-erin';
+UPDATE public.heritage_walks SET hero_image_url = 'https://loilmtqszazyhnzgbudz.supabase.co/storage/v1/object/public/images/walks/bayr-ny-skeddan-the-herring-road.jpg' WHERE slug = 'bayr-ny-skeddan-the-herring-road';
+UPDATE public.heritage_walks SET hero_image_url = 'https://loilmtqszazyhnzgbudz.supabase.co/storage/v1/object/public/images/walks/maugholds-coast-coves-and-viking-crosses.jpg' WHERE slug = 'maugholds-coast-coves-and-viking-crosses';
+UPDATE public.heritage_walks SET hero_image_url = 'https://loilmtqszazyhnzgbudz.supabase.co/storage/v1/object/public/images/walks/silverdale-glen-and-castletown-stroll.jpg' WHERE slug = 'silverdale-glen-and-castletown-stroll';
+UPDATE public.heritage_walks SET hero_image_url = 'https://loilmtqszazyhnzgbudz.supabase.co/storage/v1/object/public/images/walks/millennium-way.jpg' WHERE slug = 'millennium-way';
+UPDATE public.heritage_walks SET hero_image_url = 'https://loilmtqszazyhnzgbudz.supabase.co/storage/v1/object/public/images/walks/railway-ramble-ballasalla-castletown-derbyhaven-port-grenaugh.jpg' WHERE slug = 'railway-ramble-ballasalla-castletown-derbyhaven-port-grenaugh';
+UPDATE public.heritage_walks SET hero_image_url = 'https://loilmtqszazyhnzgbudz.supabase.co/storage/v1/object/public/images/walks/laxey-agneash-king-orrys-grave.jpg' WHERE slug = 'laxey-agneash-king-orrys-grave';
+UPDATE public.heritage_walks SET hero_image_url = 'https://loilmtqszazyhnzgbudz.supabase.co/storage/v1/object/public/images/walks/railway-ramble-baldrine-axnfell-glen-roy-laxey.jpg' WHERE slug = 'railway-ramble-baldrine-axnfell-glen-roy-laxey';
+UPDATE public.heritage_walks SET hero_image_url = 'https://loilmtqszazyhnzgbudz.supabase.co/storage/v1/object/public/images/walks/railway-ramble-castletown-scarlett-pooil-vaaish.jpg' WHERE slug = 'railway-ramble-castletown-scarlett-pooil-vaaish';
+UPDATE public.heritage_walks SET hero_image_url = 'https://loilmtqszazyhnzgbudz.supabase.co/storage/v1/object/public/images/walks/city-of-peel-heritage-strolls.jpg' WHERE slug = 'city-of-peel-heritage-strolls';
+UPDATE public.heritage_walks SET hero_image_url = 'https://loilmtqszazyhnzgbudz.supabase.co/storage/v1/object/public/images/walks/railway-ramble-ballaglass-glen-port-cornaa-glen-mona.jpg' WHERE slug = 'railway-ramble-ballaglass-glen-port-cornaa-glen-mona';
+UPDATE public.heritage_walks SET hero_image_url = 'https://loilmtqszazyhnzgbudz.supabase.co/storage/v1/object/public/images/walks/railway-ramble-port-st-mary-the-sound-port-erin.jpg' WHERE slug = 'railway-ramble-port-st-mary-the-sound-port-erin';
+UPDATE public.heritage_walks SET hero_image_url = 'https://loilmtqszazyhnzgbudz.supabase.co/storage/v1/object/public/images/walks/railway-ramble-port-erin-bradda-head-the-sloc.jpg' WHERE slug = 'railway-ramble-port-erin-bradda-head-the-sloc';
+UPDATE public.heritage_walks SET hero_image_url = 'https://loilmtqszazyhnzgbudz.supabase.co/storage/v1/object/public/images/walks/railway-ramble-port-erin-bradda-head-fleshwick-bay.jpg' WHERE slug = 'railway-ramble-port-erin-bradda-head-fleshwick-bay';
+UPDATE public.heritage_walks SET hero_image_url = 'https://loilmtqszazyhnzgbudz.supabase.co/storage/v1/object/public/images/walks/raad-ny-foillan-coastal-path.jpg' WHERE slug = 'raad-ny-foillan-coastal-path';
+-- AllTrails additions
+UPDATE public.heritage_walks SET hero_image_url = 'https://loilmtqszazyhnzgbudz.supabase.co/storage/v1/object/public/images/walks/port-erin-and-cregneash.jpg' WHERE slug = 'port-erin-and-cregneash';
+UPDATE public.heritage_walks SET hero_image_url = 'https://loilmtqszazyhnzgbudz.supabase.co/storage/v1/object/public/images/walks/bradda-glen-and-fleshwick-bay.jpg' WHERE slug = 'bradda-glen-and-fleshwick-bay';
+UPDATE public.heritage_walks SET hero_image_url = 'https://loilmtqszazyhnzgbudz.supabase.co/storage/v1/object/public/images/walks/peel-castle-and-corrins-hill-circular.jpg' WHERE slug = 'peel-castle-and-corrins-hill-circular';
+UPDATE public.heritage_walks SET hero_image_url = 'https://loilmtqszazyhnzgbudz.supabase.co/storage/v1/object/public/images/walks/snaefell-summit.jpg' WHERE slug = 'snaefell-summit';
+UPDATE public.heritage_walks SET hero_image_url = 'https://loilmtqszazyhnzgbudz.supabase.co/storage/v1/object/public/images/walks/groudle-glen.jpg' WHERE slug = 'groudle-glen';
+UPDATE public.heritage_walks SET hero_image_url = 'https://loilmtqszazyhnzgbudz.supabase.co/storage/v1/object/public/images/walks/isle-of-man-bottom-to-top.jpg' WHERE slug = 'isle-of-man-bottom-to-top';
+UPDATE public.heritage_walks SET hero_image_url = 'https://loilmtqszazyhnzgbudz.supabase.co/storage/v1/object/public/images/walks/triskelion-way.jpg' WHERE slug = 'triskelion-way';
+UPDATE public.heritage_walks SET hero_image_url = 'https://loilmtqszazyhnzgbudz.supabase.co/storage/v1/object/public/images/walks/point-of-ayre-to-ramsey.jpg' WHERE slug = 'point-of-ayre-to-ramsey';
+UPDATE public.heritage_walks SET hero_image_url = 'https://loilmtqszazyhnzgbudz.supabase.co/storage/v1/object/public/images/walks/dhoon-glen.jpg' WHERE slug = 'dhoon-glen';
+UPDATE public.heritage_walks SET hero_image_url = 'https://loilmtqszazyhnzgbudz.supabase.co/storage/v1/object/public/images/walks/point-of-ayre-and-jurby.jpg' WHERE slug = 'point-of-ayre-and-jurby';
+UPDATE public.heritage_walks SET hero_image_url = 'https://loilmtqszazyhnzgbudz.supabase.co/storage/v1/object/public/images/walks/maughold-along-the-sea.jpg' WHERE slug = 'maughold-along-the-sea';
+UPDATE public.heritage_walks SET hero_image_url = 'https://loilmtqszazyhnzgbudz.supabase.co/storage/v1/object/public/images/walks/niarbyl-and-cronk-ny-arrey-laa.jpg' WHERE slug = 'niarbyl-and-cronk-ny-arrey-laa';
+UPDATE public.heritage_walks SET hero_image_url = 'https://loilmtqszazyhnzgbudz.supabase.co/storage/v1/object/public/images/walks/barrule-from-ramsey.jpg' WHERE slug = 'barrule-from-ramsey';

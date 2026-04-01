@@ -90,7 +90,7 @@ export default function BusinessesApprovalsPage() {
           .select(
             "id, slug, name, category, subcategory, area, created_at, approved, boosted"
           )
-          .eq("approved", false)
+          .or("approved.is.null,approved.eq.false")
           .order("created_at", { ascending: true }),
         supabase
           .from("businesses")
@@ -142,7 +142,7 @@ export default function BusinessesApprovalsPage() {
           .select(
             "id, slug, name, category, subcategory, area, created_at, approved, boosted"
           )
-          .eq("approved", false)
+          .or("approved.is.null,approved.eq.false")
           .order("created_at", { ascending: true }),
         supabase
           .from("businesses")

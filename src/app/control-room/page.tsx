@@ -37,6 +37,7 @@ type ListingRow = {
 
 type BusinessRow = {
   id: string;
+  slug: string | null;
   name: string | null;
   area: string | null;
   category: string | null;
@@ -53,6 +54,38 @@ type DealRow = {
   approved: boolean | null;
 };
 
+type SportRow = {
+  id: number;
+  name: string;
+  slug: string;
+  sport_type: string | null;
+  area: string | null;
+  venue: string | null;
+  status: string | null; // pending / published
+  website: string | null;
+};
+
+type WalkRow = {
+  id: string;
+  name: string;
+  slug: string;
+  area: string | null;
+  difficulty: string | null;
+  distance_km: number | null;
+  duration_minutes: number | null;
+  status: string | null; // pending / published
+};
+
+type LeagueRow = {
+  id: number;
+  name: string;
+  slug: string;
+  sport_type: string | null;
+  area: string | null;
+  status: string | null; // pending / published
+  website: string | null;
+};
+
 async function loadData() {
   const supabase = createClient(supabaseUrl!, supabaseServiceKey!, {
     auth: { persistSession: false },
@@ -60,7 +93,15 @@ async function loadData() {
 
   const nowIso = new Date().toISOString();
 
-  const [eventsRes, listingsRes, businessesRes, dealsRes] = await Promise.all([
+  const [
+    eventsRes,
+    listingsRes,
+    businessesRes,
+    dealsRes,
+    sportsRes,
+    walksRes,
+    leaguesRes,
+  ] = await Promise.all([
     supabase
       .from("events")
       .select(
@@ -69,6 +110,7 @@ async function loadData() {
       .gte("starts_at", nowIso)
       .order("starts_at", { ascending: true })
       .limit(30),
+
     supabase
       .from("marketplace_listings")
       .select(
@@ -76,36 +118,56 @@ async function loadData() {
       )
       .order("date_listed", { ascending: false })
       .limit(30),
+
     supabase
       .from("businesses")
-      .select("id, name, area, category, approved, featured_on_home")
+      .select("id, slug, name, area, category, approved, featured_on_home")
       .order("created_at", { ascending: false })
       .limit(30),
+
     supabase
       .from("deals")
       .select("id, title, business_name, area, valid_until, approved")
       .order("created_at", { ascending: false })
       .limit(30),
+
+    supabase
+      .from("sports")
+      .select("id, name, slug, sport_type, area, venue, status, website")
+      .order("submitted_at", { ascending: false })
+      .limit(30),
+
+    supabase
+      .from("walks")
+      .select(
+        "id, name, slug, area, difficulty, distance_km, duration_minutes, status"
+      )
+      .order("created_at", { ascending: false })
+      .limit(30),
+
+    supabase
+      .from("leagues")
+      .select("id, name, slug, sport_type, area, status, website")
+      .order("submitted_at", { ascending: false })
+      .limit(30),
   ]);
 
-  if (eventsRes.error) {
-    console.error("[control-room] events load error", eventsRes.error);
-  }
-  if (listingsRes.error) {
-    console.error("[control-room] listings load error", listingsRes.error);
-  }
-  if (businessesRes.error) {
-    console.error("[control-room] businesses load error", businessesRes.error);
-  }
-  if (dealsRes.error) {
-    console.error("[control-room] deals load error", dealsRes.error);
-  }
+  if (eventsRes.error) console.error("[control-room] events load error", eventsRes.error);
+  if (listingsRes.error) console.error("[control-room] listings load error", listingsRes.error);
+  if (businessesRes.error) console.error("[control-room] businesses load error", businessesRes.error);
+  if (dealsRes.error) console.error("[control-room] deals load error", dealsRes.error);
+  if (sportsRes.error) console.error("[control-room] sports load error", sportsRes.error);
+  if (walksRes.error) console.error("[control-room] walks load error", walksRes.error);
+  if (leaguesRes.error) console.error("[control-room] leagues load error", leaguesRes.error);
 
   return {
     events: (eventsRes.data as EventRow[] | null) ?? [],
     listings: (listingsRes.data as ListingRow[] | null) ?? [],
     businesses: (businessesRes.data as BusinessRow[] | null) ?? [],
     deals: (dealsRes.data as DealRow[] | null) ?? [],
+    sports: (sportsRes.data as SportRow[] | null) ?? [],
+    walks: (walksRes.data as WalkRow[] | null) ?? [],
+    leagues: (leaguesRes.data as LeagueRow[] | null) ?? [],
   };
 }
 
@@ -146,6 +208,16 @@ function formatShortTime(value: string | null) {
     hour: "2-digit",
     minute: "2-digit",
   });
+}
+
+function formatKm(v: number | null) {
+  if (v == null) return "";
+  return `${v.toFixed(1)} km`;
+}
+
+function formatMins(v: number | null) {
+  if (v == null) return "";
+  return `${v} mins`;
 }
 
 function LoginScreen({ hasError }: { hasError: boolean }) {
@@ -228,12 +300,17 @@ export default async function ControlRoomPage({
   }
   // ===== END PASSWORD GATE =====
 
-  const { events, listings, businesses, deals } = await loadData();
+  const { events, listings, businesses, deals, sports, walks, leagues } =
+    await loadData();
 
   const lastLoginLabel = loginAtCookie
     ? formatDateTime(loginAtCookie)
     : "This session";
   const sessionExpiresTime = formatShortTime(expiresAtCookie);
+
+  const pendingSports = sports.filter((s) => s.status !== "published").length;
+  const pendingWalks = walks.filter((w) => w.status !== "published").length;
+  const pendingLeagues = leagues.filter((l) => l.status !== "published").length;
 
   return (
     <main className="mx-auto max-w-6xl px-4 py-8 space-y-8">
@@ -248,7 +325,7 @@ export default async function ControlRoomPage({
           </h1>
           <p className="mt-1 text-sm text-slate-600">
             Approve, feature and manage content across events, marketplace,
-            businesses and deals.
+            businesses, deals, sports, walks and leagues.
           </p>
           <p className="mt-2 text-[11px] text-slate-500">
             Logged in as <span className="font-semibold">admin</span>.{" "}
@@ -298,7 +375,7 @@ export default async function ControlRoomPage({
           </Link>
           <Link
             href="/deals#submit-deal"
-            className="inline-flex items-center rounded-full border border-slate-200 bg.white px-3 py-1.5 text-[11px] font-medium text-slate-900 hover:bg-slate-50"
+            className="inline-flex items-center rounded-full border border-slate-200 bg-white px-3 py-1.5 text-[11px] font-medium text-slate-900 hover:bg-slate-50"
           >
             + Add new deal
           </Link>
@@ -314,15 +391,75 @@ export default async function ControlRoomPage({
           >
             + Add business
           </Link>
+          <Link
+            href="/list-sport"
+            className="inline-flex items-center rounded-full border border-slate-200 bg-white px-3 py-1.5 text-[11px] font-medium text-slate-900 hover:bg-slate-50"
+          >
+            + Add sport / club
+          </Link>
+          <Link
+            href="/list-walk"
+            className="inline-flex items-center rounded-full border border-slate-200 bg-white px-3 py-1.5 text-[11px] font-medium text-slate-900 hover:bg-slate-50"
+          >
+            + Add walk
+          </Link>
+          <Link
+            href="/list-league"
+            className="inline-flex items-center rounded-full border border-slate-200 bg-white px-3 py-1.5 text-[11px] font-medium text-slate-900 hover:bg-slate-50"
+          >
+            + Add league / club
+          </Link>
         </div>
         <p className="mt-2 text-[10px] text-slate-400">
           These link to the same submission flows your users see, so you can
           quickly add content and then approve/feature it below.
         </p>
+        {(pendingSports > 0 || pendingWalks > 0 || pendingLeagues > 0) && (
+          <div className="mt-3 flex flex-wrap gap-2 border-t border-slate-100 pt-3">
+            <p className="w-full text-[10px] font-semibold text-rose-600 uppercase tracking-wide">
+              Pending approvals
+            </p>
+            {pendingSports > 0 && (
+              <Link
+                href="/admin/sports-approvals"
+                className="inline-flex items-center gap-1 rounded-full bg-rose-50 border border-rose-200 px-3 py-1.5 text-[11px] font-medium text-rose-700 hover:bg-rose-100"
+              >
+                {pendingSports} sport{pendingSports !== 1 ? "s" : ""} pending →
+              </Link>
+            )}
+            {pendingWalks > 0 && (
+              <Link
+                href="/admin/walks-approvals"
+                className="inline-flex items-center gap-1 rounded-full bg-rose-50 border border-rose-200 px-3 py-1.5 text-[11px] font-medium text-rose-700 hover:bg-rose-100"
+              >
+                {pendingWalks} walk{pendingWalks !== 1 ? "s" : ""} pending →
+              </Link>
+            )}
+            {pendingLeagues > 0 && (
+              <Link
+                href="/admin/leagues-approvals"
+                className="inline-flex items-center gap-1 rounded-full bg-rose-50 border border-rose-200 px-3 py-1.5 text-[11px] font-medium text-rose-700 hover:bg-rose-100"
+              >
+                {pendingLeagues} league{pendingLeagues !== 1 ? "s" : ""} pending →
+              </Link>
+            )}
+          </div>
+        )}
+        <div className="mt-3 flex flex-wrap gap-2 border-t border-slate-100 pt-3">
+          <p className="w-full text-[10px] font-semibold text-slate-400 uppercase tracking-wide">
+            Data management
+          </p>
+          <Link
+            href="/admin/football"
+            className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-[11px] font-medium text-slate-700 hover:bg-slate-50"
+          >
+            ⚽ Football data manager →
+          </Link>
+        </div>
       </section>
 
       {/* Tabs summary */}
-      <section className="grid gap-3 text-xs md:grid-cols-4">
+      <section className="grid gap-3 text-xs md:grid-cols-7">
         <div className="rounded-2xl border bg-white p-3 shadow-sm">
           <p className="text-[11px] text-slate-500">Upcoming events</p>
           <p className="mt-1 text-xl font-semibold text-slate-900">
@@ -347,6 +484,24 @@ export default async function ControlRoomPage({
             {deals.length}
           </p>
         </div>
+        <div className="rounded-2xl border bg-white p-3 shadow-sm">
+          <p className="text-[11px] text-slate-500">Sports pending</p>
+          <p className="mt-1 text-xl font-semibold text-slate-900">
+            {pendingSports}
+          </p>
+        </div>
+        <div className="rounded-2xl border bg-white p-3 shadow-sm">
+          <p className="text-[11px] text-slate-500">Walks pending</p>
+          <p className="mt-1 text-xl font-semibold text-slate-900">
+            {pendingWalks}
+          </p>
+        </div>
+        <div className="rounded-2xl border bg-white p-3 shadow-sm">
+          <p className="text-[11px] text-slate-500">Leagues pending</p>
+          <p className="mt-1 text-xl font-semibold text-slate-900">
+            {pendingLeagues}
+          </p>
+        </div>
       </section>
 
       {/* Events */}
@@ -362,6 +517,7 @@ export default async function ControlRoomPage({
             View public What&apos;s On →
           </Link>
         </div>
+
         {events.length === 0 ? (
           <p className="text-xs text-slate-500">No upcoming events.</p>
         ) : (
@@ -397,12 +553,8 @@ export default async function ControlRoomPage({
                       <td className="px-2 py-1 align-top">
                         {formatDateTime(ev.starts_at)}
                       </td>
-                      <td className="px-2 py-1 align-top">
-                        {ev.venue || ""}
-                      </td>
-                      <td className="px-2 py-1 align-top">
-                        {ev.category || ""}
-                      </td>
+                      <td className="px-2 py-1 align-top">{ev.venue || ""}</td>
+                      <td className="px-2 py-1 align-top">{ev.category || ""}</td>
                       <td className="px-2 py-1 align-top">
                         <span
                           className={`inline-flex rounded-full px-2 py-0.5 text-[10px] ${
@@ -427,18 +579,10 @@ export default async function ControlRoomPage({
                       </td>
                       <td className="space-y-1 px-2 py-1 align-top text-right">
                         <div className="inline-flex flex-wrap justify-end gap-1">
-                          <form
-                            method="POST"
-                            action="/api/admin/update"
-                            className="inline"
-                          >
+                          <form method="POST" action="/api/admin/update" className="inline">
                             <input type="hidden" name="table" value="events" />
                             <input type="hidden" name="id" value={ev.id} />
-                            <input
-                              type="hidden"
-                              name="field"
-                              value="approved"
-                            />
+                            <input type="hidden" name="field" value="approved" />
                             <input
                               type="hidden"
                               name="value"
@@ -451,18 +595,10 @@ export default async function ControlRoomPage({
                               {approved ? "Unapprove" : "Approve"}
                             </button>
                           </form>
-                          <form
-                            method="POST"
-                            action="/api/admin/update"
-                            className="inline"
-                          >
+                          <form method="POST" action="/api/admin/update" className="inline">
                             <input type="hidden" name="table" value="events" />
                             <input type="hidden" name="id" value={ev.id} />
-                            <input
-                              type="hidden"
-                              name="field"
-                              value="featured"
-                            />
+                            <input type="hidden" name="field" value="featured" />
                             <input
                               type="hidden"
                               name="value"
@@ -505,6 +641,7 @@ export default async function ControlRoomPage({
             View public marketplace →
           </Link>
         </div>
+
         {listings.length === 0 ? (
           <p className="text-xs text-slate-500">No listings found.</p>
         ) : (
@@ -533,9 +670,7 @@ export default async function ControlRoomPage({
                         </div>
                       </td>
                       <td className="px-2 py-1 align-top">{l.area || ""}</td>
-                      <td className="px-2 py-1 align-top">
-                        {l.category || ""}
-                      </td>
+                      <td className="px-2 py-1 align-top">{l.category || ""}</td>
                       <td className="px-2 py-1 align-top">
                         {formatPricePence(l.price_pence)}
                       </td>
@@ -563,22 +698,10 @@ export default async function ControlRoomPage({
                       </td>
                       <td className="space-y-1 px-2 py-1 align-top text-right">
                         <div className="inline-flex flex-wrap justify-end gap-1">
-                          <form
-                            method="POST"
-                            action="/api/admin/update"
-                            className="inline"
-                          >
-                            <input
-                              type="hidden"
-                              name="table"
-                              value="marketplace_listings"
-                            />
+                          <form method="POST" action="/api/admin/update" className="inline">
+                            <input type="hidden" name="table" value="marketplace_listings" />
                             <input type="hidden" name="id" value={l.id} />
-                            <input
-                              type="hidden"
-                              name="field"
-                              value="approved"
-                            />
+                            <input type="hidden" name="field" value="approved" />
                             <input
                               type="hidden"
                               name="value"
@@ -591,22 +714,10 @@ export default async function ControlRoomPage({
                               {approved ? "Unapprove" : "Approve"}
                             </button>
                           </form>
-                          <form
-                            method="POST"
-                            action="/api/admin/update"
-                            className="inline"
-                          >
-                            <input
-                              type="hidden"
-                              name="table"
-                              value="marketplace_listings"
-                            />
+                          <form method="POST" action="/api/admin/update" className="inline">
+                            <input type="hidden" name="table" value="marketplace_listings" />
                             <input type="hidden" name="id" value={l.id} />
-                            <input
-                              type="hidden"
-                              name="field"
-                              value="boosted"
-                            />
+                            <input type="hidden" name="field" value="boosted" />
                             <input
                               type="hidden"
                               name="value"
@@ -649,6 +760,7 @@ export default async function ControlRoomPage({
             View public businesses →
           </Link>
         </div>
+
         {businesses.length === 0 ? (
           <p className="text-xs text-slate-500">No businesses found.</p>
         ) : (
@@ -676,9 +788,7 @@ export default async function ControlRoomPage({
                         </div>
                       </td>
                       <td className="px-2 py-1 align-top">{b.area || ""}</td>
-                      <td className="px-2 py-1 align-top">
-                        {b.category || ""}
-                      </td>
+                      <td className="px-2 py-1 align-top">{b.category || ""}</td>
                       <td className="px-2 py-1 align-top">
                         <span
                           className={`inline-flex rounded-full px-2 py-0.5 text-[10px] ${
@@ -703,22 +813,10 @@ export default async function ControlRoomPage({
                       </td>
                       <td className="space-y-1 px-2 py-1 align-top text-right">
                         <div className="inline-flex flex-wrap justify-end gap-1">
-                          <form
-                            method="POST"
-                            action="/api/admin/update"
-                            className="inline"
-                          >
-                            <input
-                              type="hidden"
-                              name="table"
-                              value="businesses"
-                            />
+                          <form method="POST" action="/api/admin/update" className="inline">
+                            <input type="hidden" name="table" value="businesses" />
                             <input type="hidden" name="id" value={b.id} />
-                            <input
-                              type="hidden"
-                              name="field"
-                              value="approved"
-                            />
+                            <input type="hidden" name="field" value="approved" />
                             <input
                               type="hidden"
                               name="value"
@@ -731,22 +829,10 @@ export default async function ControlRoomPage({
                               {approved ? "Unapprove" : "Approve"}
                             </button>
                           </form>
-                          <form
-                            method="POST"
-                            action="/api/admin/update"
-                            className="inline"
-                          >
-                            <input
-                              type="hidden"
-                              name="table"
-                              value="businesses"
-                            />
+                          <form method="POST" action="/api/admin/update" className="inline">
+                            <input type="hidden" name="table" value="businesses" />
                             <input type="hidden" name="id" value={b.id} />
-                            <input
-                              type="hidden"
-                              name="field"
-                              value="featured_on_home"
-                            />
+                            <input type="hidden" name="field" value="featured_on_home" />
                             <input
                               type="hidden"
                               name="value"
@@ -759,6 +845,12 @@ export default async function ControlRoomPage({
                               {featured ? "Remove home feature" : "Feature home"}
                             </button>
                           </form>
+                          <Link
+                            href={`/businesses/${b.slug || b.id}`}
+                            className="rounded-full border border-rose-200 bg-white px-2.5 py-1 text-[10px] font-medium text-rose-600 hover:bg-rose-50"
+                          >
+                            View page
+                          </Link>
                         </div>
                       </td>
                     </tr>
@@ -783,6 +875,7 @@ export default async function ControlRoomPage({
             View public deals →
           </Link>
         </div>
+
         {deals.length === 0 ? (
           <p className="text-xs text-slate-500">No deals found.</p>
         ) : (
@@ -808,13 +901,9 @@ export default async function ControlRoomPage({
                           {d.title || "(no title)"}
                         </div>
                       </td>
-                      <td className="px-2 py-1 align-top">
-                        {d.business_name || ""}
-                      </td>
+                      <td className="px-2 py-1 align-top">{d.business_name || ""}</td>
                       <td className="px-2 py-1 align-top">{d.area || ""}</td>
-                      <td className="px-2 py-1 align-top">
-                        {formatDate(d.valid_until)}
-                      </td>
+                      <td className="px-2 py-1 align-top">{formatDate(d.valid_until)}</td>
                       <td className="px-2 py-1 align-top">
                         <span
                           className={`inline-flex rounded-full px-2 py-0.5 text-[10px] ${
@@ -828,18 +917,10 @@ export default async function ControlRoomPage({
                       </td>
                       <td className="space-y-1 px-2 py-1 align-top text-right">
                         <div className="inline-flex flex-wrap justify-end gap-1">
-                          <form
-                            method="POST"
-                            action="/api/admin/update"
-                            className="inline"
-                          >
+                          <form method="POST" action="/api/admin/update" className="inline">
                             <input type="hidden" name="table" value="deals" />
                             <input type="hidden" name="id" value={d.id} />
-                            <input
-                              type="hidden"
-                              name="field"
-                              value="approved"
-                            />
+                            <input type="hidden" name="field" value="approved" />
                             <input
                               type="hidden"
                               name="value"
@@ -850,6 +931,261 @@ export default async function ControlRoomPage({
                               className="rounded-full bg-slate-900 px-2.5 py-1 text-[10px] font-medium text-white hover:bg-slate-800"
                             >
                               {approved ? "Unapprove" : "Approve"}
+                            </button>
+                          </form>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </section>
+
+      {/* Sports */}
+      <section className="space-y-3 rounded-2xl border bg-white p-4 shadow-sm">
+        <div className="flex items-center justify-between gap-2">
+          <h2 className="text-sm font-semibold text-slate-900">
+            Sports moderation
+          </h2>
+          <Link
+            href="/sports"
+            className="text-xs font-medium text-rose-600 hover:underline"
+          >
+            View public sports →
+          </Link>
+        </div>
+
+        {sports.length === 0 ? (
+          <p className="text-xs text-slate-500">No sports/clubs found.</p>
+        ) : (
+          <div className="overflow-x-auto text-xs">
+            <table className="min-w-full border-separate border-spacing-y-1">
+              <thead className="text-[11px] text-slate-500">
+                <tr>
+                  <th className="px-2 py-1 text-left">Name</th>
+                  <th className="px-2 py-1 text-left">Sport</th>
+                  <th className="px-2 py-1 text-left">Area</th>
+                  <th className="px-2 py-1 text-left">Venue</th>
+                  <th className="px-2 py-1 text-left">Status</th>
+                  <th className="px-2 py-1 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {sports.map((s) => {
+                  const published = s.status === "published";
+                  return (
+                    <tr key={s.id} className="bg-slate-50/60">
+                      <td className="px-2 py-1 align-top">
+                        <div className="font-medium text-slate-900">{s.name}</div>
+                        <div className="text-[11px] text-slate-500">{s.slug}</div>
+                      </td>
+                      <td className="px-2 py-1 align-top">{s.sport_type || ""}</td>
+                      <td className="px-2 py-1 align-top">{s.area || ""}</td>
+                      <td className="px-2 py-1 align-top">{s.venue || ""}</td>
+                      <td className="px-2 py-1 align-top">
+                        <span
+                          className={`inline-flex rounded-full px-2 py-0.5 text-[10px] ${
+                            published
+                              ? "bg-emerald-50 text-emerald-700"
+                              : "bg-amber-50 text-amber-700"
+                          }`}
+                        >
+                          {published ? "Published" : "Pending"}
+                        </span>
+                      </td>
+                      <td className="px-2 py-1 align-top text-right">
+                        <div className="inline-flex flex-wrap justify-end gap-1">
+                          <form method="POST" action="/api/admin/update" className="inline">
+                            <input type="hidden" name="table" value="sports" />
+                            <input type="hidden" name="id" value={s.id} />
+                            <input type="hidden" name="field" value="status" />
+                            <input
+                              type="hidden"
+                              name="value"
+                              value={published ? "pending" : "published"}
+                            />
+                            <button
+                              type="submit"
+                              className="rounded-full bg-slate-900 px-2.5 py-1 text-[10px] font-medium text-white hover:bg-slate-800"
+                            >
+                              {published ? "Unpublish" : "Publish"}
+                            </button>
+                          </form>
+                          <Link
+                            href={`/sports/${s.slug}`}
+                            className="rounded-full border border-rose-200 bg-white px-2.5 py-1 text-[10px] font-medium text-rose-600 hover:bg-rose-50"
+                          >
+                            View page
+                          </Link>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </section>
+
+      {/* Walks */}
+      <section className="space-y-3 rounded-2xl border bg-white p-4 shadow-sm">
+        <div className="flex items-center justify-between gap-2">
+          <h2 className="text-sm font-semibold text-slate-900">
+            Walks moderation
+          </h2>
+          <Link
+            href="/heritage/walks"
+            className="text-xs font-medium text-rose-600 hover:underline"
+          >
+            View public walks →
+          </Link>
+        </div>
+
+        {walks.length === 0 ? (
+          <p className="text-xs text-slate-500">No walks found.</p>
+        ) : (
+          <div className="overflow-x-auto text-xs">
+            <table className="min-w-full border-separate border-spacing-y-1">
+              <thead className="text-[11px] text-slate-500">
+                <tr>
+                  <th className="px-2 py-1 text-left">Name</th>
+                  <th className="px-2 py-1 text-left">Area</th>
+                  <th className="px-2 py-1 text-left">Difficulty</th>
+                  <th className="px-2 py-1 text-left">Distance</th>
+                  <th className="px-2 py-1 text-left">Duration</th>
+                  <th className="px-2 py-1 text-left">Status</th>
+                  <th className="px-2 py-1 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {walks.map((w) => {
+                  const published = w.status === "published";
+                  return (
+                    <tr key={w.id} className="bg-slate-50/60">
+                      <td className="px-2 py-1 align-top">
+                        <div className="font-medium text-slate-900">{w.name}</div>
+                        <div className="text-[11px] text-slate-500">{w.slug}</div>
+                      </td>
+                      <td className="px-2 py-1 align-top">{w.area || ""}</td>
+                      <td className="px-2 py-1 align-top">{w.difficulty || ""}</td>
+                      <td className="px-2 py-1 align-top">{formatKm(w.distance_km)}</td>
+                      <td className="px-2 py-1 align-top">{formatMins(w.duration_minutes)}</td>
+                      <td className="px-2 py-1 align-top">
+                        <span
+                          className={`inline-flex rounded-full px-2 py-0.5 text-[10px] ${
+                            published
+                              ? "bg-emerald-50 text-emerald-700"
+                              : "bg-amber-50 text-amber-700"
+                          }`}
+                        >
+                          {published ? "Published" : "Pending"}
+                        </span>
+                      </td>
+                      <td className="px-2 py-1 align-top text-right">
+                        <div className="inline-flex flex-wrap justify-end gap-1">
+                          <form method="POST" action="/api/admin/update" className="inline">
+                            <input type="hidden" name="table" value="walks" />
+                            <input type="hidden" name="id" value={w.id} />
+                            <input type="hidden" name="field" value="status" />
+                            <input
+                              type="hidden"
+                              name="value"
+                              value={published ? "pending" : "published"}
+                            />
+                            <button
+                              type="submit"
+                              className="rounded-full bg-slate-900 px-2.5 py-1 text-[10px] font-medium text-white hover:bg-slate-800"
+                            >
+                              {published ? "Unpublish" : "Publish"}
+                            </button>
+                          </form>
+                          <Link
+                            href={`/heritage/walks/${w.slug}`}
+                            className="rounded-full border border-rose-200 bg-white px-2.5 py-1 text-[10px] font-medium text-rose-600 hover:bg-rose-50"
+                          >
+                            View page
+                          </Link>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </section>
+
+      {/* Leagues */}
+      <section className="space-y-3 rounded-2xl border bg-white p-4 shadow-sm">
+        <div className="flex items-center justify-between gap-2">
+          <h2 className="text-sm font-semibold text-slate-900">
+            Leagues moderation
+          </h2>
+          <Link
+            href="/sports"
+            className="text-xs font-medium text-rose-600 hover:underline"
+          >
+            View public sports →
+          </Link>
+        </div>
+
+        {leagues.length === 0 ? (
+          <p className="text-xs text-slate-500">No leagues found.</p>
+        ) : (
+          <div className="overflow-x-auto text-xs">
+            <table className="min-w-full border-separate border-spacing-y-1">
+              <thead className="text-[11px] text-slate-500">
+                <tr>
+                  <th className="px-2 py-1 text-left">Name</th>
+                  <th className="px-2 py-1 text-left">Sport</th>
+                  <th className="px-2 py-1 text-left">Area</th>
+                  <th className="px-2 py-1 text-left">Status</th>
+                  <th className="px-2 py-1 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {leagues.map((l) => {
+                  const published = l.status === "published";
+                  return (
+                    <tr key={l.id} className="bg-slate-50/60">
+                      <td className="px-2 py-1 align-top">
+                        <div className="font-medium text-slate-900">{l.name}</div>
+                        <div className="text-[11px] text-slate-500">{l.slug}</div>
+                      </td>
+                      <td className="px-2 py-1 align-top">{l.sport_type || ""}</td>
+                      <td className="px-2 py-1 align-top">{l.area || ""}</td>
+                      <td className="px-2 py-1 align-top">
+                        <span
+                          className={`inline-flex rounded-full px-2 py-0.5 text-[10px] ${
+                            published
+                              ? "bg-emerald-50 text-emerald-700"
+                              : "bg-amber-50 text-amber-700"
+                          }`}
+                        >
+                          {published ? "Published" : "Pending"}
+                        </span>
+                      </td>
+                      <td className="px-2 py-1 align-top text-right">
+                        <div className="inline-flex flex-wrap justify-end gap-1">
+                          <form method="POST" action="/api/admin/update" className="inline">
+                            <input type="hidden" name="table" value="leagues" />
+                            <input type="hidden" name="id" value={l.id} />
+                            <input type="hidden" name="field" value="status" />
+                            <input
+                              type="hidden"
+                              name="value"
+                              value={published ? "pending" : "published"}
+                            />
+                            <button
+                              type="submit"
+                              className="rounded-full bg-slate-900 px-2.5 py-1 text-[10px] font-medium text-white hover:bg-slate-800"
+                            >
+                              {published ? "Unpublish" : "Publish"}
                             </button>
                           </form>
                         </div>

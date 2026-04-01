@@ -44,4 +44,7 @@ export type Listing = {
   approved?: boolean;
   dateListed: string;
   images?: string[] | null;
+  type?: string | null;
+  businessId?: string | null;
+  attrs?: Record<string, any> | null;
 };

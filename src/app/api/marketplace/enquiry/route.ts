@@ -1,6 +1,7 @@
 // src/app/api/marketplace/enquiry/route.ts
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { Resend } from "resend";
 
 export const runtime = "nodejs"; // ensure non-edge
 
@@ -82,6 +83,43 @@ export async function POST(req: Request) {
         { error: "Could not send enquiry" },
         { status: 500 }
       );
+    }
+
+    // Email notification to seller (best-effort — never blocks the response)
+    if (listing.seller_user_id && process.env.RESEND_API_KEY) {
+      try {
+        const { data: sellerUser } = await supabase.auth.admin.getUserById(listing.seller_user_id);
+        const sellerEmail = sellerUser?.user?.email;
+        if (sellerEmail) {
+          const resend = new Resend(process.env.RESEND_API_KEY);
+          const fromEmail = process.env.EMAIL_FROM || process.env.RESEND_FROM_EMAIL || "hello@manxhive.com";
+          const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://manxhive.com";
+          await resend.emails.send({
+            from: fromEmail,
+            to: sellerEmail,
+            replyTo: replyTo,
+            subject: `New enquiry from ${name}`,
+            html: `
+<div style="font-family:sans-serif;max-width:520px;margin:0 auto;padding:24px;color:#1e293b">
+  <p style="font-size:13px;color:#94a3b8;margin:0 0 16px">ManxHive Marketplace</p>
+  <h2 style="font-size:20px;font-weight:700;margin:0 0 8px">You have a new enquiry</h2>
+  <p style="font-size:14px;color:#475569;margin:0 0 20px">
+    <strong>${name}</strong> sent a message about your listing.
+  </p>
+  <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:16px 20px;margin-bottom:20px">
+    <p style="margin:0 0 8px;font-size:13px;color:#64748b"><strong>From:</strong> ${name} (${replyTo})</p>
+    <p style="margin:0;font-size:14px;color:#1e293b;white-space:pre-wrap">${message.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</p>
+  </div>
+  <a href="${siteUrl}/account/enquiries" style="display:inline-block;background:#D90429;color:#fff;text-decoration:none;border-radius:8px;padding:10px 20px;font-size:14px;font-weight:600">View in your inbox →</a>
+  <p style="font-size:12px;color:#94a3b8;margin-top:24px">
+    You can reply directly to this email to respond to ${name}.
+  </p>
+</div>`,
+          });
+        }
+      } catch (emailErr) {
+        console.warn("[enquiry] Email notification failed:", emailErr);
+      }
     }
 
     return NextResponse.json({ ok: true });

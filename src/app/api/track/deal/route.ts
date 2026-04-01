@@ -12,8 +12,6 @@ export async function POST(req: Request) {
       // ignore bad JSON
     }
 
-    console.log("[api/track/deal] hit", body);
-
     // Always succeed — we simply don’t track server-side right now
     return NextResponse.json({ ok: true });
   } catch (err) {

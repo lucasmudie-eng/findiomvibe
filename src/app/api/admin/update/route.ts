@@ -1,6 +1,7 @@
 // src/app/api/admin/update/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { requireAdminBasicAuth } from "@/lib/auth/admin";
 
 export const runtime = "nodejs";
 
@@ -22,6 +23,9 @@ function getAdminClient() {
 
 // For now this is a *safe stub* – we can wire real logic later.
 export async function POST(req: NextRequest) {
+  const unauthorized = requireAdminBasicAuth(req);
+  if (unauthorized) return unauthorized;
+
   const client = getAdminClient();
   if (!client) {
     return NextResponse.json(
@@ -37,8 +41,6 @@ export async function POST(req: NextRequest) {
     // no body / invalid JSON – fine for now
   }
 
-  console.log("[api/admin/update] called with payload:", payload);
-
-  // TODO: implement whatever admin update logic you actually want here.
+  void payload; // stub — wire real logic here when needed
   return NextResponse.json({ ok: true });
 }

@@ -35,14 +35,21 @@ export async function GET(req: Request) {
 
   try {
     const { searchParams } = new URL(req.url);
-    const limit = Math.min(Number(searchParams.get("limit") ?? "50"), 200);
+    const limit = Math.min(Number(searchParams.get("limit") ?? "20"), 50);
+    const offset = Math.max(Number(searchParams.get("offset") ?? "0"), 0);
 
     const category = searchParams.get("category");
     const type = (searchParams.get("type") || "").toLowerCase();
+    const searchQuery = (searchParams.get("q") || "").trim();
+    const boostedParam = searchParams.get("boosted");
     const dealer = searchParams.get("dealer");
     const make = searchParams.get("make");
     const model = searchParams.get("model");
+    const condition = searchParams.get("condition");
+    const sort = (searchParams.get("sort") || "newest").toLowerCase();
+    const negotiableParam = searchParams.get("negotiable");
     const priceMax = searchParams.get("priceMax");
+    const priceMin = searchParams.get("priceMin");
     const yearMin = searchParams.get("yearMin");
     const mileageMax = searchParams.get("mileageMax");
 
@@ -54,7 +61,7 @@ export async function GET(req: Request) {
         ? "private"
         : "all";
 
-    let q = supabase
+    let query = supabase
       .from("marketplace_listings")
       .select(
         `
@@ -76,14 +83,39 @@ export async function GET(req: Request) {
       `
       )
       .eq("approved", true)
-      .order("boosted", { ascending: false })
-      .order("date_listed", { ascending: false })
-      .limit(limit);
+      .range(offset, offset + limit - 1);
 
-    if (category) q = q.eq("category", category);
-    if (type) q = q.eq("type", type);
-    if (sellerType === "dealer") q = q.not("business_id", "is", null);
-    if (sellerType === "private") q = q.is("business_id", null);
+    if (sort === "price_asc") {
+      query = query.order("price_pence", { ascending: true });
+      query = query.order("date_listed", { ascending: false });
+    } else if (sort === "price_desc") {
+      query = query.order("price_pence", { ascending: false });
+      query = query.order("date_listed", { ascending: false });
+    } else if (sort === "oldest") {
+      query = query.order("date_listed", { ascending: true });
+    } else {
+      query = query.order("boosted", { ascending: false });
+      query = query.order("date_listed", { ascending: false });
+    }
+
+    if (category) query = query.eq("category", category);
+    if (type) query = query.eq("type", type);
+    if (boostedParam === "1") query = query.eq("boosted", true);
+    if (condition) query = query.eq("condition", condition);
+    if (negotiableParam === "1") query = query.eq("negotiable", true);
+    if (sellerType === "dealer") query = query.not("business_id", "is", null);
+    if (sellerType === "private") query = query.is("business_id", null);
+
+    if (searchQuery) {
+      query = query.or(
+        [
+          `title.ilike.%${searchQuery}%`,
+          `description.ilike.%${searchQuery}%`,
+          `area.ilike.%${searchQuery}%`,
+          `condition.ilike.%${searchQuery}%`,
+        ].join(",")
+      );
+    }
 
     if (dealer) {
       const { data: bizBySlug } = await supabase
@@ -93,13 +125,22 @@ export async function GET(req: Request) {
         .maybeSingle();
 
       const businessId = bizBySlug?.id || dealer;
-      q = q.eq("business_id", businessId);
+      query = query.eq("business_id", businessId);
     }
 
-    if (make) q = q.eq("attrs->>make", make);
-    if (model) q = q.eq("attrs->>model", model);
+    if (make) query = query.eq("attrs->>make", make);
+    if (model) query = query.eq("attrs->>model", model);
 
-    const { data, error } = await q;
+    const pMax = priceMax ? Number(priceMax) : undefined;
+    const pMin = priceMin ? Number(priceMin) : undefined;
+    if (pMax !== undefined && !Number.isNaN(pMax)) {
+      query = query.lte("price_pence", Math.round(pMax * 100));
+    }
+    if (pMin !== undefined && !Number.isNaN(pMin)) {
+      query = query.gte("price_pence", Math.round(pMin * 100));
+    }
+
+    const { data, error } = await query;
     if (error) {
       console.error("[api/marketplace] query error", error);
       return NextResponse.json({ items: [], error: "Query error" }, { status: 500 });
@@ -127,12 +168,8 @@ export async function GET(req: Request) {
       attrs: r.attrs,
     }));
 
-    const pMax = priceMax ? Number(priceMax) : undefined;
     const yMin = yearMin ? Number(yearMin) : undefined;
     const mMax = mileageMax ? Number(mileageMax) : undefined;
-
-    if (pMax !== undefined && !Number.isNaN(pMax))
-      items = items.filter((i) => ((i.pricePence ?? 0) / 100) <= pMax);
 
     if (yMin !== undefined && !Number.isNaN(yMin))
       items = items.filter((i) => (i.attrs?.year ?? 0) >= yMin);

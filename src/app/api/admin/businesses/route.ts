@@ -1,10 +1,15 @@
 // src/app/api/admin/businesses/route.ts
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import { requireAdminBasicAuth } from "@/lib/auth/admin";
 
 export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
-export async function GET() {
+export async function GET(req: Request) {
+  const unauthorized = requireAdminBasicAuth(req);
+  if (unauthorized) return unauthorized;
+
   if (!supabaseAdmin) {
     console.warn("[api/admin/businesses] Supabase admin not configured.");
     return NextResponse.json(

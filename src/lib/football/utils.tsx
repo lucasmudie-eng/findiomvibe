@@ -14,12 +14,24 @@ export function leagueDisplayName(league: string) {
 
 // Exact overrides come first (force correct punctuation/case)
 export const TEAM_NAME_OVERRIDES: Record<string, string> = {
-  "st-georges": "St Georges",
-  "st-georges-combi": "St Georges - Combi",
-  "douglas-and-district": "Douglas & District",
-  "douglas-and-district-combi": "Douglas & District - Combi",
+  // Special capitalisation / punctuation
+  "dhsob": "DHSOB",
+  "dhsob-comb": "DHSOB Combination",
   "rycob": "RYCOB",
-  "rycob-combi": "RYCOB - Combi",
+  "rycob-comb": "RYCOB Combination",
+  "douglas-district": "Douglas & District",
+  "douglas-district-comb": "Douglas & District Combination",
+  "st-georges": "St Georges",
+  "st-georges-comb": "St Georges Combination",
+  "douglas-athletic-comb": "Douglas Athletic Combination",
+  "gymnasium-comb": "Gymnasium Combination",
+  "michael-united-comb": "Michael United Combination",
+  "governors-athletic-comb": "Governors Athletic Combination",
+  // Legacy slug variants
+  "st-georges-combi": "St Georges Combination",
+  "douglas-and-district": "Douglas & District",
+  "douglas-and-district-combi": "Douglas & District Combination",
+  "rycob-combi": "RYCOB Combination",
 };
 
 function cap(word: string) {
@@ -35,6 +47,7 @@ function formatBaseWords(parts: string[]) {
       if (w === "and") return "&";
       if (w === "st") return "St";
       if (w === "rycob") return "RYCOB";
+      if (w === "dhsob") return "DHSOB";
       // General title case otherwise
       return cap(w);
     })
@@ -42,8 +55,8 @@ function formatBaseWords(parts: string[]) {
 }
 
 /**
- * Format a team id (e.g. "castletown-combi") → "Castletown - Combi"
- * with overrides applied.
+ * Format a team slug (e.g. "corinthians-comb") → "Corinthians Combination"
+ * Handles both "-comb" and "-combi" suffixes.
  */
 export function formatTeamName(id: string): string {
   if (!id) return "";
@@ -51,11 +64,12 @@ export function formatTeamName(id: string): string {
   if (forced) return forced;
 
   const parts = id.split("-");
-  const isCombi = parts[parts.length - 1].toLowerCase() === "combi";
+  const last = parts[parts.length - 1].toLowerCase();
+  const isComb = last === "comb" || last === "combi";
 
-  if (isCombi) {
+  if (isComb) {
     const base = parts.slice(0, -1);
-    return `${formatBaseWords(base)} - Combi`;
+    return `${formatBaseWords(base)} Combination`;
   }
   return formatBaseWords(parts);
 }

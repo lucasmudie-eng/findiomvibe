@@ -1,5 +1,17 @@
 import { Suspense } from "react";
+import type { Metadata } from "next";
 import HomePageClient from "./HomePageClient";
+
+export const metadata: Metadata = {
+  title: "ManxHive – Isle of Man Events, Marketplace & Community",
+  description: "Your island hub. Find what's on, browse the marketplace, discover local deals, follow sports and explore businesses across the Isle of Man.",
+  alternates: { canonical: "https://manxhive.com" },
+  openGraph: {
+    title: "ManxHive – Isle of Man Events, Marketplace & Community",
+    description: "Your island hub for events, listings, deals, sports and local life.",
+    url: "https://manxhive.com",
+  },
+};
 
 function HomePageSkeleton() {
   return (

@@ -1,354 +1,306 @@
-"use client";
-
+// src/app/promote/page.tsx
 import Link from "next/link";
-import { useRef, useState } from "react";
-
-type ActiveForm = "boost" | "ads" | null;
+import {
+  ArrowLeft,
+  ArrowRight,
+  Sparkles,
+  BarChart3,
+  MapPin,
+  Rocket,
+  CalendarClock,
+  Users,
+  Star,
+} from "lucide-react";
 
 export default function PromotePage() {
-  const [activeForm, setActiveForm] = useState<ActiveForm>(null);
-  const boostRef = useRef<HTMLDivElement | null>(null);
-  const adsRef = useRef<HTMLDivElement | null>(null);
-
-  const openForm = (type: ActiveForm) => {
-    setActiveForm(type);
-
-    // Slight delay so the DOM has rendered before scrolling
-    setTimeout(() => {
-      if (type === "boost" && boostRef.current) {
-        boostRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
-      }
-      if (type === "ads" && adsRef.current) {
-        adsRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
-      }
-    }, 50);
-  };
-
   return (
-    <main className="mx-auto max-w-5xl px-4 pb-16 pt-10 sm:px-6 lg:px-8">
-      {/* Hero */}
-      <section className="space-y-4">
-        <p className="text-xs font-semibold uppercase tracking-wide text-[#D90429]">
-          Promote on ManxHive
-        </p>
-        <h1 className="text-3xl font-semibold text-slate-900 sm:text-4xl">
-          Get your business or campaign in front of the island.
-        </h1>
-        <p className="max-w-2xl text-sm text-slate-600">
-          Use this page to enquire about homepage features, boosted listings, or
-          advertising across ManxHive. Choose the option that fits you best and
-          send us a quick brief.
-        </p>
-      </section>
-
-      {/* Two main options */}
-      <section className="mt-8 grid gap-6 md:grid-cols-2">
-        {/* Boost business */}
-        <div className="rounded-3xl border border-slate-100 bg-white px-6 py-6 shadow-sm">
-          <h2 className="text-lg font-semibold text-slate-900">
-            Boost my business profile
-          </h2>
-          <p className="mt-2 text-sm text-slate-600">
-            Homepage &quot;Featured business&quot; slots and boosted directory
-            visibility for launches, offers or awareness campaigns.
-          </p>
-          <ul className="mt-3 list-disc space-y-1 pl-5 text-xs text-slate-600">
-            <li>Featured business strip on the homepage</li>
-            <li>Optional boosted placement in provider / business sections</li>
-            <li>Short-term or ongoing campaigns</li>
-          </ul>
-          <button
-            type="button"
-            onClick={() => openForm("boost")}
-            className="mt-4 inline-flex items-center rounded-full bg-slate-900 px-5 py-2 text-xs font-semibold text-white hover:bg-slate-800"
-          >
-            Enquire about boosting →
-          </button>
-        </div>
-
-        {/* Advertising */}
-        <div className="rounded-3xl border border-slate-100 bg-white px-6 py-6 shadow-sm">
-          <h2 className="text-lg font-semibold text-slate-900">
-            Homepage &amp; site-wide advertising
-          </h2>
-          <p className="mt-2 text-sm text-slate-600">
-            Display slots, sponsored content and branded placements across the
-            site and within relevant sections.
-          </p>
-          <ul className="mt-3 list-disc space-y-1 pl-5 text-xs text-slate-600">
-            <li>Homepage promo banners and tiles</li>
-            <li>Section-specific placements (sports, what&apos;s on, marketplace)</li>
-            <li>Longer-term campaigns and brand awareness</li>
-          </ul>
-          <button
-            type="button"
-            onClick={() => openForm("ads")}
-            className="mt-4 inline-flex items-center rounded-full bg-[#D90429] px-5 py-2 text-xs font-semibold text-white hover:bg-[#b40320]"
-          >
-            Enquire about advertising →
-          </button>
-        </div>
-      </section>
-
-      {/* Little hint */}
-      {activeForm === null && (
-        <p className="mt-6 text-xs text-slate-500">
-          Choose an option above to open a simple enquiry form.
-        </p>
-      )}
-
-      {/* Boost business form */}
-      {activeForm === "boost" && (
-        <section ref={boostRef} className="mt-12">
-          <h2 className="text-xl font-semibold text-slate-900">
-            Enquiry: Boost my business profile
-          </h2>
-          <p className="mt-1 text-sm text-slate-600">
-            Tell us a bit about your business and what you&apos;d like to boost.
-          </p>
-
-          <form
-            className="mt-5 space-y-4 rounded-3xl border border-slate-100 bg-white px-6 py-6 shadow-sm"
-            action="mailto:lucasmudie@gmail.com"
-            method="post"
-            encType="text/plain"
-          >
-            <div className="grid gap-4 md:grid-cols-2">
-              <div>
-                <label className="block text-xs font-medium text-slate-700">
-                  Your name
-                </label>
-                <input
-                  name="name"
-                  type="text"
-                  required
-                  className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#D90429] focus:ring-1 focus:ring-[#D90429]"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-slate-700">
-                  Email
-                </label>
-                <input
-                  name="email"
-                  type="email"
-                  required
-                  className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#D90429] focus:ring-1 focus:ring-[#D90429]"
-                />
-              </div>
-            </div>
-
-            <div className="grid gap-4 md:grid-cols-2">
-              <div>
-                <label className="block text-xs font-medium text-slate-700">
-                  Business name
-                </label>
-                <input
-                  name="business_name"
-                  type="text"
-                  required
-                  className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#D90429] focus:ring-1 focus:ring-[#D90429]"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-slate-700">
-                  Website / social (optional)
-                </label>
-                <input
-                  name="website"
-                  type="text"
-                  className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#D90429] focus:ring-1 focus:ring-[#D90429]"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-xs font-medium text-slate-700">
-                What would you like to boost?
-              </label>
-              <textarea
-                name="boost_details"
-                required
-                rows={4}
-                className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#D90429] focus:ring-1 focus:ring-[#D90429]"
-                placeholder="E.g. feature us as 'Featured business' for 4 weeks, highlight our new offer, etc."
-              />
-            </div>
-
-            <div className="grid gap-4 md:grid-cols-2">
-              <div>
-                <label className="block text-xs font-medium text-slate-700">
-                  Approximate budget (per month)
-                </label>
-                <input
-                  name="budget"
-                  type="text"
-                  className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#D90429] focus:ring-1 focus:ring-[#D90429]"
-                  placeholder="e.g. £100–£300"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-slate-700">
-                  Preferred start date
-                </label>
-                <input
-                  name="start_date"
-                  type="text"
-                  className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#D90429] focus:ring-1 focus:ring-[#D90429]"
-                  placeholder="e.g. 1st Feb or ASAP"
-                />
-              </div>
-            </div>
-
-            <input
-              type="hidden"
-              name="enquiry_type"
-              value="boost_business_profile"
-            />
-
-            <button
-              type="submit"
-              className="mt-2 inline-flex items-center rounded-full bg-slate-900 px-6 py-2 text-xs font-semibold text-white hover:bg-slate-800"
-            >
-              Send enquiry
-            </button>
-          </form>
-        </section>
-      )}
-
-      {/* Advertising form */}
-      {activeForm === "ads" && (
-        <section ref={adsRef} className="mt-12">
-          <h2 className="text-xl font-semibold text-slate-900">
-            Enquiry: Homepage &amp; site-wide advertising
-          </h2>
-          <p className="mt-1 text-sm text-slate-600">
-            Share your campaign idea and we&apos;ll come back with options and pricing.
-          </p>
-
-          <form
-            className="mt-5 space-y-4 rounded-3xl border border-slate-100 bg-white px-6 py-6 shadow-sm"
-            action="mailto:lucasmudie@gmail.com"
-            method="post"
-            encType="text/plain"
-          >
-            <div className="grid gap-4 md:grid-cols-2">
-              <div>
-                <label className="block text-xs font-medium text-slate-700">
-                  Your name
-                </label>
-                <input
-                  name="name"
-                  type="text"
-                  required
-                  className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#D90429] focus:ring-1 focus:ring-[#D90429]"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-slate-700">
-                  Email
-                </label>
-                <input
-                  name="email"
-                  type="email"
-                  required
-                  className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#D90429] focus:ring-1 focus:ring-[#D90429]"
-                />
-              </div>
-            </div>
-
-            <div className="grid gap-4 md:grid-cols-2">
-              <div>
-                <label className="block text-xs font-medium text-slate-700">
-                  Business / organisation
-                </label>
-                <input
-                  name="business_name"
-                  type="text"
-                  required
-                  className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#D90429] focus:ring-1 focus:ring-[#D90429]"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-slate-700">
-                  Website / social (optional)
-                </label>
-                <input
-                  name="website"
-                  type="text"
-                  className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#D90429] focus:ring-1 focus:ring-[#D90429]"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-xs font-medium text-slate-700">
-                What are you looking to advertise?
-              </label>
-              <textarea
-                name="campaign_details"
-                required
-                rows={4}
-                className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#D90429] focus:ring-1 focus:ring-[#D90429]"
-                placeholder="E.g. homepage banner for 6 weeks, section-specific ads for sports & deals, etc."
-              />
-            </div>
-
-            <div className="grid gap-4 md:grid-cols-2">
-              <div>
-                <label className="block text-xs font-medium text-slate-700">
-                  Approximate budget (total)
-                </label>
-                <input
-                  name="budget"
-                  type="text"
-                  className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#D90429] focus:ring-1 focus:ring-[#D90429]"
-                  placeholder="e.g. £300–£1,000"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-slate-700">
-                  Ideal dates / timeframe
-                </label>
-                <input
-                  name="timeframe"
-                  type="text"
-                  className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#D90429] focus:ring-1 focus:ring-[#D90429]"
-                  placeholder="e.g. March–April, or specific dates"
-                />
-              </div>
-            </div>
-
-            <input
-              type="hidden"
-              name="enquiry_type"
-              value="homepage_sitewide_advertising"
-            />
-
-            <button
-              type="submit"
-              className="mt-2 inline-flex items-center rounded-full bg-[#D90429] px-6 py-2 text-xs font-semibold text-white hover:bg-[#b40320]"
-            >
-              Send enquiry
-            </button>
-          </form>
-
-          <p className="mt-3 text-xs text-slate-500">
-            By submitting this form, you&apos;re sending an email enquiry. We&apos;ll
-            reply with options, availability and pricing.
-          </p>
-        </section>
-      )}
-
-      {/* Back link */}
-      <section className="mt-10">
+    <main className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8 space-y-10">
+      {/* Top breadcrumb / back link */}
+      <div className="mb-2">
         <Link
-          href="/"
-          className="text-xs font-medium text-[#D90429] hover:underline"
+          href="/provider-dashboard"
+          className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-600 hover:text-slate-900"
         >
-          ← Back to homepage
+          <ArrowLeft className="h-3 w-3" />
+          Back to provider dashboard
         </Link>
+      </div>
+
+      {/* Hero */}
+      <section className="overflow-hidden rounded-3xl border border-slate-900/10 bg-slate-950 text-slate-50 shadow-md">
+        <div className="relative px-6 py-8 sm:px-10 sm:py-10">
+          <div className="pointer-events-none absolute -left-10 -top-10 h-32 w-32 rounded-full bg-[#D90429]/40 blur-2xl opacity-80" />
+          <div className="pointer-events-none absolute bottom-[-3rem] right-[-2rem] h-36 w-36 rounded-full bg-slate-500/30 blur-3xl opacity-70" />
+
+          <div className="relative grid gap-8 lg:grid-cols-[1.5fr,1fr] lg:items-center">
+            <div>
+              <div className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1 text-[10px] font-medium uppercase tracking-wide">
+                <Sparkles className="h-3 w-3" />
+                Promote on ManxHive
+              </div>
+              <h1 className="mt-3 text-2xl sm:text-3xl font-semibold leading-tight">
+                Put your business in front of more people on the Isle of Man.
+              </h1>
+              <p className="mt-3 max-w-xl text-sm text-slate-200/85">
+                Pay once to push your listing, deal, or business profile higher
+                in search, categories, and discovery areas across ManxHive.
+                No subscriptions, no monthly fees.
+              </p>
+
+              <div className="mt-5 flex flex-wrap gap-3">
+                <Link
+                  href="/provider-dashboard"
+                  className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-xs font-semibold text-slate-900 shadow-sm hover:bg-slate-100"
+                >
+                  Go to your dashboard
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+                <Link
+                  href="/contact"
+                  className="inline-flex items-center gap-2 rounded-full border border-white/40 px-4 py-2 text-xs font-medium text-slate-50 hover:bg-white/5"
+                >
+                  Talk to us about promotion
+                  <ArrowRight className="h-3 w-3" />
+                </Link>
+              </div>
+            </div>
+
+            {/* Stats / bullet column */}
+            <div className="relative rounded-2xl border border-white/10 bg-slate-900/60 p-4 sm:p-5">
+              <p className="text-xs font-semibold uppercase tracking-wide text-slate-200/90">
+                Why boost on ManxHive?
+              </p>
+              <div className="mt-3 space-y-3 text-[11px] text-slate-200/90">
+                <div className="flex gap-2">
+                  <div className="mt-0.5 flex h-6 w-6 items-center justify-center rounded-full bg-[#D90429]/20">
+                    <BarChart3 className="h-3.5 w-3.5 text-[#FFCC4D]" />
+                  </div>
+                  <div>
+                    <p className="font-semibold">More eyes, more enquiries</p>
+                    <p className="text-slate-300/80">
+                      Push your best offers up the page where locals actually
+                      click.
+                    </p>
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <div className="mt-0.5 flex h-6 w-6 items-center justify-center rounded-full bg-[#D90429]/20">
+                    <MapPin className="h-3.5 w-3.5 text-[#FFCC4D]" />
+                  </div>
+                  <div>
+                    <p className="font-semibold">Local-first placement</p>
+                    <p className="text-slate-300/80">
+                      Designed around Isle of Man buyers looking for real,
+                      nearby providers.
+                    </p>
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <div className="mt-0.5 flex h-6 w-6 items-center justify-center rounded-full bg-[#D90429]/20">
+                    <Rocket className="h-3.5 w-3.5 text-[#FFCC4D]" />
+                  </div>
+                  <div>
+                    <p className="font-semibold">Pay once, no commitment</p>
+                    <p className="text-slate-300/80">
+                      One-time payments only — boost for as many days as you
+                      need, with no ongoing subscription.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Boost types */}
+      <section className="grid gap-6 md:grid-cols-[1.4fr,1fr] items-start">
+        <div className="rounded-3xl border bg-white p-6 shadow-sm">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <h2 className="text-sm font-semibold text-slate-900">
+                Boost types
+              </h2>
+              <p className="mt-1 text-[11px] text-slate-600">
+                Choose how and where you want extra visibility. We keep the
+                rules simple and predictable.
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-4 grid gap-3 sm:grid-cols-3">
+            <BoostTypeCard
+              title="Listing boost"
+              subtitle="24 hours"
+              icon={<Rocket className="h-4 w-4" />}
+              description="Push one marketplace listing higher in its category and search results for a day."
+              bestFor="Flash offers, fresh stock, time-sensitive services."
+            />
+            <BoostTypeCard
+              title="Weekend boost"
+              subtitle="Fri–Sun"
+              icon={<CalendarClock className="h-4 w-4" />}
+              description="Keep your listing close to the top across the weekend peak when locals are browsing."
+              bestFor="Events, experiences, trades, and seasonal offers."
+            />
+            <BoostTypeCard
+              title="Business spotlight"
+              subtitle="Multi-day"
+              icon={<Users className="h-4 w-4" />}
+              description="Boost your business profile across ManxHive discovery sections and relevant pages."
+              bestFor="Brand awareness and long-term local presence."
+            />
+          </div>
+
+          <p className="mt-4 text-[11px] text-slate-600">
+            We&apos;ll always show boosted content clearly and keep placements
+            fair for all providers on the island.
+          </p>
+        </div>
+
+        {/* Practical tips / CTA */}
+        <div className="flex flex-col gap-4">
+          <div className="rounded-3xl border bg-slate-900 text-slate-50 p-5 shadow-sm">
+            <div className="flex items-center gap-2">
+              <Star className="h-4 w-4 text-amber-300" />
+              <h3 className="text-xs font-semibold uppercase tracking-wide text-white/80">
+                Make boosts count
+              </h3>
+            </div>
+            <ul className="mt-3 space-y-1.5 text-[11px] text-slate-200/90">
+              <li>• Use your best photos and a clear, simple title.</li>
+              <li>
+                • Time boosts for evenings and weekends when traffic typically
+                rises.
+              </li>
+              <li>
+                • Keep pricing and availability up to date to convert views into
+                enquiries.
+              </li>
+              <li>
+                • Refresh long-running listings so they feel current and
+                relevant.
+              </li>
+            </ul>
+          </div>
+
+          <div className="rounded-3xl border border-dashed border-slate-300 bg-white p-5 text-sm text-slate-800 shadow-sm">
+            <div className="flex items-center justify-between gap-2">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                  How it works
+                </p>
+                <p className="mt-1 text-sm font-semibold">
+                  Pick your boost, pay once via PayPal
+                </p>
+              </div>
+              <CreditCardIcon />
+            </div>
+            <ol className="mt-3 space-y-1.5 text-[11px] text-slate-600">
+              <li>1. Choose what you want to boost — listing, deal, or business.</li>
+              <li>2. Select the number of boost days and complete the PayPal payment.</li>
+              <li>3. Your boost goes live immediately — no waiting, no approval needed.</li>
+            </ol>
+            <div className="mt-3">
+              <Link
+                href="/provider-dashboard"
+                className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-[#D90429] hover:underline"
+              >
+                Go to your dashboard to boost
+                <ArrowRight className="h-3 w-3" />
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ-ish strip */}
+      <section className="rounded-3xl border bg-slate-50 p-6 shadow-sm">
+        <div className="grid gap-6 md:grid-cols-3 text-[11px] text-slate-700">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+              Will boosting affect organic results?
+            </p>
+            <p className="mt-2">
+              Organic relevance still matters. Boosts temporarily improve your
+              placement but don&apos;t remove other providers from view.
+            </p>
+          </div>
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+              Is there a subscription?
+            </p>
+            <p className="mt-2">
+              No. ManxHive is completely free to use. Boosts are one-time
+              payments only — you pay for exactly what you need, when you need
+              it.
+            </p>
+          </div>
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+              How do I see what worked?
+            </p>
+            <p className="mt-2">
+              Your provider dashboard shows enquiries and key metrics. We&apos;ll
+              keep expanding analytics so you can see how boosts perform over
+              time.
+            </p>
+          </div>
+        </div>
       </section>
     </main>
+  );
+}
+
+// ----------------- Helper components -----------------
+
+type BoostTypeCardProps = {
+  title: string;
+  subtitle: string;
+  icon: React.ReactNode;
+  description: string;
+  bestFor: string;
+};
+
+function BoostTypeCard({
+  title,
+  subtitle,
+  icon,
+  description,
+  bestFor,
+}: BoostTypeCardProps) {
+  return (
+    <div className="flex flex-col rounded-2xl border bg-slate-50 px-4 py-3 text-[11px] text-slate-800">
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2">
+          <div className="flex h-7 w-7 items-center justify-center rounded-full bg-slate-900/5">
+            {icon}
+          </div>
+          <p className="text-[12px] font-semibold text-slate-900">{title}</p>
+        </div>
+        <span className="rounded-full bg-slate-900/5 px-2 py-0.5 text-[10px] font-medium text-slate-700">
+          {subtitle}
+        </span>
+      </div>
+      <p className="mt-2 text-[11px] text-slate-600">{description}</p>
+      <p className="mt-2 text-[10px] text-slate-500">
+        <span className="font-semibold text-slate-700">Best for:</span>{" "}
+        {bestFor}
+      </p>
+    </div>
+  );
+}
+
+function CreditCardIcon() {
+  return (
+    <div className="flex h-9 w-14 items-center justify-center rounded-xl bg-slate-900 text-slate-50">
+      <div className="flex h-6 w-10 flex-col justify-between rounded-lg bg-slate-800 p-1 text-[7px]">
+        <div className="flex items-center justify-between">
+          <span className="h-2 w-3 rounded-sm bg-[#D90429]" />
+          <span className="h-1 w-4 rounded-sm bg-slate-600" />
+        </div>
+        <div className="h-1 w-6 rounded-sm bg-slate-600" />
+      </div>
+    </div>
   );
 }

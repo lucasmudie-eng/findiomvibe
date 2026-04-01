@@ -2,7 +2,7 @@
 import { notFound } from "next/navigation";
 import { headers } from "next/headers";
 import Link from "next/link";
-import { ArrowLeft, Trophy, Calendar, MapPin } from "lucide-react";
+import { ArrowLeft, Trophy, Calendar, MapPin, ChevronRight } from "lucide-react";
 import type { TeamSnapshot } from "@/lib/football/types";
 import { leagueDisplayName, formatTeamName } from "@/lib/football/utils";
 
@@ -197,298 +197,264 @@ export default async function TeamPage({
   const bio = getTeamBio(team, data.team.name);
 
   return (
-    <main className="mx-auto max-w-6xl space-y-8 px-4 py-8">
-      {/* Breadcrumb + back */}
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="text-sm text-gray-500">
-          <Link href="/sports" className="hover:underline">
-            Sports
-          </Link>{" "}
-          /{" "}
-          <Link href="/sports/football" className="hover:underline">
-            Football
-          </Link>{" "}
-          /{" "}
-          <Link href={`/sports/football/${league}`} className="hover:underline">
-            {leagueName}
-          </Link>{" "}
-          / <span className="text-gray-900">{teamName}</span>
-        </div>
-        <Link
-          href={`/sports/football/${league}`}
-          className="inline-flex items-center gap-1 text-xs text-gray-600 hover:text-[#D90429]"
-        >
-          <ArrowLeft className="h-3 w-3" />
-          Back to league
-        </Link>
-      </div>
-
-      {/* HERO */}
+    <main>
+      {/* ── GRADIENT HERO ─────────────────────────────────────────────────────── */}
       <section
-        className="rounded-3xl p-6 text-white shadow-lg"
-        style={{
-          background: `linear-gradient(to right, ${gradient.from}, ${gradient.to})`,
-        }}
+        className="relative overflow-hidden"
+        style={{ background: `linear-gradient(135deg, ${gradient.from}, ${gradient.to})` }}
       >
-        <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
-          <div className="max-w-xl space-y-3">
-            <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide">
-              <Trophy className="h-3.5 w-3.5" />
-              <span>{leagueName}</span>
-              {typeof position === "number" && (
-                <>
-                  <span className="opacity-60">•</span>
-                  <span>Current position: {position}</span>
-                </>
-              )}
-            </div>
+        <div
+          className="pointer-events-none absolute inset-0 opacity-[0.08]"
+          style={{
+            backgroundImage: "repeating-linear-gradient(45deg, #fff 0, #fff 1px, transparent 0, transparent 50%)",
+            backgroundSize: "20px 20px",
+          }}
+        />
+        <div className="relative mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16 lg:px-8">
 
-            <h1 className="text-3xl font-semibold sm:text-4xl">
-              {teamName}
-            </h1>
+          {/* Breadcrumb */}
+          <nav className="mb-8 flex items-center gap-1.5 text-[11px] text-white/50">
+            <Link href="/sports" className="hover:text-white/80 transition-colors">Sports</Link>
+            <ChevronRight className="h-3 w-3" />
+            <Link href="/sports/football" className="hover:text-white/80 transition-colors">Football</Link>
+            <ChevronRight className="h-3 w-3" />
+            <Link href={`/sports/football/${league}`} className="hover:text-white/80 transition-colors">{leagueName}</Link>
+            <ChevronRight className="h-3 w-3" />
+            <span className="text-white/80">{teamName}</span>
+          </nav>
 
-            <div className="flex flex-wrap items-center gap-3 text-xs text-red-50/90">
-              {played != null && (
-                <span>
-                  <span className="font-semibold">{played}</span> played
-                </span>
-              )}
-              {points != null && (
-                <>
-                  <span className="opacity-60">•</span>
-                  <span>
-                    <span className="font-semibold">{points}</span> points
-                  </span>
-                </>
-              )}
-              {gf != null && ga != null && (
-                <>
-                  <span className="opacity-60">•</span>
-                  <span>
-                    {gf} scored, {ga} conceded
-                  </span>
-                </>
-              )}
-              {gd != null && (
-                <>
-                  <span className="opacity-60">•</span>
-                  <span>GD {gd >= 0 ? `+${gd}` : gd}</span>
-                </>
-              )}
-            </div>
-
-            {form.length > 0 && (
-              <div className="flex flex-wrap items-center gap-2 text-xs">
-                <span className="text-red-50/90">Recent form:</span>
-                <div className="flex gap-1">
-                  {form.map((result, idx) => (
-                    <span
-                      key={`${result}-${idx}`}
-                      className={
-                        "inline-flex h-6 w-6 items-center justify-center rounded-full text-[11px] font-bold " +
-                        (result === "W"
-                          ? "bg-emerald-100 text-emerald-800"
-                          : result === "L"
-                          ? "bg-red-100 text-red-700"
-                          : "bg-amber-100 text-amber-700")
-                      }
-                    >
-                      {result}
-                    </span>
-                  ))}
-                </div>
+          <div className="flex flex-wrap items-start justify-between gap-8">
+            <div className="max-w-xl space-y-4">
+              {/* League badge */}
+              <div className="inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-white/90">
+                <Trophy className="h-3.5 w-3.5" />
+                <span>{leagueName}</span>
+                {typeof position === "number" && (
+                  <>
+                    <span className="opacity-50">·</span>
+                    <span>#{position}</span>
+                  </>
+                )}
               </div>
-            )}
 
-            <p className="text-xs text-red-50/80">
-              Full league data updates whenever the latest FA results and tables
-              are imported.
-            </p>
+              <h1 className="font-playfair text-4xl font-bold text-white sm:text-5xl">
+                {teamName}
+              </h1>
+
+              {/* Stats strip */}
+              {(played != null || points != null) && (
+                <div className="flex flex-wrap items-center gap-4">
+                  {played != null && (
+                    <div className="text-center">
+                      <p className="text-2xl font-bold text-white">{played}</p>
+                      <p className="text-[10px] font-semibold uppercase tracking-wide text-white/60">Played</p>
+                    </div>
+                  )}
+                  {points != null && (
+                    <div className="text-center">
+                      <p className="text-2xl font-bold text-white">{points}</p>
+                      <p className="text-[10px] font-semibold uppercase tracking-wide text-white/60">Points</p>
+                    </div>
+                  )}
+                  {gf != null && (
+                    <div className="text-center">
+                      <p className="text-2xl font-bold text-white">{gf}</p>
+                      <p className="text-[10px] font-semibold uppercase tracking-wide text-white/60">Scored</p>
+                    </div>
+                  )}
+                  {ga != null && (
+                    <div className="text-center">
+                      <p className="text-2xl font-bold text-white">{ga}</p>
+                      <p className="text-[10px] font-semibold uppercase tracking-wide text-white/60">Conceded</p>
+                    </div>
+                  )}
+                  {gd != null && (
+                    <div className="text-center">
+                      <p className="text-2xl font-bold text-white">{gd >= 0 ? `+${gd}` : gd}</p>
+                      <p className="text-[10px] font-semibold uppercase tracking-wide text-white/60">GD</p>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Form */}
+              {form.length > 0 && (
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="text-[11px] font-semibold text-white/60">Recent form</span>
+                  <div className="flex gap-1.5">
+                    {form.map((result, idx) => (
+                      <span
+                        key={`${result}-${idx}`}
+                        className={`inline-flex h-7 w-7 items-center justify-center rounded-full text-[11px] font-bold ${
+                          result === "W" ? "bg-emerald-100 text-emerald-800" :
+                          result === "L" ? "bg-red-200 text-red-800" :
+                          "bg-amber-100 text-amber-800"
+                        }`}
+                      >
+                        {result}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Back to league button */}
+            <Link
+              href={`/sports/football/${league}`}
+              className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm font-semibold text-white backdrop-blur-sm transition hover:bg-white/20"
+            >
+              <ArrowLeft className="h-3.5 w-3.5" />
+              Back to league
+            </Link>
           </div>
-        </div>
 
-        <div className="mt-4 text-[11px] text-red-50/80">
-          Updated:{" "}
-          {data.updatedAt
-            ? new Date(data.updatedAt).toLocaleString()
-            : "Recently"}
+          <p className="mt-6 text-[11px] text-white/40">
+            Data updated: {data.updatedAt ? new Date(data.updatedAt).toLocaleString("en-GB") : "Recently"}
+          </p>
         </div>
       </section>
 
-      {/* Club history / about */}
-      {bio && (
-        <section className="rounded-2xl border bg-white p-4 text-sm text-gray-700 shadow-sm">
-          <h2 className="mb-1 text-sm font-semibold text-gray-900">
-            About {teamName}
-          </h2>
-          <p>{bio}</p>
-        </section>
-      )}
+      {/* ── CONTENT ───────────────────────────────────────────────────────────── */}
+      <div className="mx-auto max-w-6xl space-y-8 px-4 py-10 sm:px-6 sm:py-12 lg:px-8">
 
-      {/* Grid: last 3, next 3, mini table */}
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-        {/* Last 3 Results */}
-        <section className="rounded-2xl border bg-white p-4 shadow-sm md:col-span-1">
-          <h2 className="mb-2 text-sm font-semibold text-gray-900">
-            Last 3 results
-          </h2>
-          {data.last3.length === 0 && (
-            <p className="text-xs text-gray-500">No recent results.</p>
-          )}
-          <ul className="space-y-2">
-            {data.last3.map((r) => {
-              const isHome = r.homeId === data.team.id;
-              const opponentId = isHome ? r.awayId : r.homeId;
-              const opponentName = formatTeamName(opponentId);
-              const score = `${r.homeGoals} - ${r.awayGoals}`;
-              const outcome =
-                r.homeGoals === r.awayGoals
-                  ? "D"
-                  : (isHome && r.homeGoals > r.awayGoals) ||
-                    (!isHome && r.awayGoals > r.homeGoals)
-                  ? "W"
-                  : "L";
+        {/* Club bio */}
+        {bio && (
+          <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+            <h2 className="mb-2 text-sm font-semibold text-slate-900">About {teamName}</h2>
+            <p className="text-sm leading-relaxed text-slate-600">{bio}</p>
+          </section>
+        )}
 
-              return (
-                <li
-                  key={r.id}
-                  className="flex items-center justify-between rounded-xl border px-3 py-2 text-xs"
-                >
-                  <div className="space-y-0.5">
-                    <div className="font-medium text-gray-900">
-                      {isHome ? "Home vs" : "Away vs"} {opponentName}
-                    </div>
-                    <div className="flex items-center gap-1 text-[10px] text-gray-500">
-                      <Calendar className="h-3 w-3" />
-                      <span>
-                        {new Date(r.date).toLocaleDateString("en-GB", {
-                          weekday: "short",
-                          day: "numeric",
-                          month: "short",
-                        })}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <div className="font-semibold text-gray-900">
-                      {score}
-                    </div>
-                    <div
-                      className={
-                        "mt-0.5 inline-flex items-center rounded-full px-2 py-0.5 text-[9px] font-semibold " +
-                        (outcome === "W"
-                          ? "bg-emerald-50 text-emerald-700"
-                          : outcome === "L"
-                          ? "bg-red-50 text-red-600"
-                          : "bg-gray-50 text-gray-600")
-                      }
-                    >
-                      {outcome}
-                    </div>
-                  </div>
-                </li>
-              );
-            })}
-          </ul>
-        </section>
+        {/* Grid: results + fixtures + table */}
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
 
-        {/* Next 3 Fixtures */}
-        <section className="rounded-2xl border bg-white p-4 shadow-sm md:col-span-1">
-          <h2 className="mb-2 text-sm font-semibold text-gray-900">
-            Next 3 fixtures
-          </h2>
-          {data.next3.length === 0 && (
-            <p className="text-xs text-gray-500">No upcoming fixtures.</p>
-          )}
-          <ul className="space-y-2">
-            {data.next3.map((f) => {
-              const isHome = f.homeId === data.team.id;
-              const opponentId = isHome ? f.awayId : f.homeId;
-              const opponentName = formatTeamName(opponentId);
-              return (
-                <li
-                  key={f.id}
-                  className="flex items-center justify-between rounded-xl border px-3 py-2 text-xs"
-                >
-                  <div className="space-y-0.5">
-                    <div className="font-medium text-gray-900">
-                      {isHome ? "Home vs" : "Away vs"} {opponentName}
+          {/* Last 3 results */}
+          <section className="lg:col-span-1">
+            <h2 className="mb-3 text-base font-semibold text-slate-900">Last 3 results</h2>
+            {data.last3.length === 0 ? (
+              <div className="rounded-2xl border border-dashed border-slate-200 px-5 py-6 text-center text-sm text-slate-400">
+                No recent results.
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {data.last3.map((r) => {
+                  const isHome = r.homeId === data.team.id;
+                  const opponentId = isHome ? r.awayId : r.homeId;
+                  const outcome =
+                    r.homeGoals === r.awayGoals ? "D" :
+                    (isHome && r.homeGoals > r.awayGoals) || (!isHome && r.awayGoals > r.homeGoals) ? "W" : "L";
+                  return (
+                    <div key={r.id} className="rounded-2xl bg-slate-950 px-5 py-4 text-white">
+                      <div className="flex items-center gap-3">
+                        <p className="min-w-0 flex-1 truncate text-right text-sm font-semibold">
+                          {isHome ? teamName : formatTeamName(opponentId)}
+                        </p>
+                        <div className="shrink-0 text-center">
+                          <p className="text-xl font-bold tabular-nums text-[#E8002D]">
+                            {r.homeGoals} – {r.awayGoals}
+                          </p>
+                          <span className={`mt-0.5 inline-block rounded-full px-2 py-0.5 text-[10px] font-bold ${
+                            outcome === "W" ? "bg-emerald-900/60 text-emerald-300" :
+                            outcome === "L" ? "bg-red-900/60 text-red-300" :
+                            "bg-amber-900/60 text-amber-300"
+                          }`}>
+                            {outcome}
+                          </span>
+                        </div>
+                        <p className="min-w-0 flex-1 truncate text-left text-sm font-semibold">
+                          {isHome ? formatTeamName(opponentId) : teamName}
+                        </p>
+                      </div>
+                      <p className="mt-2 text-center text-[11px] text-slate-500">
+                        {new Date(r.date).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" })}
+                        {isHome ? " · Home" : " · Away"}
+                      </p>
                     </div>
-                    <div className="flex flex-wrap items-center gap-2 text-[10px] text-gray-500">
-                      <span className="inline-flex items-center gap-1">
-                        <Calendar className="h-3 w-3" />
-                        {new Date(f.date).toLocaleString("en-GB", {
-                          weekday: "short",
-                          day: "numeric",
-                          month: "short",
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}
-                      </span>
-                      {f.venue && (
-                        <span className="inline-flex items-center gap-1">
-                          <MapPin className="h-3 w-3" />
-                          {f.venue}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </li>
-              );
-            })}
-          </ul>
-        </section>
+                  );
+                })}
+              </div>
+            )}
+          </section>
 
-        {/* Mini Table */}
-        <section className="rounded-2xl border bg-white p-4 shadow-sm md:col-span-1">
-          <h2 className="mb-2 text-sm font-semibold text-gray-900">
-            League table
-          </h2>
-          <div className="overflow-x-auto">
-            <table className="min-w-full text-[10px]">
-              <thead>
-                <tr className="text-gray-500">
-                  <th className="py-1 pr-1 text-left">Pos</th>
-                  <th className="py-1 pr-1 text-left">Team</th>
-                  <th className="px-1">P</th>
-                  <th className="px-1">GD</th>
-                  <th className="px-1 text-right">Pts</th>
-                </tr>
-              </thead>
-              <tbody>
-                {data.table.map((e) => (
-                  <tr
-                    key={e.teamId}
-                    className={
-                      "border-t last:border-b-0 " +
-                      (e.teamId === data.team.id ? "bg-red-50/60" : "")
-                    }
-                  >
-                    <td className="py-1 pr-1">{e.pos}</td>
-                    <td className="py-1 pr-1">
-                      <Link
-                        href={`/sports/football/${league}/${e.teamId}`}
-                        className={
-                          "hover:underline " +
-                          (e.teamId === data.team.id
-                            ? "font-semibold text-[#D90429]"
-                            : "text-gray-800")
-                        }
-                      >
-                        {formatTeamName(e.teamId)}
-                      </Link>
-                    </td>
-                    <td className="px-1 text-center">{e.played}</td>
-                    <td className="px-1 text-center">{e.gd}</td>
-                    <td className="px-1 text-right font-semibold">
-                      {e.points}
-                    </td>
+          {/* Next 3 fixtures */}
+          <section className="lg:col-span-1">
+            <h2 className="mb-3 text-base font-semibold text-slate-900">Next 3 fixtures</h2>
+            {data.next3.length === 0 ? (
+              <div className="rounded-2xl border border-dashed border-slate-200 px-5 py-6 text-center text-sm text-slate-400">
+                No upcoming fixtures.
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {data.next3.map((f) => {
+                  const isHome = f.homeId === data.team.id;
+                  const opponentId = isHome ? f.awayId : f.homeId;
+                  return (
+                    <div key={f.id} className="rounded-2xl border border-slate-200 bg-white px-5 py-4 shadow-sm">
+                      <div className="flex items-start gap-3">
+                        <Calendar className="mt-0.5 h-4 w-4 shrink-0 text-slate-400" />
+                        <div>
+                          <p className="text-sm font-semibold text-slate-900">
+                            {isHome ? "Home" : "Away"} vs {formatTeamName(opponentId)}
+                          </p>
+                          <p className="mt-0.5 text-[11px] text-slate-500">
+                            {new Date(f.date).toLocaleString("en-GB", { weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}
+                          </p>
+                          {f.venue && (
+                            <p className="mt-0.5 flex items-center gap-1 text-[11px] text-slate-400">
+                              <MapPin className="h-3 w-3" />{f.venue}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </section>
+
+          {/* Mini league table */}
+          <section className="lg:col-span-1">
+            <h2 className="mb-3 text-base font-semibold text-slate-900">League table</h2>
+            <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+              <table className="min-w-full text-xs">
+                <thead>
+                  <tr className="border-b border-slate-100 text-slate-400">
+                    <th className="py-2 pl-4 pr-1 text-left font-semibold">#</th>
+                    <th className="py-2 pr-2 text-left font-semibold">Team</th>
+                    <th className="px-1 py-2 text-center font-semibold">P</th>
+                    <th className="px-1 py-2 text-center font-semibold">GD</th>
+                    <th className="py-2 pl-1 pr-4 text-right font-semibold">Pts</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </section>
+                </thead>
+                <tbody>
+                  {data.table.map((e, idx) => (
+                    <tr
+                      key={e.teamId}
+                      className={`border-t border-slate-50 ${e.teamId === data.team.id ? "bg-red-50" : "hover:bg-slate-50/50"} transition-colors`}
+                    >
+                      <td className="py-2 pl-4 pr-1 text-slate-500">{e.pos ?? idx + 1}</td>
+                      <td className="py-2 pr-2">
+                        <Link
+                          href={`/sports/football/${league}/${e.teamId}`}
+                          className={`font-medium hover:underline transition-colors ${
+                            e.teamId === data.team.id ? "font-semibold text-[#D90429]" : "text-slate-900 hover:text-[#E8002D]"
+                          }`}
+                        >
+                          {formatTeamName(e.teamId)}
+                        </Link>
+                      </td>
+                      <td className="px-1 py-2 text-center text-slate-600">{e.played}</td>
+                      <td className="px-1 py-2 text-center text-slate-600">{e.gd != null ? (e.gd > 0 ? `+${e.gd}` : e.gd) : "—"}</td>
+                      <td className="py-2 pl-1 pr-4 text-right font-bold text-slate-900">{e.points}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </section>
+        </div>
       </div>
     </main>
   );

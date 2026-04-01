@@ -172,14 +172,7 @@ function MatchList({ items }: { items: Match[] }) {
               </span>
             )}
           </div>
-          <div className="sm:col-span-2">
-            <Link
-              href="#"
-              className="inline-flex w-full items-center justify-center rounded-lg border px-3 py-1.5 text-sm text-gray-800 hover:bg-gray-50 sm:w-auto"
-            >
-              Match centre
-            </Link>
-          </div>
+          <div className="sm:col-span-2" />
         </li>
       ))}
     </ul>

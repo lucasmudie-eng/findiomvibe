@@ -1,6 +1,12 @@
 // src/app/community/page.tsx
 import Link from "next/link";
-import { Calendar, MapPin, ArrowRight, Sparkles } from "lucide-react";
+import {
+  ArrowRight,
+  Calendar,
+  MapPin,
+  Sparkles,
+  ChevronRight,
+} from "lucide-react";
 
 type SpotlightStory = {
   slug: string;
@@ -10,6 +16,7 @@ type SpotlightStory = {
   location?: string;
   category: "Business" | "Sport" | "Community" | "Youth";
   imageUrl?: string;
+  readingTime?: string;
 };
 
 const STORIES: SpotlightStory[] = [
@@ -17,11 +24,23 @@ const STORIES: SpotlightStory[] = [
     slug: "local-plumber-gives-back",
     title: "Local plumber completes 100 free safety checks for elderly residents",
     excerpt:
-      "ManxHive providers aren’t just selling services – they’re supporting the community. See how one small business turned bookings into genuine impact.",
+      "ManxHive providers aren’t just selling services — they’re backing the community. One small business turned bookings into genuine impact.",
     date: "2025-03-01",
     location: "Douglas",
     category: "Business",
     imageUrl: "/placeholder/community-plumber.jpg",
+    readingTime: "4 min read",
+  },
+  {
+    slug: "peel-sailing-club-open-day",
+    title: "Peel Sailing Club opens the season with a record turnout",
+    excerpt:
+      "A breezy afternoon, youth teams, and a packed harbour as new members joined for the summer launch.",
+    date: "2025-02-26",
+    location: "Peel",
+    category: "Community",
+    imageUrl: "/placeholder/community-sailing.jpg",
+    readingTime: "3 min read",
   },
   {
     slug: "youth-football-success",
@@ -32,6 +51,18 @@ const STORIES: SpotlightStory[] = [
     location: "Onchan",
     category: "Sport",
     imageUrl: "/placeholder/community-football.jpg",
+    readingTime: "5 min read",
+  },
+  {
+    slug: "ramsey-community-kitchen",
+    title: "Ramsey’s community kitchen delivers 1,000th meal",
+    excerpt:
+      "A milestone celebration for the volunteers helping families keep warm and fed through winter.",
+    date: "2025-02-18",
+    location: "Ramsey",
+    category: "Community",
+    imageUrl: "/placeholder/community-kitchen.jpg",
+    readingTime: "4 min read",
   },
   {
     slug: "town-cleanup",
@@ -42,6 +73,18 @@ const STORIES: SpotlightStory[] = [
     location: "Peel",
     category: "Community",
     imageUrl: "/placeholder/community-cleanup.jpg",
+    readingTime: "3 min read",
+  },
+  {
+    slug: "youth-tech-workshop",
+    title: "Young makers showcase creative tech projects at the Villa",
+    excerpt:
+      "From robotics to wearable art, the youth workshop proved the island’s next generation is ready.",
+    date: "2025-02-06",
+    location: "Douglas",
+    category: "Youth",
+    imageUrl: "/placeholder/community-tech.jpg",
+    readingTime: "4 min read",
   },
 ];
 
@@ -57,11 +100,25 @@ function formatDate(iso: string) {
   }
 }
 
+function categoryTone(category: SpotlightStory["category"]) {
+  switch (category) {
+    case "Business":
+      return "bg-emerald-50 text-emerald-700";
+    case "Sport":
+      return "bg-indigo-50 text-indigo-700";
+    case "Youth":
+      return "bg-amber-50 text-amber-700";
+    default:
+      return "bg-rose-50 text-rose-700";
+  }
+}
+
 export default function CommunityPage() {
-  const [featured, ...rest] = STORIES;
+  const [featured, second, third, ...rest] = STORIES;
+  const latest = rest.slice(0, 4);
 
   return (
-    <main className="mx-auto max-w-6xl px-4 py-8 space-y-6">
+    <main className="mx-auto max-w-6xl px-4 py-8 space-y-8">
       {/* Breadcrumb */}
       <nav className="mb-1 text-xs text-gray-500">
         <Link href="/" className="hover:underline">
@@ -71,161 +128,242 @@ export default function CommunityPage() {
       </nav>
 
       {/* Hero */}
-      <section className="flex flex-col gap-4 rounded-2xl border bg-white p-5 shadow-sm md:flex-row md:items-center md:justify-between">
-        <div className="max-w-xl">
-          <div className="inline-flex items-center gap-1.5 rounded-full bg-[#FFF5F5] px-3 py-1 text-[10px] font-medium text-[#D90429]">
-            <Sparkles className="h-3 w-3" />
-            Community Spotlight
-          </div>
-          <h1 className="mt-2 text-2xl font-semibold text-gray-900">
-            Stories from around the island
-          </h1>
-          <p className="mt-1 text-sm text-gray-600">
-            Celebrating local wins, good causes, youth success, and ManxHive
-            providers making a difference. Curated, short reads — no noise.
-          </p>
-          <div className="mt-3 flex flex-wrap gap-2 text-xs">
-            <span className="rounded-full bg-gray-100 px-3 py-1 text-gray-700">
-              Success stories
-            </span>
-            <span className="rounded-full bg-gray-100 px-3 py-1 text-gray-700">
-              Grassroots sport
-            </span>
-            <span className="rounded-full bg-gray-100 px-3 py-1 text-gray-700">
-              Community projects
-            </span>
-          </div>
-        </div>
+      <section className="relative overflow-hidden rounded-3xl bg-slate-950 p-7 text-white shadow-md md:p-9">
+        <div className="pointer-events-none absolute -left-10 -top-10 h-48 w-48 rounded-full bg-[#D90429]/20 blur-3xl" />
+        <div className="pointer-events-none absolute bottom-0 right-0 h-40 w-40 rounded-full bg-slate-700/30 blur-2xl" />
 
-        <div className="flex flex-col items-start gap-2 text-xs">
-          <p className="text-gray-600">
-            Have a story we should feature?
-          </p>
-          <Link
-            href="/contact"
-            className="inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[11px] font-medium text-gray-800 hover:bg-gray-50"
-          >
-            Submit a story
-            <ArrowRight className="h-3 w-3" />
-          </Link>
+        <div className="relative grid gap-8 lg:grid-cols-[1.3fr,1fr] lg:items-center">
+          <div>
+            <div className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-wide text-white/80">
+              <Sparkles className="h-3 w-3" />
+              Community Spotlight
+            </div>
+            <h1 className="mt-3 font-playfair text-3xl font-bold text-white sm:text-4xl">
+              Stories that prove the island is thriving
+              <span className="text-[#D90429]">.</span>
+            </h1>
+            <p className="mt-3 max-w-xl text-sm text-slate-300">
+              A curated feed of local wins, causes, youth stories and community
+              moments. Short reads, big impact, and always island‑first.
+            </p>
+            <div className="mt-4 flex flex-wrap gap-2 text-[11px]">
+              {["Success stories", "Grassroots sport", "Good causes", "Youth talent"].map(
+                (tag) => (
+                  <span
+                    key={tag}
+                    className="rounded-full bg-white/10 px-3 py-1 text-white/70"
+                  >
+                    {tag}
+                  </span>
+                )
+              )}
+            </div>
+            <div className="mt-5 flex flex-wrap gap-3 text-xs">
+              <Link
+                href="/contact"
+                className="inline-flex items-center gap-1.5 rounded-full bg-white px-4 py-2 font-semibold text-slate-900 shadow-sm hover:bg-slate-100"
+              >
+                Submit a story
+                <ArrowRight className="h-3 w-3" />
+              </Link>
+              <Link
+                href="/community"
+                className="inline-flex items-center gap-1.5 rounded-full border border-white/20 px-4 py-2 font-semibold text-white hover:bg-white/5"
+              >
+                View all stories
+                <ChevronRight className="h-3 w-3" />
+              </Link>
+            </div>
+          </div>
+
+          {featured && (
+            <Link
+              href={`/community/${featured.slug}`}
+              className="group relative flex min-h-[260px] flex-col justify-end overflow-hidden rounded-2xl border border-white/10 bg-slate-800 p-5 text-white shadow-sm"
+            >
+              {featured.imageUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={featured.imageUrl}
+                  alt={featured.title}
+                  className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]"
+                />
+              ) : (
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(217,4,41,0.35),rgba(15,23,42,0.9)_70%)]" />
+              )}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
+              <div className="relative z-10">
+                <span
+                  className={`inline-flex items-center rounded-full px-2.5 py-1 text-[9px] font-semibold ${categoryTone(
+                    featured.category
+                  )}`}
+                >
+                  {featured.category}
+                </span>
+                <h2 className="mt-3 font-playfair text-xl font-bold">
+                  {featured.title}
+                </h2>
+                <p className="mt-2 line-clamp-3 text-sm text-white/80">
+                  {featured.excerpt}
+                </p>
+                <div className="mt-3 flex flex-wrap items-center gap-3 text-[11px] text-white/70">
+                  <span className="inline-flex items-center gap-1">
+                    <Calendar className="h-3 w-3" />
+                    {formatDate(featured.date)}
+                  </span>
+                  {featured.location && (
+                    <span className="inline-flex items-center gap-1">
+                      <MapPin className="h-3 w-3" />
+                      {featured.location}
+                    </span>
+                  )}
+                  {featured.readingTime && <span>{featured.readingTime}</span>}
+                </div>
+              </div>
+            </Link>
+          )}
         </div>
       </section>
 
-      {/* Featured story */}
-      {featured && (
-        <section className="grid gap-4 rounded-2xl border bg-white p-4 shadow-sm md:grid-cols-[2fr,1.5fr]">
-          <div className="flex flex-col gap-2">
-            <div className="inline-flex items-center gap-2 text-[10px] text-gray-500">
-              <span className="rounded-full bg-gray-100 px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-gray-700">
-                {featured.category}
-              </span>
-              <span className="inline-flex items-center gap-1">
-                <Calendar className="h-3 w-3 text-gray-400" />
-                {formatDate(featured.date)}
-              </span>
-              {featured.location && (
-                <span className="inline-flex items-center gap-1">
-                  <MapPin className="h-3 w-3 text-gray-400" />
-                  {featured.location}
-                </span>
-              )}
-            </div>
-            <h2 className="text-lg font-semibold text-gray-900">
-              {featured.title}
-            </h2>
-            <p className="text-sm text-gray-600">
-              {featured.excerpt}
-            </p>
-            <Link
-              href={`/community/${featured.slug}`}
-              className="mt-1 inline-flex items-center gap-1.5 text-xs font-medium text-[#D90429] hover:underline"
-            >
-              Read full story
-              <ArrowRight className="h-3 w-3" />
-            </Link>
-          </div>
-
-          {/* Image slot */}
-          <div className="relative h-40 w-full overflow-hidden rounded-xl bg-gray-100">
-            {featured.imageUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={featured.imageUrl}
-                alt={featured.title}
-                className="h-full w-full object-cover"
-              />
-            ) : (
-              <div className="flex h-full w-full items-center justify-center px-4 text-center text-[10px] text-gray-400">
-                Drop a feature image here later (e.g. upload via CMS or Supabase
-                Storage).
-              </div>
-            )}
-          </div>
-        </section>
-      )}
-
-      {/* Other stories */}
-      <section className="grid gap-4 md:grid-cols-3">
-        {rest.map((story) => (
-          <article
-            key={story.slug}
-            className="flex flex-col overflow-hidden rounded-2xl border bg-white text-xs shadow-sm"
+      {/* Editor's picks */}
+      <section className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-sm font-semibold text-slate-900">
+            Editor&apos;s picks
+          </h2>
+          <Link
+            href="/community"
+            className="text-[11px] font-semibold text-[#D90429] hover:underline"
           >
-            <div className="h-24 w-full bg-gray-100">
-              {story.imageUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={story.imageUrl}
-                  alt={story.title}
-                  className="h-full w-full object-cover"
-                />
-              ) : (
-                <div className="flex h-full w-full items-center justify-center px-3 text-[9px] text-gray-400">
-                  Image placeholder for this story.
-                </div>
-              )}
-            </div>
-            <div className="flex flex-1 flex-col gap-1 p-3">
-              <div className="flex items-center justify-between gap-2 text-[9px] text-gray-500">
-                <span className="rounded-full bg-gray-100 px-2 py-0.5 text-[8px] font-semibold uppercase tracking-wide text-gray-700">
-                  {story.category}
-                </span>
-                <span>{formatDate(story.date)}</span>
+            See all
+          </Link>
+        </div>
+        <div className="grid gap-4 md:grid-cols-3">
+          {[second, third, rest[0]].filter(Boolean).map((story) => (
+            <Link
+              key={story!.slug}
+              href={`/community/${story!.slug}`}
+              className="group flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm"
+            >
+              <div className="relative h-32 w-full overflow-hidden bg-slate-100">
+                {story!.imageUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={story!.imageUrl}
+                    alt={story!.title}
+                    className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]"
+                  />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center text-[10px] text-slate-400">
+                    Image coming soon
+                  </div>
+                )}
               </div>
-              <h3 className="line-clamp-2 text-[13px] font-semibold text-gray-900">
-                {story.title}
-              </h3>
-              <p className="line-clamp-3 text-[10px] text-gray-600">
-                {story.excerpt}
-              </p>
-              {story.location && (
-                <p className="mt-auto inline-flex items-center gap-1 text-[9px] text-gray-500">
-                  <MapPin className="h-3 w-3 text-gray-400" />
-                  {story.location}
+              <div className="flex flex-1 flex-col gap-2 p-4">
+                <span
+                  className={`inline-flex w-fit items-center rounded-full px-2.5 py-1 text-[9px] font-semibold ${categoryTone(
+                    story!.category
+                  )}`}
+                >
+                  {story!.category}
+                </span>
+                <h3 className="font-playfair line-clamp-2 text-sm font-bold text-slate-900">
+                  {story!.title}
+                </h3>
+                <p className="line-clamp-3 text-[11px] text-slate-600">
+                  {story!.excerpt}
                 </p>
-              )}
-              <Link
-                href={`/community/${story.slug}`}
-                className="mt-1 inline-flex items-center gap-1 text-[9px] font-medium text-[#D90429] hover:underline"
-              >
-                Read more
-                <ArrowRight className="h-3 w-3" />
-              </Link>
-            </div>
-          </article>
-        ))}
+                <div className="mt-auto flex items-center justify-between text-[10px] text-slate-500">
+                  <span>{formatDate(story!.date)}</span>
+                  {story!.readingTime && <span>{story!.readingTime}</span>}
+                </div>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      {/* Latest stories */}
+      <section className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-sm font-semibold text-slate-900">
+            Latest from the island
+          </h2>
+          <span className="text-[10px] text-slate-500">
+            Updated weekly
+          </span>
+        </div>
+        <div className="grid gap-4">
+          {latest.map((story) => (
+            <Link
+              key={story.slug}
+              href={`/community/${story.slug}`}
+              className="group grid gap-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm md:grid-cols-[180px,1fr]"
+            >
+              <div className="relative h-32 overflow-hidden rounded-xl bg-slate-100">
+                {story.imageUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={story.imageUrl}
+                    alt={story.title}
+                    className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]"
+                  />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center text-[10px] text-slate-400">
+                    Image coming soon
+                  </div>
+                )}
+              </div>
+              <div className="flex flex-col gap-2">
+                <div className="flex flex-wrap items-center gap-2 text-[10px] text-slate-500">
+                  <span
+                    className={`inline-flex items-center rounded-full px-2.5 py-1 text-[9px] font-semibold ${categoryTone(
+                      story.category
+                    )}`}
+                  >
+                    {story.category}
+                  </span>
+                  <span className="inline-flex items-center gap-1">
+                    <Calendar className="h-3 w-3" />
+                    {formatDate(story.date)}
+                  </span>
+                  {story.location && (
+                    <span className="inline-flex items-center gap-1">
+                      <MapPin className="h-3 w-3" />
+                      {story.location}
+                    </span>
+                  )}
+                </div>
+                <h3 className="font-playfair text-base font-bold text-slate-900">
+                  {story.title}
+                </h3>
+                <p className="line-clamp-2 text-[11px] text-slate-600">
+                  {story.excerpt}
+                </p>
+                <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#D90429]">
+                  Read story
+                  <ArrowRight className="h-3 w-3" />
+                </span>
+              </div>
+            </Link>
+          ))}
+        </div>
       </section>
 
       {/* CTA */}
-      <section className="mt-2 rounded-2xl border border-dashed bg-white p-4 text-center text-xs text-gray-700">
-        Want to highlight a local success story, charity project, club win, or
-        provider doing good work?
-        <br />
+      <section className="rounded-3xl border border-dashed border-slate-200 bg-white p-6 text-center">
+        <h3 className="text-lg font-semibold text-slate-900">
+          Have a story the island should hear?
+        </h3>
+        <p className="mt-2 text-sm text-slate-600">
+          We’re always looking for local wins, grassroots highlights, and
+          projects that deserve more attention.
+        </p>
         <Link
           href="/contact"
-          className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-[#D90429] px-4 py-1.5 text-[11px] font-semibold text-white hover:bg-[#b40320]"
+          className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-[#D90429] px-5 py-2 text-xs font-semibold text-white hover:bg-[#b40320]"
         >
-          Share a story with the ManxHive team
+          Share your story
           <ArrowRight className="h-3 w-3" />
         </Link>
       </section>
