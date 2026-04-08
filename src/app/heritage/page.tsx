@@ -27,6 +27,20 @@ function useCountUp(target: number, duration = 1400, active = false): number {
   return count;
 }
 
+/* ── parse PostgreSQL array literal strings ────────────────────────────── */
+function toStringArray(value: unknown): string[] {
+  if (Array.isArray(value)) return value.map((v) => (v == null ? "" : String(v).trim())).filter((v) => v.length > 0);
+  if (typeof value === "string") {
+    let s = value.trim();
+    if (s.startsWith("{") && s.endsWith("}")) {
+      s = s.slice(1, -1);
+      return s.split(",").map((v) => v.trim().replace(/^"|"$/g, "").trim()).filter((v) => v.length > 0);
+    }
+    return s.split(",").map((v) => v.trim()).filter((v) => v.length > 0);
+  }
+  return [];
+}
+
 /* ── difficulty badge helper ───────────────────────────────────────────── */
 function diffBadge(d: string | undefined): { label: string; cls: string } | null {
   if (!d) return null;
@@ -235,7 +249,7 @@ export default function HeritagePage() {
             durationMins:
               typeof w.duration_mins === "number" ? w.duration_mins : undefined,
             difficulty: (w.difficulty as any) || undefined,
-            bestFor: w.best_for?.[0],
+            bestFor: toStringArray(w.best_for)[0],
           })),
           ...places.map((p) => ({
             id: String(p.id),
@@ -256,7 +270,7 @@ export default function HeritagePage() {
             difficulty: (p.difficulty as any) || undefined,
             era: p.type === "heritage" ? p.summary ?? undefined : undefined,
             cost: p.tags?.includes("paid") ? "Entry fee" : undefined,
-            bestFor: p.best_for?.[0],
+            bestFor: toStringArray(p.best_for)[0],
           })),
         ] as DiscoverPlace[]
       : [];
