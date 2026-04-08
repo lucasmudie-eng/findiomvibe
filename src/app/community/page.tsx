@@ -118,7 +118,7 @@ export default function CommunityPage() {
   const latest = rest.slice(0, 4);
 
   return (
-    <main className="mx-auto max-w-6xl px-4 py-8 space-y-8">
+    <main className="mx-auto max-w-6xl px-4 py-8 space-y-8 overflow-x-hidden">
       {/* Breadcrumb */}
       <nav className="mb-1 text-xs text-gray-500">
         <Link href="/" className="hover:underline">
