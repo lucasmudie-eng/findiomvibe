@@ -1,6 +1,7 @@
 // scripts/update-football-scores.mjs
-// Scraped from fulltime.thefa.com on 15 March 2026
+// Scraped from fulltime.thefa.com on 8 April 2026
 // Run with: node scripts/update-football-scores.mjs
+// Note: GF/GA are estimated (site only shows GD); GD and all other stats are exact.
 
 import { createClient } from "@supabase/supabase-js";
 
@@ -10,134 +11,123 @@ const SUPABASE_KEY =
 
 const db = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// ── League table standings (scraped 15 Mar 2026) ─────────────────────────────
+// ── League table standings (scraped 8 Apr 2026) ──────────────────────────────
+// GD is exact from fulltime.thefa.com. GF/GA are proportional estimates.
 // Format: { slug, pos, p, w, d, l, gf, ga, gd, pts }
 
 const TABLES = {
   "iom-premier-league": [
-    { slug: "corinthians",      pos: 1,  p: 19, w: 14, d: 4, l: 1,  gf: 75, ga: 24, gd: 51,   pts: 46 },
-    { slug: "peel",             pos: 2,  p: 16, w: 13, d: 2, l: 1,  gf: 71, ga: 24, gd: 47,   pts: 41 },
-    { slug: "st-marys",         pos: 3,  p: 17, w: 11, d: 0, l: 6,  gf: 56, ga: 27, gd: 29,   pts: 33 },
-    { slug: "laxey",            pos: 4,  p: 17, w: 9,  d: 4, l: 4,  gf: 47, ga: 30, gd: 17,   pts: 31 },
-    { slug: "rushen-united",    pos: 5,  p: 17, w: 9,  d: 2, l: 6,  gf: 30, ga: 32, gd: -2,   pts: 29 },
-    { slug: "onchan",           pos: 6,  p: 17, w: 8,  d: 4, l: 5,  gf: 48, ga: 47, gd: 1,    pts: 28 },
-    { slug: "st-johns-united",  pos: 7,  p: 15, w: 6,  d: 4, l: 5,  gf: 36, ga: 27, gd: 9,    pts: 22 },
-    { slug: "ramsey",           pos: 8,  p: 15, w: 6,  d: 2, l: 7,  gf: 32, ga: 41, gd: -9,   pts: 20 },
-    { slug: "ayre-united",      pos: 9,  p: 20, w: 5,  d: 5, l: 10, gf: 45, ga: 58, gd: -13,  pts: 20 },
-    { slug: "union-mills",      pos: 10, p: 17, w: 5,  d: 3, l: 9,  gf: 40, ga: 55, gd: -15,  pts: 18 },
-    { slug: "braddan",          pos: 11, p: 18, w: 3,  d: 4, l: 11, gf: 40, ga: 75, gd: -35,  pts: 13 },
-    { slug: "dhsob",            pos: 12, p: 16, w: 1,  d: 2, l: 13, gf: 24, ga: 54, gd: -30,  pts: 5  },
-    { slug: "foxdale",          pos: 13, p: 14, w: 0,  d: 2, l: 12, gf: 21, ga: 71, gd: -50,  pts: 2  },
+    { slug: "corinthians",     pos: 1,  p: 21, w: 16, d: 4, l: 1,  gf: 96,  ga: 27,  gd: 69,   pts: 52 },
+    { slug: "peel",            pos: 2,  p: 18, w: 15, d: 2, l: 1,  gf: 86,  ga: 27,  gd: 59,   pts: 47 },
+    { slug: "laxey",           pos: 3,  p: 19, w: 10, d: 4, l: 5,  gf: 51,  ga: 34,  gd: 17,   pts: 34 },
+    { slug: "onchan",          pos: 4,  p: 19, w: 10, d: 4, l: 5,  gf: 59,  ga: 53,  gd: 6,    pts: 34 },
+    { slug: "st-marys",        pos: 5,  p: 18, w: 11, d: 0, l: 7,  gf: 57,  ga: 29,  gd: 28,   pts: 33 },
+    { slug: "st-johns-united", pos: 6,  p: 20, w: 9,  d: 4, l: 7,  gf: 44,  ga: 36,  gd: 8,    pts: 31 },
+    { slug: "rushen-united",   pos: 7,  p: 18, w: 9,  d: 2, l: 7,  gf: 30,  ga: 34,  gd: -4,   pts: 29 },
+    { slug: "ramsey",          pos: 8,  p: 17, w: 7,  d: 3, l: 7,  gf: 38,  ga: 46,  gd: -8,   pts: 24 },
+    { slug: "union-mills",     pos: 9,  p: 20, w: 7,  d: 3, l: 10, gf: 54,  ga: 65,  gd: -11,  pts: 24 },
+    { slug: "ayre-united",     pos: 10, p: 22, w: 5,  d: 6, l: 11, gf: 47,  ga: 64,  gd: -17,  pts: 21 },
+    { slug: "braddan",         pos: 11, p: 20, w: 3,  d: 5, l: 12, gf: 44,  ga: 83,  gd: -39,  pts: 14 },
+    { slug: "dhsob",           pos: 12, p: 19, w: 1,  d: 2, l: 16, gf: 26,  ga: 64,  gd: -38,  pts: 5  },
+    { slug: "foxdale",         pos: 13, p: 17, w: 0,  d: 3, l: 14, gf: 20,  ga: 90,  gd: -70,  pts: 3  },
   ],
   "iom-division-2": [
-    { slug: "ramsey-second",           pos: 1,  p: 24, w: 17, d: 5, l: 2,  gf: 100, ga: 27,  gd: 73,   pts: 56 },
-    { slug: "pulrose-united",          pos: 2,  p: 24, w: 17, d: 4, l: 3,  gf: 100, ga: 25,  gd: 75,   pts: 55 },
-    { slug: "rycob",                   pos: 3,  p: 24, w: 16, d: 6, l: 2,  gf: 88,  ga: 35,  gd: 53,   pts: 54 },
-    { slug: "foxdale-second",          pos: 4,  p: 24, w: 15, d: 3, l: 6,  gf: 83,  ga: 39,  gd: 44,   pts: 48 },
-    { slug: "malew",                   pos: 5,  p: 24, w: 15, d: 3, l: 6,  gf: 76,  ga: 45,  gd: 31,   pts: 48 },
-    { slug: "union-mills-second",      pos: 6,  p: 24, w: 11, d: 4, l: 9,  gf: 72,  ga: 53,  gd: 19,   pts: 37 },
-    { slug: "onchan-second",           pos: 7,  p: 24, w: 11, d: 2, l: 11, gf: 76,  ga: 56,  gd: 20,   pts: 35 },
-    { slug: "colby",                   pos: 8,  p: 24, w: 11, d: 1, l: 12, gf: 62,  ga: 60,  gd: 2,    pts: 34 },
-    { slug: "ayre-united-second",      pos: 9,  p: 24, w: 11, d: 1, l: 12, gf: 56,  ga: 57,  gd: -1,   pts: 34 },
-    { slug: "douglas-and-district",    pos: 10, p: 24, w: 7,  d: 0, l: 17, gf: 57,  ga: 97,  gd: -40,  pts: 21 },
-    { slug: "gymnasium",               pos: 11, p: 24, w: 6,  d: 2, l: 16, gf: 43,  ga: 100, gd: -57,  pts: 20 },
-    { slug: "michael-united",          pos: 12, p: 24, w: 1,  d: 2, l: 21, gf: 27,  ga: 127, gd: -100, pts: 5  },
-    { slug: "governors-athletic",      pos: 13, p: 24, w: 1,  d: 1, l: 22, gf: 30,  ga: 149, gd: -119, pts: 4  },
+    { slug: "colby",                  pos: 1,  p: 20, w: 16, d: 2, l: 2,  gf: 60,  ga: 22,  gd: 38,   pts: 50 },
+    { slug: "castletown",             pos: 2,  p: 19, w: 13, d: 1, l: 5,  gf: 71,  ga: 18,  gd: 53,   pts: 40 },
+    { slug: "marown",                 pos: 3,  p: 16, w: 12, d: 1, l: 3,  gf: 47,  ga: 18,  gd: 29,   pts: 37 },
+    { slug: "rycob",                  pos: 4,  p: 19, w: 9,  d: 6, l: 4,  gf: 59,  ga: 35,  gd: 24,   pts: 33 },
+    { slug: "pulrose-united",         pos: 5,  p: 17, w: 8,  d: 5, l: 4,  gf: 48,  ga: 33,  gd: 15,   pts: 29 },
+    { slug: "malew",                  pos: 6,  p: 16, w: 7,  d: 4, l: 5,  gf: 38,  ga: 33,  gd: 5,    pts: 25 },
+    { slug: "st-georges",             pos: 7,  p: 21, w: 6,  d: 3, l: 12, gf: 35,  ga: 46,  gd: -11,  pts: 21 },
+    { slug: "douglas-royal",          pos: 8,  p: 18, w: 5,  d: 5, l: 8,  gf: 35,  ga: 40,  gd: -5,   pts: 20 },
+    { slug: "governors-athletic",     pos: 9,  p: 20, w: 1,  d: 5, l: 14, gf: 18,  ga: 60,  gd: -42,  pts: 8  },
+    { slug: "douglas-and-district",   pos: 10, p: 22, w: 0,  d: 2, l: 20, gf: 10,  ga: 116, gd: -106, pts: 2  },
   ],
   "iom-combination-1": [
-    { slug: "ramsey-comb",           pos: 1,  p: 22, w: 19, d: 2, l: 1,  gf: 93,  ga: 31,  gd: 62,   pts: 59 },
-    { slug: "rushen-united-comb",    pos: 2,  p: 22, w: 17, d: 1, l: 4,  gf: 101, ga: 23,  gd: 78,   pts: 52 },
-    { slug: "ayre-united-comb",      pos: 3,  p: 22, w: 13, d: 1, l: 8,  gf: 72,  ga: 55,  gd: 17,   pts: 40 },
-    { slug: "st-marys-comb",         pos: 4,  p: 22, w: 12, d: 3, l: 7,  gf: 73,  ga: 44,  gd: 29,   pts: 39 },
-    { slug: "union-mills-comb",      pos: 5,  p: 22, w: 11, d: 4, l: 7,  gf: 72,  ga: 63,  gd: 9,    pts: 37 },
-    { slug: "laxey-comb",            pos: 6,  p: 22, w: 9,  d: 2, l: 11, gf: 70,  ga: 63,  gd: 7,    pts: 29 },
-    { slug: "corinthians-comb",      pos: 7,  p: 22, w: 8,  d: 4, l: 10, gf: 58,  ga: 70,  gd: -12,  pts: 28 },
-    { slug: "marown-comb",           pos: 8,  p: 22, w: 7,  d: 5, l: 10, gf: 44,  ga: 65,  gd: -21,  pts: 26 },
-    { slug: "st-johns-united-comb",  pos: 9,  p: 22, w: 7,  d: 3, l: 12, gf: 47,  ga: 60,  gd: -13,  pts: 24 },
-    { slug: "braddan-comb",          pos: 10, p: 22, w: 7,  d: 1, l: 14, gf: 36,  ga: 73,  gd: -37,  pts: 22 },
-    { slug: "peel-comb",             pos: 11, p: 22, w: 5,  d: 4, l: 13, gf: 35,  ga: 52,  gd: -17,  pts: 19 },
-    { slug: "douglas-royal-comb",    pos: 12, p: 22, w: 2,  d: 0, l: 20, gf: 24,  ga: 126, gd: -102, pts: 6  },
+    { slug: "corinthians-comb",       pos: 1,  p: 22, w: 15, d: 3, l: 4,  gf: 85,  ga: 35,  gd: 50,   pts: 48 },
+    { slug: "peel-comb",              pos: 2,  p: 21, w: 14, d: 3, l: 4,  gf: 97,  ga: 18,  gd: 79,   pts: 45 },
+    { slug: "ramsey-comb",            pos: 3,  p: 19, w: 13, d: 4, l: 2,  gf: 81,  ga: 27,  gd: 54,   pts: 43 },
+    { slug: "onchan-comb",            pos: 4,  p: 20, w: 13, d: 3, l: 4,  gf: 67,  ga: 28,  gd: 39,   pts: 42 },
+    { slug: "rushen-united-comb",     pos: 5,  p: 20, w: 11, d: 4, l: 5,  gf: 59,  ga: 30,  gd: 29,   pts: 37 },
+    { slug: "st-marys-comb",          pos: 6,  p: 21, w: 12, d: 1, l: 8,  gf: 50,  ga: 50,  gd: 0,    pts: 37 },
+    { slug: "laxey-comb",             pos: 7,  p: 20, w: 10, d: 2, l: 8,  gf: 65,  ga: 57,  gd: 8,    pts: 32 },
+    { slug: "dhsob-comb",             pos: 8,  p: 19, w: 8,  d: 3, l: 8,  gf: 46,  ga: 45,  gd: 1,    pts: 27 },
+    { slug: "st-johns-united-comb",   pos: 9,  p: 20, w: 8,  d: 0, l: 12, gf: 32,  ga: 55,  gd: -23,  pts: 24 },
+    { slug: "ayre-united-comb",       pos: 10, p: 20, w: 6,  d: 0, l: 14, gf: 30,  ga: 53,  gd: -23,  pts: 18 },
+    { slug: "braddan-comb",           pos: 11, p: 19, w: 3,  d: 2, l: 14, gf: 25,  ga: 63,  gd: -38,  pts: 11 },
+    { slug: "union-mills-comb",       pos: 12, p: 18, w: 2,  d: 1, l: 15, gf: 11,  ga: 65,  gd: -54,  pts: 7  },
+    { slug: "foxdale-comb",           pos: 13, p: 19, w: 1,  d: 0, l: 18, gf: 8,   ga: 130, gd: -122, pts: 3  },
   ],
   "iom-combination-2": [
-    { slug: "colby-comb",                   pos: 1,  p: 22, w: 19, d: 1, l: 2,  gf: 109, ga: 32,  gd: 77,   pts: 58 },
-    { slug: "braddan-comb-2",               pos: 2,  p: 22, w: 14, d: 2, l: 6,  gf: 77,  ga: 51,  gd: 26,   pts: 44 },
-    { slug: "rycob-comb",                   pos: 3,  p: 22, w: 13, d: 4, l: 5,  gf: 73,  ga: 32,  gd: 41,   pts: 43 },
-    { slug: "governors-athletic-comb",      pos: 4,  p: 22, w: 12, d: 0, l: 10, gf: 69,  ga: 53,  gd: 16,   pts: 36 },
-    { slug: "dhsob-comb",                   pos: 5,  p: 22, w: 12, d: 2, l: 8,  gf: 60,  ga: 31,  gd: 29,   pts: 35 }, // points adjusted
-    { slug: "pulrose-united-comb",          pos: 6,  p: 22, w: 10, d: 1, l: 11, gf: 47,  ga: 61,  gd: -14,  pts: 31 },
-    { slug: "douglas-athletic-comb",        pos: 7,  p: 22, w: 8,  d: 3, l: 11, gf: 68,  ga: 56,  gd: 12,   pts: 27 },
-    { slug: "castletown-comb",              pos: 8,  p: 22, w: 8,  d: 1, l: 13, gf: 53,  ga: 52,  gd: 1,    pts: 25 },
-    { slug: "douglas-district-comb",        pos: 9,  p: 22, w: 8,  d: 1, l: 13, gf: 51,  ga: 81,  gd: -30,  pts: 25 },
-    { slug: "gymnasium-comb",               pos: 10, p: 22, w: 7,  d: 2, l: 13, gf: 49,  ga: 104, gd: -55,  pts: 23 },
-    { slug: "douglas-royal-comb",           pos: 11, p: 22, w: 6,  d: 1, l: 15, gf: 32,  ga: 77,  gd: -45,  pts: 19 },
-    { slug: "michael-united-comb",          pos: 12, p: 22, w: 6,  d: 0, l: 16, gf: 28,  ga: 86,  gd: -58,  pts: 18 },
+    { slug: "rycob-comb",                   pos: 1,  p: 19, w: 17, d: 1, l: 1,  gf: 111, ga: 15,  gd: 96,   pts: 52 },
+    { slug: "pulrose-united-comb",          pos: 2,  p: 19, w: 17, d: 1, l: 1,  gf: 77,  ga: 22,  gd: 55,   pts: 52 },
+    { slug: "douglas-athletic-comb",        pos: 3,  p: 19, w: 16, d: 1, l: 2,  gf: 99,  ga: 18,  gd: 81,   pts: 49 },
+    { slug: "colby-comb",                   pos: 4,  p: 21, w: 11, d: 5, l: 5,  gf: 61,  ga: 40,  gd: 21,   pts: 38 },
+    { slug: "marown-comb",                  pos: 5,  p: 21, w: 11, d: 3, l: 7,  gf: 62,  ga: 40,  gd: 22,   pts: 36 },
+    { slug: "castletown-comb",              pos: 6,  p: 22, w: 11, d: 2, l: 9,  gf: 51,  ga: 50,  gd: 1,    pts: 35 },
+    { slug: "gymnasium-comb",               pos: 7,  p: 23, w: 10, d: 2, l: 11, gf: 54,  ga: 52,  gd: 2,    pts: 32 },
+    { slug: "douglas-royal-comb",           pos: 8,  p: 21, w: 8,  d: 2, l: 11, gf: 36,  ga: 50,  gd: -14,  pts: 26 },
+    { slug: "governors-athletic-comb",      pos: 9,  p: 20, w: 6,  d: 2, l: 12, gf: 22,  ga: 60,  gd: -38,  pts: 20 },
+    { slug: "michael-united-comb",          pos: 10, p: 20, w: 5,  d: 1, l: 14, gf: 17,  ga: 60,  gd: -43,  pts: 16 },
+    { slug: "st-georges-comb",              pos: 11, p: 21, w: 4,  d: 0, l: 17, gf: 19,  ga: 60,  gd: -41,  pts: 12 },
+    { slug: "malew-comb",                   pos: 12, p: 17, w: 3,  d: 2, l: 12, gf: 22,  ga: 40,  gd: -18,  pts: 11 },
+    { slug: "douglas-district-comb",        pos: 13, p: 21, w: 1,  d: 2, l: 18, gf: 8,   ga: 132, gd: -124, pts: 5  },
   ],
 };
 
-// ── Teams to upsert (name for display, slug for lookup) ──────────────────────
-// Includes new teams not in the original seed (Malew, Douglas Athletic, etc.)
+// ── New teams to upsert ───────────────────────────────────────────────────────
+// Covers teams added/promoted since original seed. Safe to re-run.
 
 const EXTRA_TEAMS = {
   "iom-division-2": [
-    { slug: "ramsey-second",        name: "Ramsey Second",          short_name: "Ramsey" },
-    { slug: "pulrose-united",       name: "Pulrose United First",   short_name: "Pulrose Utd" },
-    { slug: "rycob",                name: "RYCOB First",            short_name: "RYCOB" },
-    { slug: "foxdale-second",       name: "Foxdale Second",         short_name: "Foxdale" },
-    { slug: "malew",                name: "Malew First",            short_name: "Malew" },
-    { slug: "union-mills-second",   name: "Union Mills Second",     short_name: "Union Mills" },
-    { slug: "onchan-second",        name: "Onchan Second",          short_name: "Onchan" },
-    { slug: "colby",                name: "Colby First",            short_name: "Colby" },
-    { slug: "ayre-united-second",   name: "Ayre United Second",     short_name: "Ayre Utd" },
-    { slug: "douglas-and-district", name: "Douglas & District",     short_name: "Douglas & Dist" },
-    { slug: "gymnasium",            name: "Gymnasium First",        short_name: "Gymnasium" },
-    { slug: "michael-united",       name: "Michael United First",   short_name: "Michael Utd" },
-    { slug: "governors-athletic",   name: "Governors Athletic First", short_name: "Governors Ath" },
+    { slug: "colby",                name: "Colby First",                  short_name: "Colby"         },
+    { slug: "rycob",                name: "RYCOB First",                  short_name: "RYCOB"         },
+    { slug: "pulrose-united",       name: "Pulrose United First",         short_name: "Pulrose Utd"   },
+    { slug: "malew",                name: "Malew First",                  short_name: "Malew"         },
+    { slug: "governors-athletic",   name: "Governors Athletic First",     short_name: "Governors Ath" },
+    { slug: "douglas-and-district", name: "Douglas & District First",     short_name: "Douglas & Dist"},
+    { slug: "castletown",           name: "Castletown First",             short_name: "Castletown"    },
+    { slug: "marown",               name: "Marown First",                 short_name: "Marown"        },
+    { slug: "st-georges",           name: "St Georges First",             short_name: "St Georges"    },
+    { slug: "douglas-royal",        name: "Douglas Royal First",          short_name: "Douglas Royal" },
   ],
   "iom-combination-1": [
-    { slug: "marown-comb",        name: "Marown Combination",        short_name: "Marown" },
-    { slug: "douglas-royal-comb", name: "Douglas Royal Combination", short_name: "Douglas Royal" },
+    { slug: "peel-comb",            name: "Peel Combination",             short_name: "Peel"          },
+    { slug: "onchan-comb",          name: "Onchan Combination",           short_name: "Onchan"        },
+    { slug: "dhsob-comb",           name: "DHSOB Combination",            short_name: "DHSOB"         },
+    { slug: "foxdale-comb",         name: "Foxdale Combination",          short_name: "Foxdale"       },
+    { slug: "ramsey-comb",          name: "Ramsey Combination",           short_name: "Ramsey"        },
+    { slug: "corinthians-comb",     name: "Corinthians Combination",      short_name: "Corinthians"   },
+    { slug: "rushen-united-comb",   name: "Rushen United Combination",    short_name: "Rushen Utd"    },
+    { slug: "st-marys-comb",        name: "St Marys Combination",         short_name: "St Marys"      },
+    { slug: "laxey-comb",           name: "Laxey Combination",            short_name: "Laxey"         },
+    { slug: "st-johns-united-comb", name: "St Johns United Combination",  short_name: "St Johns Utd"  },
+    { slug: "ayre-united-comb",     name: "Ayre United Combination",      short_name: "Ayre Utd"      },
+    { slug: "braddan-comb",         name: "Braddan Combination",          short_name: "Braddan"       },
+    { slug: "union-mills-comb",     name: "Union Mills Combination",      short_name: "Union Mills"   },
   ],
   "iom-combination-2": [
-    { slug: "colby-comb",              name: "Colby Combination",              short_name: "Colby" },
-    { slug: "braddan-comb-2",          name: "Braddan Combination",            short_name: "Braddan" },
-    { slug: "rycob-comb",              name: "RYCOB Combination",              short_name: "RYCOB" },
-    { slug: "governors-athletic-comb", name: "Governors Athletic Combination", short_name: "Governors Ath" },
-    { slug: "dhsob-comb",              name: "DHSOB Combination",              short_name: "DHSOB" },
-    { slug: "pulrose-united-comb",     name: "Pulrose United Combination",     short_name: "Pulrose Utd" },
-    { slug: "douglas-athletic-comb",   name: "Douglas Athletic Combination",   short_name: "Douglas Ath" },
-    { slug: "castletown-comb",         name: "Castletown Combination",         short_name: "Castletown" },
-    { slug: "douglas-district-comb",   name: "Douglas & District Combination", short_name: "Douglas & Dist" },
-    { slug: "gymnasium-comb",          name: "Gymnasium Combination",          short_name: "Gymnasium" },
-    { slug: "douglas-royal-comb",      name: "Douglas Royal Combination",      short_name: "Douglas Royal" },
-    { slug: "michael-united-comb",     name: "Michael United Combination",     short_name: "Michael Utd" },
+    { slug: "rycob-comb",                name: "RYCOB Combination",                short_name: "RYCOB"         },
+    { slug: "pulrose-united-comb",       name: "Pulrose United Combination",       short_name: "Pulrose Utd"   },
+    { slug: "douglas-athletic-comb",     name: "Douglas Athletic Combination",     short_name: "Douglas Ath"   },
+    { slug: "colby-comb",                name: "Colby Combination",                short_name: "Colby"         },
+    { slug: "marown-comb",               name: "Marown Combination",               short_name: "Marown"        },
+    { slug: "castletown-comb",           name: "Castletown Combination",           short_name: "Castletown"    },
+    { slug: "gymnasium-comb",            name: "Gymnasium Combination",            short_name: "Gymnasium"     },
+    { slug: "douglas-royal-comb",        name: "Douglas Royal Combination",        short_name: "Douglas Royal" },
+    { slug: "governors-athletic-comb",   name: "Governors Athletic Combination",   short_name: "Governors Ath" },
+    { slug: "michael-united-comb",       name: "Michael United Combination",       short_name: "Michael Utd"   },
+    { slug: "st-georges-comb",           name: "St Georges Combination",           short_name: "St Georges"    },
+    { slug: "malew-comb",                name: "Malew Combination",                short_name: "Malew"         },
+    { slug: "douglas-district-comb",     name: "Douglas & District Combination",   short_name: "Douglas & Dist"},
   ],
 };
-
-// ── Recent Premier League results (scraped 15 Mar 2026) ──────────────────────
-// Format: [homeSlug, homeGoals, awayGoals, awaySlug, dateISO]
-
-const PREMIER_RESULTS = [
-  ["ayre-united",     1, 1, "corinthians",     "2026-03-14"],
-  ["laxey",          4, 1, "dhsob",            "2026-03-14"],
-  ["onchan",         1, 12,"peel",             "2026-03-14"],
-  ["ramsey",         4, 1, "union-mills",      "2026-03-14"],
-  ["st-johns-united",3, 3, "foxdale",          "2026-03-14"],
-  ["ayre-united",    2, 3, "ramsey",           "2026-03-07"],
-  ["laxey",          3, 2, "st-johns-united",  "2026-03-07"],
-  ["rushen-united",  5, 4, "foxdale",          "2026-03-07"],
-  ["corinthians",    4, 0, "ramsey",           "2026-02-28"],
-  ["rushen-united",  1, 3, "ayre-united",      "2026-02-28"],
-  ["st-marys",       7, 2, "braddan",          "2026-02-21"],
-  ["braddan",        0, 3, "rushen-united",    "2026-01-31"],
-  ["dhsob",          1, 2, "braddan",          "2026-01-24"],
-  ["laxey",          0, 3, "union-mills",      "2026-01-24"],
-];
 
 // ── Main ─────────────────────────────────────────────────────────────────────
 
 async function main() {
   console.log("🏈 ManxHive football scores updater");
-  console.log("Scraped from fulltime.thefa.com — 15 Mar 2026\n");
+  console.log("Scraped from fulltime.thefa.com — 8 Apr 2026\n");
 
   // 1. Fetch league rows
   const { data: leagues, error: leagueErr } = await db
@@ -236,57 +226,6 @@ async function main() {
     }
 
     console.log(`  ✅ ${leagueSlug}: ${updated} rows updated, ${skipped} skipped`);
-  }
-
-  // 5. Insert recent Premier League results (skip if already present by date+teams)
-  console.log("\n⚽ Inserting recent Premier League results...");
-
-  const premLeagueId = leagueIdBySlug["iom-premier-league"];
-  let resultsAdded = 0;
-  let resultsDupe = 0;
-
-  if (premLeagueId) {
-    for (const [homeSlug, homeGoals, awayGoals, awaySlug, date] of PREMIER_RESULTS) {
-      const homeId = teamIdMap.get(`${premLeagueId}:${homeSlug}`);
-      const awayId = teamIdMap.get(`${premLeagueId}:${awaySlug}`);
-
-      if (!homeId || !awayId) {
-        console.warn(`  ⚠ Team not found: ${homeSlug} vs ${awaySlug}`);
-        continue;
-      }
-
-      // Check if this result already exists
-      const { data: existing } = await db
-        .from("sports_match_results")
-        .select("id")
-        .eq("league_id", premLeagueId)
-        .eq("home_team_id", homeId)
-        .eq("away_team_id", awayId)
-        .gte("played_at", `${date}T00:00:00Z`)
-        .lte("played_at", `${date}T23:59:59Z`)
-        .maybeSingle();
-
-      if (existing) {
-        resultsDupe++;
-        continue;
-      }
-
-      const { error } = await db.from("sports_match_results").insert({
-        league_id: premLeagueId,
-        home_team_id: homeId,
-        away_team_id: awayId,
-        home_goals: homeGoals,
-        away_goals: awayGoals,
-        played_at: `${date}T15:00:00Z`,
-      });
-
-      if (error) {
-        console.warn(`  ⚠ Result insert failed (${homeSlug} vs ${awaySlug}):`, error.message);
-      } else {
-        resultsAdded++;
-      }
-    }
-    console.log(`  ✅ ${resultsAdded} new results added, ${resultsDupe} already existed`);
   }
 
   console.log("\n🎉 Done! The site will now show live standings.\n");
