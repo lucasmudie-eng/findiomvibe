@@ -283,7 +283,7 @@ function ScoreTicker({ items }: { items: SportsPreview[] }) {
   const item = items[idx];
 
   return (
-    <div className="mt-8 flex items-center gap-3 rounded-full border border-slate-200 bg-white px-4 py-2.5 shadow-sm w-fit max-w-full overflow-hidden">
+    <div className="mt-8 flex items-center gap-3 rounded-full border border-slate-200 bg-white px-4 py-2.5 shadow-sm max-w-full overflow-hidden">
       <span className="h-2 w-2 flex-shrink-0 rounded-full bg-[#E8002D] animate-pulse-dot" />
       <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-slate-400 flex-shrink-0">
         LIVE
@@ -1278,7 +1278,7 @@ export default function HomePageClient() {
     <div className="bg-white text-slate-900">
 
       {/* ── HERO ─────────────────────────────────────────────────────────────── */}
-      <section className="relative overflow-hidden pb-16 pt-12 sm:pt-16 lg:pt-20">
+      <section className="relative overflow-x-hidden pb-16 pt-12 sm:pt-16 lg:pt-20">
         {/* Rotating IoM landscape images — underlay */}
         {HOME_HERO_SLIDES.map((slide, i) => (
           // eslint-disable-next-line @next/next/no-img-element
