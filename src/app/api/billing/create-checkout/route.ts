@@ -8,15 +8,14 @@ export const runtime = "nodejs";
 const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL || "https://manxhive.com";
 
-const PLAN_PLUS = process.env.PAYPAL_PLAN_PLUS!;
-const PLAN_PRO = process.env.PAYPAL_PLAN_PRO!;
-
-if (!PLAN_PLUS || !PLAN_PRO) {
-  throw new Error("Missing PAYPAL_PLAN_PLUS or PAYPAL_PLAN_PRO env vars");
-}
-
 export async function POST(req: NextRequest) {
   try {
+    const PLAN_PLUS = process.env.PAYPAL_PLAN_PLUS;
+    const PLAN_PRO = process.env.PAYPAL_PLAN_PRO;
+    if (!PLAN_PLUS || !PLAN_PRO) {
+      return NextResponse.json({ error: "Billing not configured" }, { status: 503 });
+    }
+
     const userId = await getAuthenticatedUserId();
     if (!userId) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });

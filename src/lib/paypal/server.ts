@@ -1,8 +1,6 @@
 // src/lib/paypal/server.ts
 import "server-only";
 
-const PAYPAL_CLIENT_ID = process.env.PAYPAL_CLIENT_ID!;
-const PAYPAL_SECRET = process.env.PAYPAL_SECRET!;
 const PAYPAL_ENV = process.env.PAYPAL_ENV || "sandbox";
 
 const BASE =
@@ -10,15 +8,16 @@ const BASE =
     ? "https://api-m.paypal.com"
     : "https://api-m.sandbox.paypal.com";
 
-if (!PAYPAL_CLIENT_ID || !PAYPAL_SECRET) {
-  throw new Error("Missing PAYPAL_CLIENT_ID or PAYPAL_SECRET");
-}
-
 export function paypalBase() {
   return BASE;
 }
 
 export async function getAccessToken() {
+  const PAYPAL_CLIENT_ID = process.env.PAYPAL_CLIENT_ID;
+  const PAYPAL_SECRET = process.env.PAYPAL_SECRET;
+  if (!PAYPAL_CLIENT_ID || !PAYPAL_SECRET) {
+    throw new Error("Missing PAYPAL_CLIENT_ID or PAYPAL_SECRET");
+  }
   const auth = Buffer.from(
     `${PAYPAL_CLIENT_ID}:${PAYPAL_SECRET}`,
     "utf8"
