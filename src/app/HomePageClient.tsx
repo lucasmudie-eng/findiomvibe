@@ -771,6 +771,7 @@ export default function HomePageClient() {
     BoostedBusiness[]
   >([]);
   const [boostedIndex, setBoostedIndex] = useState(0);
+  const [mobileSampleBusinesses, setMobileSampleBusinesses] = useState<BoostedBusiness[]>([]);
 
   const [_loadError, setLoadError] = useState<string | null>(null);
 
@@ -1024,6 +1025,22 @@ export default function HomePageClient() {
             );
 
           if (!error && data && data.length) {
+            // Random sample for mobile businesses section
+            const shuffled = [...(data as any[])].sort(() => Math.random() - 0.5).slice(0, 3);
+            setMobileSampleBusinesses(shuffled.map((b: any) => ({
+              id: String(b.id),
+              name: b.name ?? "Business",
+              slug: b.slug ?? null,
+              area: b.area ?? null,
+              category: b.category ?? null,
+              logoUrl: b.logo_url ?? null,
+              imageUrl: Array.isArray(b.images) && b.images.length ? b.images[0] : b.logo_url ?? null,
+              headline: b.featured_headline ?? null,
+              tagline: b.featured_tagline ?? b.tagline ?? null,
+              ctaLabel: b.featured_cta_label ?? null,
+              ctaUrl: b.featured_cta_url ?? null,
+            })));
+
             const now = new Date();
             const valid = (data as any[]).filter(
               (b) => b.boosted_until && new Date(b.boosted_until) > now
@@ -1438,7 +1455,8 @@ export default function HomePageClient() {
           <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-400 mb-3">Get Outside</p>
           <div className="grid grid-cols-2 gap-3">
             <Link href="/heritage" className="relative overflow-hidden rounded-xl h-28 bg-slate-800 flex flex-col justify-end p-3">
-              {heroWalk?.imageUrl && <img src={heroWalk.imageUrl} alt="" aria-hidden className="absolute inset-0 h-full w-full object-cover opacity-60" />} {/* eslint-disable-line @next/next/no-img-element */}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={heroWalk?.imageUrl ?? "https://loilmtqszazyhnzgbudz.supabase.co/storage/v1/object/public/images/walks/raad-ny-foillan.jpg"} alt="" aria-hidden className="absolute inset-0 h-full w-full object-cover opacity-60" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
               <div className="relative">
                 <p className="text-[9px] font-semibold uppercase tracking-[0.15em] text-white/60">Routes</p>
@@ -1446,7 +1464,8 @@ export default function HomePageClient() {
               </div>
             </Link>
             <Link href="/heritage" className="relative overflow-hidden rounded-xl h-28 bg-slate-800 flex flex-col justify-end p-3">
-              {heroHeritage?.imageUrl && <img src={heroHeritage.imageUrl} alt="" aria-hidden className="absolute inset-0 h-full w-full object-cover opacity-60" />} {/* eslint-disable-line @next/next/no-img-element */}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={heroHeritage?.imageUrl ?? "https://loilmtqszazyhnzgbudz.supabase.co/storage/v1/object/public/images/heritage/castle-rushen.jpg"} alt="" aria-hidden className="absolute inset-0 h-full w-full object-cover opacity-60" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
               <div className="relative">
                 <p className="text-[9px] font-semibold uppercase tracking-[0.15em] text-white/60">History</p>
@@ -1463,17 +1482,34 @@ export default function HomePageClient() {
               <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-400">Directory</p>
               <h2 className="font-playfair text-xl font-bold text-slate-900">Businesses</h2>
             </div>
+            <Link href="/businesses" className="text-xs font-semibold text-[#E8002D]">All →</Link>
           </div>
-          <div className="flex flex-wrap gap-2">
-            <Link href="/businesses" className="rounded-full bg-[#E8002D] px-3 py-1.5 text-[12px] font-semibold text-white">All</Link>
-            {["Restaurants","Services","Retail","Health & Beauty","Sports","Trades"].map((cat) => (
-              <Link key={cat} href={`/businesses?category=${encodeURIComponent(cat.toLowerCase())}`}
-                className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-[12px] font-medium text-slate-700">
-                {cat}
-              </Link>
-            ))}
-          </div>
-          <Link href="/businesses" className="mt-3 inline-block text-xs font-semibold text-[#E8002D]">Browse all businesses →</Link>
+          {mobileSampleBusinesses.length > 0 ? (
+            <div className="space-y-2">
+              {mobileSampleBusinesses.map((b) => {
+                const href = b.slug ? `/businesses/${b.slug}` : "/businesses";
+                return (
+                  <Link key={b.id} href={href} className="flex items-center gap-3 rounded-xl border border-slate-100 bg-white p-3 shadow-sm hover:border-[#E8002D]/20">
+                    <div className="h-10 w-10 flex-shrink-0 overflow-hidden rounded-lg bg-slate-100">
+                      {b.imageUrl
+                        ? <img src={b.imageUrl} alt={b.name} className="h-full w-full object-cover" /> // eslint-disable-line @next/next/no-img-element
+                        : <div className="flex h-full w-full items-center justify-center text-[10px] font-bold text-slate-400">{b.name[0]}</div>
+                      }
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-[13px] font-semibold text-slate-900 leading-tight truncate">{b.name}</p>
+                      <p className="text-[11px] text-slate-500 truncate">{[b.category, b.area].filter(Boolean).join(" · ")}</p>
+                    </div>
+                    <span className="flex-shrink-0 text-[11px] text-slate-400">→</span>
+                  </Link>
+                );
+              })}
+            </div>
+          ) : (
+            <Link href="/businesses" className="block rounded-xl border border-dashed border-slate-200 p-4 text-center text-xs text-slate-500">
+              Browse local businesses →
+            </Link>
+          )}
         </section>
 
         {/* ── COMMUNITY SPOTLIGHT ── */}
@@ -1566,26 +1602,8 @@ export default function HomePageClient() {
           </section>
         )}
 
-        {/* ── WEEKLY DIGEST ── */}
-        <section className="px-4 pt-5 pb-4">
-          <div className="rounded-xl bg-gradient-to-br from-[#0a1628] to-[#0d1f3e] p-4">
-            <h3 className="font-playfair text-lg font-bold text-white">Weekly digest<span className="text-[#E8002D]">.</span></h3>
-            <p className="mt-1 text-[12px] text-slate-400">The best of ManxHive, once a week.</p>
-            <form className="mt-3 flex gap-2" onSubmit={(e) => e.preventDefault()}>
-              <input
-                type="email"
-                placeholder="Your email"
-                className="min-w-0 flex-1 rounded-lg bg-white/10 px-3 py-2 text-[12px] text-white placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-[#E8002D]"
-              />
-              <button type="submit" className="flex-shrink-0 rounded-lg bg-[#E8002D] px-3 py-2 text-[12px] font-semibold text-white">Join</button>
-            </form>
-          </div>
-        </section>
-
-        {/* ── FOOTER ── */}
-        <footer className="px-4 py-4 text-center">
-          <p className="text-[11px] text-slate-400">© 2026 ManxHive. All rights reserved.</p>
-        </footer>
+        {/* Weekly digest + footer handled by global Footer component in layout.tsx */}
+        <div className="pb-4" />
       </div>
 
       {/* ════════════════════════════════════════════════════════════════════════
