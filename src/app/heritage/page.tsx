@@ -584,9 +584,9 @@ export default function HeritagePage() {
                       className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.06]"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/10 to-transparent" />
-                    {/* Era badge overlaid top-left */}
+                    {/* Era badge overlaid top-left — hidden on mobile (summary text too long) */}
                     {place.era && (
-                      <span className="absolute left-2.5 top-2.5 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold text-amber-800">
+                      <span className="absolute left-2.5 top-2.5 hidden sm:inline-block rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold text-amber-800 max-w-[140px] truncate">
                         {place.era}
                       </span>
                     )}

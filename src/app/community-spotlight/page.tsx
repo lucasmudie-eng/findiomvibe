@@ -21,7 +21,7 @@ export default function CommunitySpotlightPage() {
   const mostRead = (rest.length ? rest : STORIES).slice(0, 4);
 
   return (
-    <main className="mx-auto max-w-6xl px-4 py-10 sm:px-6 sm:py-12 lg:px-8 space-y-12">
+    <main className="mx-auto w-full max-w-6xl overflow-x-hidden px-4 py-10 sm:px-6 sm:py-12 lg:px-8 space-y-12">
 
       {/* Breadcrumb */}
       <nav className="flex items-center gap-1.5 text-xs text-slate-400">
@@ -127,7 +127,7 @@ export default function CommunitySpotlightPage() {
       )}
 
       {/* ── RECENT + SIDEBAR ─────────────────────────────────────────── */}
-      <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_280px]">
+      <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_280px] min-w-0">
 
         {/* Story grid */}
         <section className="space-y-6">
@@ -233,7 +233,7 @@ export default function CommunitySpotlightPage() {
         </section>
 
         {/* ── SIDEBAR ────────────────────────────────────────────── */}
-        <aside className="space-y-5 lg:sticky lg:top-24 lg:h-fit">
+        <aside className="space-y-5 min-w-0 overflow-hidden lg:sticky lg:top-24 lg:h-fit">
 
           {/* Most read */}
           <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">

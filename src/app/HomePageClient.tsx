@@ -1332,7 +1332,7 @@ export default function HomePageClient() {
           <div className="grid gap-10 lg:grid-cols-[1fr_400px] lg:gap-16 lg:items-start">
 
             {/* Left: Headline + ticker + chips */}
-            <div className="animate-fade-up">
+            <div className="animate-fade-up min-w-0">
               <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-400 mb-5">
                 Isle of Man&apos;s Local Hub
               </p>
@@ -1344,7 +1344,7 @@ export default function HomePageClient() {
                 <span className="text-[#E8002D]">.</span>
               </h1>
 
-              <p className="mt-5 max-w-lg text-[15px] leading-relaxed text-slate-500 sm:text-lg">
+              <p className="mt-5 max-w-lg w-full text-[15px] leading-relaxed text-slate-500 sm:text-lg">
                 Events, deals, sports, businesses, walks and community —
                 all in one place, built for island life.
               </p>
