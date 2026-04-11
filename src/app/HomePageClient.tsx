@@ -1274,615 +1274,673 @@ export default function HomePageClient() {
 
   // ── RENDER ───────────────────────────────────────────────────────────────────
 
+  const sportsItems = sports.length ? sports : FALLBACK_SPORTS;
+  const eventsItems = events.length ? events : FALLBACK_EVENTS;
+  const dealsItems = deals.length ? deals : FALLBACK_DEALS;
+  const communityItems = community.length ? community : FALLBACK_COMMUNITY;
+
   return (
     <div className="bg-white text-slate-900 overflow-x-hidden">
 
-      {/* ── HERO ─────────────────────────────────────────────────────────────── */}
-      <section className="relative overflow-x-hidden pb-16 pt-12 sm:pt-16 lg:pt-20">
-        {/* Rotating IoM landscape images — underlay */}
-        {HOME_HERO_SLIDES.map((slide, i) => (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            key={slide.image}
-            src={slide.image}
-            alt=""
-            aria-hidden="true"
-            className={`pointer-events-none absolute inset-0 h-full w-full object-cover transition-opacity duration-1000 z-0 ${
-              i === homeHeroIdx ? "opacity-100" : "opacity-0"
-            }`}
-          />
-        ))}
-        {/* White gradient overlay — left-heavy so all text stays readable */}
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-0 z-10"
-          style={{
-            background:
-              "linear-gradient(105deg, rgba(255,255,255,0.97) 0%, rgba(255,255,255,0.90) 42%, rgba(255,255,255,0.60) 70%, rgba(255,255,255,0.15) 100%)",
-          }}
-        />
-        {/* Bottom fade — keeps stats strip clean */}
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-x-0 bottom-0 h-36 z-10 bg-gradient-to-t from-white to-transparent"
-        />
-        {/* Slide indicator dots — top right, subtle */}
-        <div className="absolute right-6 top-6 z-20 flex items-center gap-2.5 sm:right-10 lg:right-16">
-          <p className="hidden sm:block text-[10px] font-medium text-slate-500 tracking-wide">
-            {HOME_HERO_SLIDES[homeHeroIdx].name} · {HOME_HERO_SLIDES[homeHeroIdx].area}
+      {/* ════════════════════════════════════════════════════════════════════════
+          MOBILE LAYOUT  (hidden on sm+)
+      ════════════════════════════════════════════════════════════════════════ */}
+      <div className="sm:hidden">
+
+        {/* ── HERO ── */}
+        <section className="bg-gradient-to-br from-[#0a1628] via-[#0d1f3e] to-[#111827] px-4 pt-6 pb-5">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500 mb-3">
+            Isle of Man&apos;s Local Hub
           </p>
-          <div className="flex gap-1.5">
-            {HOME_HERO_SLIDES.map((_, i) => (
-              <button
-                key={i}
-                type="button"
-                aria-label={`Go to slide ${i + 1}`}
-                onClick={() => setHomeHeroIdx(i)}
-                className={`rounded-full transition-all duration-300 ${
-                  i === homeHeroIdx
-                    ? "w-5 h-1.5 bg-[#E8002D]"
-                    : "w-1.5 h-1.5 bg-slate-300 hover:bg-slate-500"
-                }`}
-              />
+          <h1 className="font-playfair text-[2rem] font-bold leading-[1.08] tracking-[-0.01em] text-white">
+            Everything island life<br />has to <em className="italic">offer</em><span className="text-[#E8002D]">.</span>
+          </h1>
+          <p className="mt-2 text-[13px] text-slate-400 leading-snug">
+            Events, deals, sports &amp; community — all in one place.
+          </p>
+
+          {/* Live ticker */}
+          <div className="mt-4 flex items-center gap-2 overflow-hidden">
+            <span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-[#E8002D] animate-pulse" />
+            <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-slate-500 flex-shrink-0">Live</span>
+            <span className="min-w-0 truncate text-[12px] font-semibold text-white">
+              {sportsItems[0]?.title}
+            </span>
+            {sportsItems[0]?.meta && (
+              <span className="flex-shrink-0 truncate text-[11px] text-slate-400">· {sportsItems[0].meta}</span>
+            )}
+            <Link href="/sports" className="flex-shrink-0 text-[11px] font-semibold text-[#E8002D] ml-auto">More →</Link>
+          </div>
+
+          {/* Quick-nav pills */}
+          <div className="mt-4 flex gap-2 overflow-x-auto pb-1 [-webkit-overflow-scrolling:touch] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            {[
+              { label: "Events", href: "/whats-on" },
+              { label: "Marketplace", href: "/marketplace" },
+              { label: "Walks", href: "/heritage" },
+              { label: "Sports", href: "/sports" },
+              { label: "Heritage", href: "/heritage" },
+              { label: "Community", href: "/community-spotlight" },
+            ].map((chip) => (
+              <Link
+                key={chip.label}
+                href={chip.href}
+                className="flex-shrink-0 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-[12px] font-medium text-white/80"
+              >
+                {chip.label}
+              </Link>
             ))}
           </div>
-        </div>
+        </section>
 
-        <div className="relative z-20 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="grid gap-10 lg:grid-cols-[1fr_400px] lg:gap-16 lg:items-start">
+        {/* ── EVENTS / DEALS / SCORES TABS ── */}
+        <section className="px-4 pt-4 pb-2">
+          <HeroTabPanel
+            events={eventsItems}
+            deals={dealsItems}
+            scores={sportsItems}
+          />
+        </section>
 
-            {/* Left: Headline + ticker + chips */}
-            <div className="animate-fade-up min-w-0">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-400 mb-5">
-                Isle of Man&apos;s Local Hub
-              </p>
-
-              <h1 className="font-playfair text-[clamp(2.8rem,6.5vw,5.2rem)] font-bold leading-[1.05] tracking-[-0.02em] text-slate-900">
-                Everything island<br />
-                life has to{" "}
-                <em className="italic">offer</em>
-                <span className="text-[#E8002D]">.</span>
-              </h1>
-
-              <p className="mt-5 max-w-lg w-full text-[15px] leading-relaxed text-slate-500 sm:text-lg">
-                Events, deals, sports, businesses, walks and community —
-                all in one place, built for island life.
-              </p>
-
-              {/* Score ticker */}
-              <ScoreTicker items={sports.length ? sports : FALLBACK_SPORTS} />
-
-              {/* Quick-jump chips */}
-              <div className="mt-6 flex flex-wrap gap-2">
-                {[
-                  { emoji: "📅", label: "Events this weekend", href: "/whats-on/weekend" },
-                  { emoji: "🛍️", label: "Marketplace", href: "/marketplace" },
-                  { emoji: "🥾", label: "Walks & Trails", href: "/heritage" },
-                  { emoji: "🏆", label: "Sports results", href: "/sports" },
-                  { emoji: "🏛️", label: "Heritage", href: "/heritage" },
-                  { emoji: "👥", label: "Community", href: "/community-spotlight" },
-                ].map((chip) => (
-                  <Link
-                    key={chip.href + chip.label}
-                    href={chip.href}
-                    className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 shadow-sm transition hover:border-[#E8002D]/40 hover:text-[#E8002D]"
-                  >
-                    <span>{chip.emoji}</span>
-                    {chip.label}
-                  </Link>
-                ))}
-              </div>
+        {/* ── WHAT'S ON ── */}
+        <section className="px-4 pt-5 pb-2">
+          <div className="flex items-center justify-between mb-3">
+            <div>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-400">Live feed</p>
+              <h2 className="font-playfair text-xl font-bold text-slate-900">What&apos;s On</h2>
             </div>
-
-            {/* Right: Tab panel */}
-            <div
-              className="animate-fade-up"
-              style={{ animationDelay: "120ms" }}
-            >
-              <HeroTabPanel
-                events={featuredEvents}
-                deals={deals.length ? deals.slice(0, 5) : FALLBACK_DEALS}
-                scores={sports.length ? sports : FALLBACK_SPORTS}
-              />
-            </div>
+            <Link href="/whats-on" className="text-xs font-semibold text-[#E8002D]">All events →</Link>
           </div>
-
-          {/* Stats strip — hidden on mobile to keep homepage concise */}
-          <div
-            ref={statsRef}
-            className="mt-16 hidden grid-cols-2 gap-8 border-t border-slate-100 pt-10 sm:grid sm:grid-cols-4"
-          >
-            <StatPill value={120} suffix="+" label="Upcoming events" active={statsVisible} delay={0} />
-            <StatPill value={340} suffix="+" label="Local businesses" active={statsVisible} delay={150} />
-            <StatPill value={85}  suffix="+" label="Live deals" active={statsVisible} delay={300} />
-            <StatPill value={40}  suffix="+" label="Walks & trails" active={statsVisible} delay={450} />
-          </div>
-        </div>
-      </section>
-
-      {/* ── WEATHER — hidden on mobile ────────────────────────────────────────── */}
-      <div className="hidden sm:block">
-        <WeatherSection />
-      </div>
-
-      {/* ── WHAT'S ON ────────────────────────────────────────────────────────── */}
-      <section className="py-16 sm:py-20">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <SectionHeader eyebrow="Live feed" title="What's On" href="/whats-on" cta="All events" />
-
-          {/* Featured event — large card */}
-          {heroEvent && (
-            <Link
-              href={heroEvent.id.startsWith("mock-") ? "/whats-on" : `/whats-on/${heroEvent.id}`}
-              className="group mt-8 flex flex-col overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-[0_4px_24px_rgba(0,0,0,0.06)] transition-shadow hover:shadow-[0_8px_40px_rgba(0,0,0,0.10)] sm:flex-row"
-            >
-              {/* Image */}
-              <div className="relative h-52 w-full flex-shrink-0 bg-slate-100 sm:h-auto sm:w-56">
-                {heroEvent.imageUrl ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={heroEvent.imageUrl}
-                    alt={heroEvent.name}
-                    className="h-full w-full object-cover"
-                  />
-                ) : (
-                  <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200">
-                    <CalendarDays className="h-10 w-10 text-slate-300" />
-                  </div>
-                )}
-                <span className="absolute left-3 top-3 rounded-full bg-[#E8002D] px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white">
-                  Featured
-                </span>
-              </div>
-
-              {/* Details */}
-              <div className="flex flex-col justify-center px-6 py-6 sm:px-8">
-                <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-400 mb-2">
-                  Next up
-                </p>
-                <h3 className="font-playfair text-xl font-bold leading-snug text-slate-900 group-hover:text-[#E8002D] transition-colors sm:text-2xl">
-                  {heroEvent.name}
-                </h3>
-                {heroEvent.meta && (
-                  <p className="mt-2 text-sm text-slate-500">{heroEvent.meta}</p>
-                )}
-                <span className="mt-4 text-sm font-semibold text-[#E8002D]">
-                  Book now →
-                </span>
-              </div>
-            </Link>
-          )}
-
-          {/* Remaining events — compact rows */}
-          {featuredEvents.length > 1 && (
-            <ul className="mt-3 divide-y divide-slate-100 rounded-xl border border-slate-100 bg-white shadow-sm overflow-hidden">
-              {featuredEvents.slice(1).map((e) => {
-                const href = e.id.startsWith("mock-") ? "/whats-on" : `/whats-on/${e.id}`;
-                return (
-                  <li key={e.id}>
-                    <Link
-                      href={href}
-                      className="group flex items-center gap-4 px-5 py-3.5 hover:bg-slate-50 transition-colors"
-                    >
-                      <CalendarDays className="h-4 w-4 flex-shrink-0 text-[#E8002D]" />
-                      <div className="min-w-0 flex-1">
-                        <span className="text-sm font-semibold text-slate-900 group-hover:text-[#E8002D] transition-colors">
-                          {e.name}
-                        </span>
-                        {e.meta && (
-                          <span className="ml-3 text-xs text-slate-500">
-                            {e.meta}
-                          </span>
-                        )}
-                      </div>
-                      <span className="text-xs text-slate-400 group-hover:text-[#E8002D] transition-colors">
-                        →
-                      </span>
-                    </Link>
-                  </li>
-                );
-              })}
-            </ul>
-          )}
-
-          <div className="mt-5 flex gap-3">
-            <Link
-              href="/whats-on/weekend"
-              className="inline-flex items-center rounded-full bg-[#E8002D] px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-[#c00026] transition-colors"
-            >
-              Weekend guide →
-            </Link>
-            <Link
-              href="/whats-on"
-              className="inline-flex items-center rounded-full border border-slate-200 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50 transition-colors"
-            >
-              All events
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* ── DEALS ────────────────────────────────────────────────────────────── */}
-      <section className="py-14 sm:py-16 bg-slate-50/70">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <SectionHeader eyebrow="Limited offers" title="Local Deals" href="/deals" cta="All deals" />
-
-          <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {(deals.length ? deals : FALLBACK_DEALS).slice(0, 6).map((deal) => {
-              const href = deal.id.startsWith("mock-") ? "/deals" : `/deals/${deal.id}`;
+          <div className="flex gap-3 overflow-x-auto pb-2 [-webkit-overflow-scrolling:touch] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            {eventsItems.slice(0, 6).map((e) => {
+              const href = e.id.startsWith("mock-") ? "/whats-on" : `/whats-on/${e.id}`;
               return (
-                <Link
-                  key={deal.id}
-                  href={href}
-                  className="group flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3.5 shadow-sm transition-all hover:border-[#E8002D]/30 hover:shadow-md"
-                >
-                  <Tag className="h-4 w-4 flex-shrink-0 text-[#E8002D]" />
-                  <div className="min-w-0 flex-1">
-                    <p className="line-clamp-1 text-sm font-semibold text-slate-900 group-hover:text-[#E8002D] transition-colors">
-                      {deal.title}
-                    </p>
-                    {deal.meta && (
-                      <p className="mt-0.5 line-clamp-1 text-[11px] text-slate-500">
-                        {deal.meta}
-                      </p>
-                    )}
+                <Link key={e.id} href={href} className="flex-shrink-0 w-44 overflow-hidden rounded-xl bg-white shadow-sm border border-slate-100">
+                  <div className="relative h-24 bg-slate-100">
+                    {e.imageUrl
+                      ? <img src={e.imageUrl} alt={e.name} className="h-full w-full object-cover" /> // eslint-disable-line @next/next/no-img-element
+                      : <div className="flex h-full w-full items-center justify-center"><CalendarDays className="h-6 w-6 text-slate-300" /></div>
+                    }
                   </div>
-                  <span className="flex-shrink-0 text-[11px] font-semibold text-[#E8002D]">
-                    View →
-                  </span>
+                  <div className="p-2.5">
+                    <p className="text-[12px] font-semibold text-slate-900 line-clamp-2 leading-snug">{e.name}</p>
+                    {e.meta && <p className="mt-1 text-[10px] text-slate-500 line-clamp-1">{e.meta}</p>}
+                  </div>
                 </Link>
               );
             })}
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* ── FEATURED BUSINESS SPOTLIGHT ──────────────────────────────────────── */}
-      {heroBusiness && (
-        <section className="py-16 sm:py-20">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-[0_4px_40px_rgba(0,0,0,0.07)]">
-              <div className="grid lg:grid-cols-2">
-                {/* Image side */}
-                <div className="relative min-h-[280px] bg-slate-100 lg:min-h-[380px]">
-                  {heroBusiness.imageUrl || heroBusiness.logoUrl ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={heroBusiness.imageUrl ?? heroBusiness.logoUrl!}
-                      alt={heroBusiness.name}
-                      className="absolute inset-0 h-full w-full object-cover"
-                    />
-                  ) : (
-                    <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200">
-                      <span className="text-4xl font-bold text-slate-300">
-                        {heroBusiness.name[0]}
-                      </span>
-                    </div>
-                  )}
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-white/10" />
-                </div>
-
-                {/* Content side */}
-                <div className="flex flex-col justify-center px-8 py-10 lg:px-12 lg:py-14">
-                  <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.22em] text-[#E8002D]">
-                    Sponsored spotlight
-                  </p>
-                  <h2 className="font-playfair text-[clamp(1.7rem,3vw,2.6rem)] font-bold leading-tight text-slate-900">
-                    {heroBusiness.headline ?? heroBusiness.name}
-                  </h2>
-                  {heroBusiness.tagline && (
-                    <p className="mt-3 text-base leading-relaxed text-slate-500">
-                      {heroBusiness.tagline}
-                    </p>
-                  )}
-                  {businessMeta.length > 0 && (
-                    <div className="mt-4 flex flex-wrap gap-2">
-                      {businessMeta.map((m) => (
-                        <span
-                          key={m}
-                          className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600"
-                        >
-                          {m}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                  <Link
-                    href={featuredHref ?? "/businesses"}
-                    className="mt-8 inline-flex w-fit items-center rounded-full bg-[#E8002D] px-6 py-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#c00026]"
-                  >
-                    {heroBusiness.ctaLabel ?? "View business"}
-                  </Link>
-                </div>
-              </div>
+        {/* ── LOCAL DEALS ── */}
+        <section className="px-4 pt-5 pb-2">
+          <div className="flex items-center justify-between mb-3">
+            <div>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-400">Limited Offers</p>
+              <h2 className="font-playfair text-xl font-bold text-slate-900">Local Deals</h2>
             </div>
+            <Link href="/deals" className="text-xs font-semibold text-[#E8002D]">All deals →</Link>
+          </div>
+          <div className="rounded-xl bg-white shadow-sm border border-slate-100 divide-y divide-slate-50 overflow-hidden">
+            {dealsItems.slice(0, 4).map((d) => {
+              const href = d.id.startsWith("mock-") ? "/deals" : `/deals/${d.id}`;
+              return (
+                <Link key={d.id} href={href} className="flex items-center gap-3 px-3 py-3 hover:bg-slate-50">
+                  <Tag className="h-3.5 w-3.5 flex-shrink-0 text-[#E8002D]" />
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[12px] font-semibold text-slate-900 line-clamp-1">{d.title}</p>
+                    {d.meta && <p className="text-[10px] text-slate-500 line-clamp-1">{d.meta}</p>}
+                  </div>
+                  <span className="flex-shrink-0 text-[11px] font-semibold text-[#E8002D]">View →</span>
+                </Link>
+              );
+            })}
           </div>
         </section>
-      )}
 
-      {/* ── BROWSE BUSINESSES ────────────────────────────────────────────────── */}
-      <section className="py-14 sm:py-16 bg-slate-50/70">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <SectionHeader eyebrow="Directory" title="Browse Businesses" href="/businesses" cta="All businesses" />
-
-          {boostedBusinesses.length > 0 ? (
-            <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {boostedBusinesses.slice(0, 6).map((b) => {
-                const href = b.slug ? `/businesses/${b.slug}` : "/businesses";
-                return (
-                  <Link
-                    key={b.id}
-                    href={href}
-                    className="group flex items-center gap-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition-all hover:border-[#E8002D]/30 hover:shadow-md"
-                  >
-                    {b.logoUrl || b.imageUrl ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={b.logoUrl ?? b.imageUrl!}
-                        alt={b.name}
-                        className="h-12 w-12 flex-shrink-0 rounded-lg object-cover bg-slate-100"
-                      />
-                    ) : (
-                      <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-lg bg-slate-100">
-                        <span className="text-lg font-bold text-slate-400">
-                          {b.name[0]}
-                        </span>
-                      </div>
-                    )}
-                    <div className="min-w-0">
-                      <p className="text-sm font-semibold text-slate-900 group-hover:text-[#E8002D] transition-colors">
-                        {b.name}
-                      </p>
-                      <p className="mt-0.5 text-xs text-slate-500">
-                        {[b.category, b.area].filter(Boolean).join(" • ")}
-                      </p>
-                    </div>
-                  </Link>
-                );
-              })}
+        {/* ── SPONSORED SPOTLIGHT ── */}
+        {heroBusiness && (
+          <section className="px-4 pt-5 pb-2">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-400 mb-3">Sponsored Spotlight</p>
+            <div className="overflow-hidden rounded-xl bg-white shadow-md border border-slate-100">
+              <div className="relative h-44 bg-slate-100">
+                {heroBusiness.imageUrl || heroBusiness.logoUrl
+                  ? <img src={heroBusiness.imageUrl ?? heroBusiness.logoUrl!} alt={heroBusiness.name} className="h-full w-full object-cover" /> // eslint-disable-line @next/next/no-img-element
+                  : <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200"><span className="text-3xl font-bold text-slate-300">{heroBusiness.name[0]}</span></div>
+                }
+                <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
+              </div>
+              <div className="p-3.5">
+                <h2 className="font-playfair text-lg font-bold text-slate-900 leading-snug">{heroBusiness.headline ?? heroBusiness.name}</h2>
+                {businessMeta.length > 0 && (
+                  <div className="mt-2 flex flex-wrap gap-1.5">
+                    {businessMeta.map((m) => (
+                      <span key={m} className="rounded-full bg-slate-100 px-2.5 py-0.5 text-[10px] font-medium text-slate-600">{m}</span>
+                    ))}
+                  </div>
+                )}
+                {heroBusiness.tagline && (
+                  <p className="mt-2 text-[12px] text-slate-500 line-clamp-2">{heroBusiness.tagline}</p>
+                )}
+                <Link
+                  href={featuredHref ?? "/businesses"}
+                  className="mt-3 block w-full rounded-lg bg-[#E8002D] py-2.5 text-center text-[13px] font-semibold text-white"
+                >
+                  {heroBusiness.ctaLabel ?? "View business"}
+                </Link>
+              </div>
             </div>
-          ) : (
-            <div className="mt-8 flex flex-wrap gap-3">
-              {["Restaurants", "Services", "Retail", "Health & Beauty", "Sports", "Trades"].map(
-                (cat) => (
-                  <Link
-                    key={cat}
-                    href={`/businesses?category=${encodeURIComponent(cat.toLowerCase())}`}
-                    className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:border-[#E8002D]/30 hover:text-[#E8002D]"
-                  >
-                    {cat}
-                  </Link>
-                )
-              )}
-            </div>
-          )}
+          </section>
+        )}
 
-          <div className="mt-6">
-            <Link
-              href="/businesses"
-              className="inline-flex items-center text-sm font-semibold text-[#E8002D] hover:underline"
-            >
-              Browse all businesses →
+        {/* ── EXPLORE THE ISLAND ── */}
+        <section className="px-4 pt-5 pb-2">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-400 mb-3">Get Outside</p>
+          <div className="grid grid-cols-2 gap-3">
+            <Link href="/heritage" className="relative overflow-hidden rounded-xl h-28 bg-slate-800 flex flex-col justify-end p-3">
+              {heroWalk?.imageUrl && <img src={heroWalk.imageUrl} alt="" aria-hidden className="absolute inset-0 h-full w-full object-cover opacity-60" />} {/* eslint-disable-line @next/next/no-img-element */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+              <div className="relative">
+                <p className="text-[9px] font-semibold uppercase tracking-[0.15em] text-white/60">Routes</p>
+                <p className="text-[13px] font-bold text-white leading-tight">Walks &amp; Trails</p>
+              </div>
+            </Link>
+            <Link href="/heritage" className="relative overflow-hidden rounded-xl h-28 bg-slate-800 flex flex-col justify-end p-3">
+              {heroHeritage?.imageUrl && <img src={heroHeritage.imageUrl} alt="" aria-hidden className="absolute inset-0 h-full w-full object-cover opacity-60" />} {/* eslint-disable-line @next/next/no-img-element */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+              <div className="relative">
+                <p className="text-[9px] font-semibold uppercase tracking-[0.15em] text-white/60">History</p>
+                <p className="text-[13px] font-bold text-white leading-tight">Heritage</p>
+              </div>
             </Link>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* ── SPORTS ───────────────────────────────────────────────────────────── */}
-      <section className="py-16 sm:py-20">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <SectionHeader eyebrow="Latest results" title="Sports" href="/sports" cta="Sports hub →" />
-
-          <div className="mt-8 overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-[0_4px_24px_rgba(0,0,0,0.05)]">
-            {/* Header bar */}
-            <div className="flex items-center gap-2.5 border-b border-slate-100 bg-slate-50/80 px-5 py-3">
-              <span className="h-2 w-2 rounded-full bg-[#E8002D] animate-pulse" />
-              <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-slate-500">
-                Live Results
-              </span>
+        {/* ── BROWSE BUSINESSES ── */}
+        <section className="px-4 pt-5 pb-2">
+          <div className="flex items-center justify-between mb-3">
+            <div>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-400">Directory</p>
+              <h2 className="font-playfair text-xl font-bold text-slate-900">Businesses</h2>
             </div>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <Link href="/businesses" className="rounded-full bg-[#E8002D] px-3 py-1.5 text-[12px] font-semibold text-white">All</Link>
+            {["Restaurants","Services","Retail","Health & Beauty","Sports","Trades"].map((cat) => (
+              <Link key={cat} href={`/businesses?category=${encodeURIComponent(cat.toLowerCase())}`}
+                className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-[12px] font-medium text-slate-700">
+                {cat}
+              </Link>
+            ))}
+          </div>
+          <Link href="/businesses" className="mt-3 inline-block text-xs font-semibold text-[#E8002D]">Browse all businesses →</Link>
+        </section>
 
+        {/* ── COMMUNITY SPOTLIGHT ── */}
+        <section className="px-4 pt-5 pb-2">
+          <div className="flex items-center justify-between mb-3">
+            <div>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-400">People &amp; Places</p>
+              <h2 className="font-playfair text-xl font-bold text-slate-900">Community</h2>
+            </div>
+            <Link href="/community-spotlight" className="text-xs font-semibold text-[#E8002D]">All stories →</Link>
+          </div>
+          <div className="rounded-xl bg-white shadow-sm border border-slate-100 divide-y divide-slate-50 overflow-hidden">
+            {communityItems.slice(0, 2).map((c, i) => (
+              <Link key={c.id} href="/community-spotlight" className="flex items-start gap-3 px-3 py-3 hover:bg-slate-50">
+                <span className="mt-1 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-[#E8002D]" />
+                <div className="min-w-0 flex-1">
+                  {i === 0 && <span className="inline-block rounded-full bg-[#E8002D]/10 px-2 py-0.5 text-[9px] font-semibold text-[#E8002D] mb-1">Latest</span>}
+                  <p className="text-[12px] font-semibold text-slate-900 line-clamp-2 leading-snug">{c.title}</p>
+                  {c.meta && <p className="mt-0.5 text-[10px] text-slate-500 line-clamp-1">{c.meta}</p>}
+                </div>
+                <span className="flex-shrink-0 text-[11px] font-semibold text-[#E8002D]">Read →</span>
+              </Link>
+            ))}
+          </div>
+        </section>
+
+        {/* ── SPORTS RESULTS ── */}
+        <section className="px-4 pt-5 pb-2">
+          <div className="flex items-center justify-between mb-3">
+            <div>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-400">Latest Results</p>
+              <h2 className="font-playfair text-xl font-bold text-slate-900">Sports</h2>
+            </div>
+            <Link href="/sports" className="text-xs font-semibold text-[#E8002D]">Sports hub →</Link>
+          </div>
+          <div className="overflow-hidden rounded-xl bg-white shadow-sm border border-slate-100">
+            <div className="flex items-center gap-2 border-b border-slate-100 bg-slate-50 px-3 py-2">
+              <span className="h-1.5 w-1.5 rounded-full bg-[#E8002D] animate-pulse" />
+              <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-slate-500">Live Results</span>
+            </div>
             <ul className="divide-y divide-slate-50">
-              {(sports.length ? sports : FALLBACK_SPORTS).map((s) => (
+              {sportsItems.slice(0, 3).map((s) => (
                 <li key={s.id}>
-                  <Link
-                    href="/sports"
-                    className="group flex items-center gap-4 px-5 py-4 transition-colors hover:bg-slate-50"
-                  >
-                    <Trophy className="h-4 w-4 flex-shrink-0 text-[#E8002D]" />
-                    <div className="flex-1">
-                      <p className="text-sm font-semibold text-slate-900 group-hover:text-[#E8002D] transition-colors">
-                        {s.title}
-                      </p>
-                      {s.meta && (
-                        <p className="mt-0.5 text-xs text-slate-500">{s.meta}</p>
-                      )}
+                  <Link href="/sports" className="flex items-center gap-3 px-3 py-3 hover:bg-slate-50">
+                    <Trophy className="h-3.5 w-3.5 flex-shrink-0 text-[#E8002D]" />
+                    <div className="min-w-0 flex-1">
+                      <p className="text-[12px] font-semibold text-slate-900 line-clamp-1">{s.title}</p>
+                      {s.meta && <p className="text-[10px] text-slate-500 line-clamp-1">{s.meta}</p>}
                     </div>
-                    <span className="text-xs text-slate-400 group-hover:text-[#E8002D] transition-colors">
-                      →
-                    </span>
+                    <span className="text-[11px] text-slate-400">→</span>
                   </Link>
                 </li>
               ))}
             </ul>
+          </div>
+        </section>
 
-            <div className="border-t border-slate-100 px-5 py-3 bg-slate-50/60">
-              <Link
-                href="/sports"
-                className="text-xs font-semibold text-[#E8002D] hover:underline"
-              >
-                View all sports & fixtures →
-              </Link>
+        {/* ── MARKETPLACE ── */}
+        {listings.length > 0 && (
+          <section className="px-4 pt-5 pb-2">
+            <div className="flex items-center justify-between mb-3">
+              <div>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-400">Promoted Listings</p>
+                <h2 className="font-playfair text-xl font-bold text-slate-900">Marketplace</h2>
+              </div>
+              <Link href="/marketplace" className="text-xs font-semibold text-[#E8002D]">Browse all →</Link>
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ── EXPLORE THE ISLAND ───────────────────────────────────────────────── */}
-      <section className="py-14 sm:py-20 bg-slate-50/70">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="mb-10 text-center">
-            <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-400">
-              Get outside
-            </p>
-            <h2 className="font-playfair text-3xl font-bold text-slate-900 sm:text-4xl">
-              Explore the Island
-            </h2>
-          </div>
-
-          <div className="grid gap-6 md:grid-cols-2">
-            <ExplorePanel
-              title="Walks & Trails"
-              eyebrow="Routes"
-              item={heroWalk}
-              href="/heritage"
-              ctaLabel="Browse all walks"
-              metaLine={
-                heroWalk
-                  ? [
-                      heroWalk.area,
-                      heroWalk.distanceKm ? `${heroWalk.distanceKm}km` : null,
-                      heroWalk.difficulty,
-                    ]
-                      .filter(Boolean)
-                      .join(" • ")
-                  : undefined
-              }
-              summary={heroWalk?.summary ?? heroWalk?.description}
-              activeIndex={walkIndex}
-              onPrev={() =>
-                setWalkIndex((i) =>
-                  (i - 1 + featuredWalks.length) % Math.max(1, featuredWalks.length)
-                )
-              }
-              onNext={() =>
-                setWalkIndex((i) => (i + 1) % Math.max(1, featuredWalks.length))
-              }
-              total={featuredWalks.length}
-            />
-
-            <ExplorePanel
-              title="Heritage"
-              eyebrow="History & culture"
-              item={heroHeritage}
-              href="/heritage"
-              ctaLabel="Discover heritage"
-              metaLine={heroHeritage?.area ?? undefined}
-              summary={heroHeritage?.tagline ?? heroHeritage?.description}
-              activeIndex={heritageIndex}
-              onPrev={() =>
-                setHeritageIndex((i) =>
-                  (i - 1 + featuredHeritage.length) % Math.max(1, featuredHeritage.length)
-                )
-              }
-              onNext={() =>
-                setHeritageIndex((i) => (i + 1) % Math.max(1, featuredHeritage.length))
-              }
-              total={featuredHeritage.length}
-            />
-          </div>
-        </div>
-      </section>
-
-      {/* ── COMMUNITY ────────────────────────────────────────────────────────── */}
-      <section className="py-16 sm:py-20">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <SectionHeader
-            eyebrow="People & places"
-            title="Community Spotlight"
-            href="/community-spotlight"
-            cta="All stories"
-          />
-
-          <div className="mt-8 grid gap-4 sm:grid-cols-2">
-            {(community.length ? community : FALLBACK_COMMUNITY)
-              .slice(0, 4)
-              .map((c, i) => (
-                <Link
-                  key={c.id}
-                  href="/community-spotlight"
-                  className="group rounded-xl border border-slate-100 bg-white p-5 shadow-sm transition-all hover:border-[#E8002D]/25 hover:shadow-md"
-                >
-                  {i === 0 && (
-                    <span className="mb-3 inline-block rounded-full bg-[#E8002D]/8 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-[#E8002D]">
-                      Latest
-                    </span>
-                  )}
-                  <h3 className="text-sm font-semibold leading-snug text-slate-900 group-hover:text-[#E8002D] transition-colors">
-                    {c.title}
-                  </h3>
-                  {c.meta && (
-                    <p className="mt-2 line-clamp-2 text-xs text-slate-500">
-                      {c.meta}
-                    </p>
-                  )}
-                  <span className="mt-3 inline-block text-[11px] font-semibold text-[#E8002D]">
-                    Read story →
-                  </span>
-                </Link>
-              ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── MARKETPLACE ──────────────────────────────────────────────────────── */}
-      {listings.length > 0 && (
-        <section className="py-14 sm:py-16 bg-slate-50/70">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <SectionHeader
-              eyebrow="Promoted listings"
-              title="Marketplace"
-              href="/marketplace"
-              cta="Browse all"
-            />
-
-            <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              {listings.slice(0, 8).map((l) => (
-                <Link
-                  key={l.id}
-                  href={`/marketplace/item/${l.id}`}
-                  className="group overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition-all hover:border-[#E8002D]/30 hover:shadow-md"
-                >
-                  <div className="relative h-40 bg-slate-100">
-                    {l.imageUrl ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={l.imageUrl}
-                        alt={l.title}
-                        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
-                      />
-                    ) : (
-                      <div className="flex h-full w-full items-center justify-center text-xs text-slate-400">
-                        No image
-                      </div>
-                    )}
+            <div className="flex gap-3 overflow-x-auto pb-2 [-webkit-overflow-scrolling:touch] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              {listings.slice(0, 6).map((l) => (
+                <Link key={l.id} href={`/marketplace/item/${l.id}`} className="flex-shrink-0 w-36 overflow-hidden rounded-xl bg-white shadow-sm border border-slate-100">
+                  <div className="relative h-24 bg-slate-100">
+                    {l.imageUrl
+                      ? <img src={l.imageUrl} alt={l.title} className="h-full w-full object-cover" /> // eslint-disable-line @next/next/no-img-element
+                      : <div className="flex h-full w-full items-center justify-center text-[10px] text-slate-400">No image</div>
+                    }
                     {l.price && (
-                      <span className="absolute right-2 top-2 rounded-full bg-white/90 px-2 py-0.5 text-[11px] font-bold text-slate-900 shadow-sm backdrop-blur-sm">
-                        {l.price}
-                      </span>
+                      <span className="absolute right-1.5 top-1.5 rounded-full bg-white/90 px-1.5 py-0.5 text-[10px] font-bold text-slate-900 shadow-sm">{l.price}</span>
                     )}
                   </div>
-                  <div className="p-3">
-                    <p className="line-clamp-2 text-sm font-semibold text-slate-900 group-hover:text-[#E8002D] transition-colors">
-                      {l.title}
-                    </p>
-                    <p className="mt-1 text-[11px] text-slate-500">{l.meta}</p>
+                  <div className="p-2">
+                    <p className="text-[11px] font-semibold text-slate-900 line-clamp-2 leading-snug">{l.title}</p>
+                    {l.meta && <p className="mt-0.5 text-[9px] text-slate-500 line-clamp-1">{l.meta}</p>}
                   </div>
                 </Link>
               ))}
+              <Link href="/marketplace" className="flex-shrink-0 w-28 flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-200 text-center p-3">
+                <span className="text-[11px] font-semibold text-[#E8002D]">Browse all →</span>
+              </Link>
+            </div>
+          </section>
+        )}
+
+        {/* ── WEEKLY DIGEST ── */}
+        <section className="px-4 pt-5 pb-4">
+          <div className="rounded-xl bg-gradient-to-br from-[#0a1628] to-[#0d1f3e] p-4">
+            <h3 className="font-playfair text-lg font-bold text-white">Weekly digest<span className="text-[#E8002D]">.</span></h3>
+            <p className="mt-1 text-[12px] text-slate-400">The best of ManxHive, once a week.</p>
+            <form className="mt-3 flex gap-2" onSubmit={(e) => e.preventDefault()}>
+              <input
+                type="email"
+                placeholder="Your email"
+                className="min-w-0 flex-1 rounded-lg bg-white/10 px-3 py-2 text-[12px] text-white placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-[#E8002D]"
+              />
+              <button type="submit" className="flex-shrink-0 rounded-lg bg-[#E8002D] px-3 py-2 text-[12px] font-semibold text-white">Join</button>
+            </form>
+          </div>
+        </section>
+
+        {/* ── FOOTER ── */}
+        <footer className="px-4 py-4 text-center">
+          <p className="text-[11px] text-slate-400">© 2026 ManxHive. All rights reserved.</p>
+        </footer>
+      </div>
+
+      {/* ════════════════════════════════════════════════════════════════════════
+          DESKTOP LAYOUT  (hidden on mobile, shown sm+)
+      ════════════════════════════════════════════════════════════════════════ */}
+      <div className="hidden sm:block">
+
+        {/* ── HERO ─────────────────────────────────────────────────────────────── */}
+        <section className="relative overflow-x-hidden pb-16 pt-12 sm:pt-16 lg:pt-20">
+          {HOME_HERO_SLIDES.map((slide, i) => (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              key={slide.image}
+              src={slide.image}
+              alt=""
+              aria-hidden="true"
+              className={`pointer-events-none absolute inset-0 h-full w-full object-cover transition-opacity duration-1000 z-0 ${
+                i === homeHeroIdx ? "opacity-100" : "opacity-0"
+              }`}
+            />
+          ))}
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 z-10"
+            style={{
+              background:
+                "linear-gradient(105deg, rgba(255,255,255,0.97) 0%, rgba(255,255,255,0.90) 42%, rgba(255,255,255,0.60) 70%, rgba(255,255,255,0.15) 100%)",
+            }}
+          />
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-x-0 bottom-0 h-36 z-10 bg-gradient-to-t from-white to-transparent"
+          />
+          <div className="absolute right-10 top-6 z-20 flex items-center gap-2.5 lg:right-16">
+            <p className="text-[10px] font-medium text-slate-500 tracking-wide">
+              {HOME_HERO_SLIDES[homeHeroIdx].name} · {HOME_HERO_SLIDES[homeHeroIdx].area}
+            </p>
+            <div className="flex gap-1.5">
+              {HOME_HERO_SLIDES.map((_, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  aria-label={`Go to slide ${i + 1}`}
+                  onClick={() => setHomeHeroIdx(i)}
+                  className={`rounded-full transition-all duration-300 ${
+                    i === homeHeroIdx
+                      ? "w-5 h-1.5 bg-[#E8002D]"
+                      : "w-1.5 h-1.5 bg-slate-300 hover:bg-slate-500"
+                  }`}
+                />
+              ))}
+            </div>
+          </div>
+
+          <div className="relative z-20 mx-auto max-w-7xl px-6 lg:px-8">
+            <div className="grid gap-10 lg:grid-cols-[1fr_400px] lg:gap-16 lg:items-start">
+              <div className="min-w-0">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-400 mb-5">
+                  Isle of Man&apos;s Local Hub
+                </p>
+                <h1 className="font-playfair text-[clamp(2.8rem,6.5vw,5.2rem)] font-bold leading-[1.05] tracking-[-0.02em] text-slate-900">
+                  Everything island<br />
+                  life has to{" "}
+                  <em className="italic">offer</em>
+                  <span className="text-[#E8002D]">.</span>
+                </h1>
+                <p className="mt-5 max-w-lg text-[15px] leading-relaxed text-slate-500 sm:text-lg">
+                  Events, deals, sports, businesses, walks and community —
+                  all in one place, built for island life.
+                </p>
+                <ScoreTicker items={sportsItems} />
+                <div className="mt-6 flex flex-wrap gap-2">
+                  {[
+                    { emoji: "📅", label: "Events this weekend", href: "/whats-on/weekend" },
+                    { emoji: "🛍️", label: "Marketplace", href: "/marketplace" },
+                    { emoji: "🥾", label: "Walks & Trails", href: "/heritage" },
+                    { emoji: "🏆", label: "Sports results", href: "/sports" },
+                    { emoji: "🏛️", label: "Heritage", href: "/heritage" },
+                    { emoji: "👥", label: "Community", href: "/community-spotlight" },
+                  ].map((chip) => (
+                    <Link
+                      key={chip.href + chip.label}
+                      href={chip.href}
+                      className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 shadow-sm transition hover:border-[#E8002D]/40 hover:text-[#E8002D]"
+                    >
+                      <span>{chip.emoji}</span>
+                      {chip.label}
+                    </Link>
+                  ))}
+                </div>
+              </div>
+              <HeroTabPanel events={featuredEvents} deals={dealsItems} scores={sportsItems} />
             </div>
 
-            <div className="mt-6">
-              <Link
-                href="/marketplace"
-                className="inline-flex items-center text-sm font-semibold text-[#E8002D] hover:underline"
-              >
-                Browse all listings →
-              </Link>
+            <div
+              ref={statsRef}
+              className="mt-16 grid grid-cols-2 gap-8 border-t border-slate-100 pt-10 sm:grid-cols-4"
+            >
+              <StatPill value={120} suffix="+" label="Upcoming events" active={statsVisible} delay={0} />
+              <StatPill value={340} suffix="+" label="Local businesses" active={statsVisible} delay={150} />
+              <StatPill value={85}  suffix="+" label="Live deals" active={statsVisible} delay={300} />
+              <StatPill value={40}  suffix="+" label="Walks & trails" active={statsVisible} delay={450} />
             </div>
           </div>
         </section>
-      )}
+
+        <WeatherSection />
+
+        {/* ── WHAT'S ON ── */}
+        <section className="py-16 sm:py-20">
+          <div className="mx-auto max-w-7xl px-6 lg:px-8">
+            <SectionHeader eyebrow="Live feed" title="What's On" href="/whats-on" cta="All events" />
+            {heroEvent && (
+              <Link
+                href={heroEvent.id.startsWith("mock-") ? "/whats-on" : `/whats-on/${heroEvent.id}`}
+                className="group mt-8 flex flex-col overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-[0_4px_24px_rgba(0,0,0,0.06)] transition-shadow hover:shadow-[0_8px_40px_rgba(0,0,0,0.10)] sm:flex-row"
+              >
+                <div className="relative h-52 w-full flex-shrink-0 bg-slate-100 sm:h-auto sm:w-56">
+                  {heroEvent.imageUrl
+                    ? <img src={heroEvent.imageUrl} alt={heroEvent.name} className="h-full w-full object-cover" /> // eslint-disable-line @next/next/no-img-element
+                    : <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200"><CalendarDays className="h-10 w-10 text-slate-300" /></div>
+                  }
+                  <span className="absolute left-3 top-3 rounded-full bg-[#E8002D] px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white">Featured</span>
+                </div>
+                <div className="flex flex-col justify-center px-6 py-6 sm:px-8">
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-400 mb-2">Next up</p>
+                  <h3 className="font-playfair text-xl font-bold leading-snug text-slate-900 group-hover:text-[#E8002D] transition-colors sm:text-2xl">{heroEvent.name}</h3>
+                  {heroEvent.meta && <p className="mt-2 text-sm text-slate-500">{heroEvent.meta}</p>}
+                  <span className="mt-4 text-sm font-semibold text-[#E8002D]">Book now →</span>
+                </div>
+              </Link>
+            )}
+            {featuredEvents.length > 1 && (
+              <ul className="mt-3 divide-y divide-slate-100 rounded-xl border border-slate-100 bg-white shadow-sm overflow-hidden">
+                {featuredEvents.slice(1).map((e) => {
+                  const href = e.id.startsWith("mock-") ? "/whats-on" : `/whats-on/${e.id}`;
+                  return (
+                    <li key={e.id}>
+                      <Link href={href} className="group flex items-center gap-4 px-5 py-3.5 hover:bg-slate-50 transition-colors">
+                        <CalendarDays className="h-4 w-4 flex-shrink-0 text-[#E8002D]" />
+                        <div className="min-w-0 flex-1">
+                          <span className="text-sm font-semibold text-slate-900 group-hover:text-[#E8002D] transition-colors">{e.name}</span>
+                          {e.meta && <span className="ml-3 text-xs text-slate-500">{e.meta}</span>}
+                        </div>
+                        <span className="text-xs text-slate-400 group-hover:text-[#E8002D] transition-colors">→</span>
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+            <div className="mt-5 flex gap-3">
+              <Link href="/whats-on/weekend" className="inline-flex items-center rounded-full bg-[#E8002D] px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-[#c00026] transition-colors">Weekend guide →</Link>
+              <Link href="/whats-on" className="inline-flex items-center rounded-full border border-slate-200 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50 transition-colors">All events</Link>
+            </div>
+          </div>
+        </section>
+
+        {/* ── DEALS ── */}
+        <section className="py-14 sm:py-16 bg-slate-50/70">
+          <div className="mx-auto max-w-7xl px-6 lg:px-8">
+            <SectionHeader eyebrow="Limited offers" title="Local Deals" href="/deals" cta="All deals" />
+            <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {dealsItems.slice(0, 6).map((deal) => {
+                const href = deal.id.startsWith("mock-") ? "/deals" : `/deals/${deal.id}`;
+                return (
+                  <Link key={deal.id} href={href} className="group flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3.5 shadow-sm transition-all hover:border-[#E8002D]/30 hover:shadow-md">
+                    <Tag className="h-4 w-4 flex-shrink-0 text-[#E8002D]" />
+                    <div className="min-w-0 flex-1">
+                      <p className="line-clamp-1 text-sm font-semibold text-slate-900 group-hover:text-[#E8002D] transition-colors">{deal.title}</p>
+                      {deal.meta && <p className="mt-0.5 line-clamp-1 text-[11px] text-slate-500">{deal.meta}</p>}
+                    </div>
+                    <span className="flex-shrink-0 text-[11px] font-semibold text-[#E8002D]">View →</span>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+
+        {/* ── FEATURED BUSINESS ── */}
+        {heroBusiness && (
+          <section className="py-16 sm:py-20">
+            <div className="mx-auto max-w-7xl px-6 lg:px-8">
+              <div className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-[0_4px_40px_rgba(0,0,0,0.07)]">
+                <div className="grid lg:grid-cols-2">
+                  <div className="relative min-h-[280px] bg-slate-100 lg:min-h-[380px]">
+                    {heroBusiness.imageUrl || heroBusiness.logoUrl
+                      ? <img src={heroBusiness.imageUrl ?? heroBusiness.logoUrl!} alt={heroBusiness.name} className="absolute inset-0 h-full w-full object-cover" /> // eslint-disable-line @next/next/no-img-element
+                      : <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200"><span className="text-4xl font-bold text-slate-300">{heroBusiness.name[0]}</span></div>
+                    }
+                  </div>
+                  <div className="flex flex-col justify-center px-8 py-10 lg:px-12 lg:py-14">
+                    <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.22em] text-[#E8002D]">Sponsored spotlight</p>
+                    <h2 className="font-playfair text-[clamp(1.7rem,3vw,2.6rem)] font-bold leading-tight text-slate-900">{heroBusiness.headline ?? heroBusiness.name}</h2>
+                    {heroBusiness.tagline && <p className="mt-3 text-base leading-relaxed text-slate-500">{heroBusiness.tagline}</p>}
+                    {businessMeta.length > 0 && (
+                      <div className="mt-4 flex flex-wrap gap-2">
+                        {businessMeta.map((m) => <span key={m} className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600">{m}</span>)}
+                      </div>
+                    )}
+                    <Link href={featuredHref ?? "/businesses"} className="mt-8 inline-flex w-fit items-center rounded-full bg-[#E8002D] px-6 py-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#c00026]">
+                      {heroBusiness.ctaLabel ?? "View business"}
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* ── BROWSE BUSINESSES ── */}
+        <section className="py-14 sm:py-16 bg-slate-50/70">
+          <div className="mx-auto max-w-7xl px-6 lg:px-8">
+            <SectionHeader eyebrow="Directory" title="Browse Businesses" href="/businesses" cta="All businesses" />
+            {boostedBusinesses.length > 0 ? (
+              <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {boostedBusinesses.slice(0, 6).map((b) => {
+                  const href = b.slug ? `/businesses/${b.slug}` : "/businesses";
+                  return (
+                    <Link key={b.id} href={href} className="group flex items-center gap-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition-all hover:border-[#E8002D]/30 hover:shadow-md">
+                      {b.logoUrl || b.imageUrl
+                        ? <img src={b.logoUrl ?? b.imageUrl!} alt={b.name} className="h-12 w-12 flex-shrink-0 rounded-lg object-cover bg-slate-100" /> // eslint-disable-line @next/next/no-img-element
+                        : <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-lg bg-slate-100"><span className="text-lg font-bold text-slate-400">{b.name[0]}</span></div>
+                      }
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold text-slate-900 group-hover:text-[#E8002D] transition-colors">{b.name}</p>
+                        <p className="mt-0.5 text-xs text-slate-500">{[b.category, b.area].filter(Boolean).join(" • ")}</p>
+                      </div>
+                    </Link>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="mt-8 flex flex-wrap gap-3">
+                {["Restaurants","Services","Retail","Health & Beauty","Sports","Trades"].map((cat) => (
+                  <Link key={cat} href={`/businesses?category=${encodeURIComponent(cat.toLowerCase())}`}
+                    className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:border-[#E8002D]/30 hover:text-[#E8002D]">
+                    {cat}
+                  </Link>
+                ))}
+              </div>
+            )}
+            <div className="mt-6">
+              <Link href="/businesses" className="inline-flex items-center text-sm font-semibold text-[#E8002D] hover:underline">Browse all businesses →</Link>
+            </div>
+          </div>
+        </section>
+
+        {/* ── SPORTS ── */}
+        <section className="py-16 sm:py-20">
+          <div className="mx-auto max-w-7xl px-6 lg:px-8">
+            <SectionHeader eyebrow="Latest results" title="Sports" href="/sports" cta="Sports hub →" />
+            <div className="mt-8 overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-[0_4px_24px_rgba(0,0,0,0.05)]">
+              <div className="flex items-center gap-2.5 border-b border-slate-100 bg-slate-50/80 px-5 py-3">
+                <span className="h-2 w-2 rounded-full bg-[#E8002D] animate-pulse" />
+                <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-slate-500">Live Results</span>
+              </div>
+              <ul className="divide-y divide-slate-50">
+                {sportsItems.map((s) => (
+                  <li key={s.id}>
+                    <Link href="/sports" className="group flex items-center gap-4 px-5 py-4 transition-colors hover:bg-slate-50">
+                      <Trophy className="h-4 w-4 flex-shrink-0 text-[#E8002D]" />
+                      <div className="flex-1">
+                        <p className="text-sm font-semibold text-slate-900 group-hover:text-[#E8002D] transition-colors">{s.title}</p>
+                        {s.meta && <p className="mt-0.5 text-xs text-slate-500">{s.meta}</p>}
+                      </div>
+                      <span className="text-xs text-slate-400 group-hover:text-[#E8002D] transition-colors">→</span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+              <div className="border-t border-slate-100 px-5 py-3 bg-slate-50/60">
+                <Link href="/sports" className="text-xs font-semibold text-[#E8002D] hover:underline">View all sports & fixtures →</Link>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ── EXPLORE ── */}
+        <section className="py-14 sm:py-20 bg-slate-50/70">
+          <div className="mx-auto max-w-7xl px-6 lg:px-8">
+            <div className="mb-10 text-center">
+              <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-400">Get outside</p>
+              <h2 className="font-playfair text-3xl font-bold text-slate-900 sm:text-4xl">Explore the Island</h2>
+            </div>
+            <div className="grid gap-6 md:grid-cols-2">
+              <ExplorePanel
+                title="Walks & Trails" eyebrow="Routes" item={heroWalk} href="/heritage" ctaLabel="Browse all walks"
+                metaLine={heroWalk ? [heroWalk.area, heroWalk.distanceKm ? `${heroWalk.distanceKm}km` : null, heroWalk.difficulty].filter(Boolean).join(" • ") : undefined}
+                summary={heroWalk?.summary ?? heroWalk?.description}
+                activeIndex={walkIndex}
+                onPrev={() => setWalkIndex((i) => (i - 1 + featuredWalks.length) % Math.max(1, featuredWalks.length))}
+                onNext={() => setWalkIndex((i) => (i + 1) % Math.max(1, featuredWalks.length))}
+                total={featuredWalks.length}
+              />
+              <ExplorePanel
+                title="Heritage" eyebrow="History & culture" item={heroHeritage} href="/heritage" ctaLabel="Discover heritage"
+                metaLine={heroHeritage?.area ?? undefined}
+                summary={heroHeritage?.tagline ?? heroHeritage?.description}
+                activeIndex={heritageIndex}
+                onPrev={() => setHeritageIndex((i) => (i - 1 + featuredHeritage.length) % Math.max(1, featuredHeritage.length))}
+                onNext={() => setHeritageIndex((i) => (i + 1) % Math.max(1, featuredHeritage.length))}
+                total={featuredHeritage.length}
+              />
+            </div>
+          </div>
+        </section>
+
+        {/* ── COMMUNITY ── */}
+        <section className="py-16 sm:py-20">
+          <div className="mx-auto max-w-7xl px-6 lg:px-8">
+            <SectionHeader eyebrow="People & places" title="Community Spotlight" href="/community-spotlight" cta="All stories" />
+            <div className="mt-8 grid gap-4 sm:grid-cols-2">
+              {communityItems.slice(0, 4).map((c, i) => (
+                <Link key={c.id} href="/community-spotlight" className="group rounded-xl border border-slate-100 bg-white p-5 shadow-sm transition-all hover:border-[#E8002D]/25 hover:shadow-md">
+                  {i === 0 && <span className="mb-3 inline-block rounded-full bg-[#E8002D]/10 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-[#E8002D]">Latest</span>}
+                  <h3 className="text-sm font-semibold leading-snug text-slate-900 group-hover:text-[#E8002D] transition-colors">{c.title}</h3>
+                  {c.meta && <p className="mt-2 line-clamp-2 text-xs text-slate-500">{c.meta}</p>}
+                  <span className="mt-3 inline-block text-[11px] font-semibold text-[#E8002D]">Read story →</span>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ── MARKETPLACE ── */}
+        {listings.length > 0 && (
+          <section className="py-14 sm:py-16 bg-slate-50/70">
+            <div className="mx-auto max-w-7xl px-6 lg:px-8">
+              <SectionHeader eyebrow="Promoted listings" title="Marketplace" href="/marketplace" cta="Browse all" />
+              <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                {listings.slice(0, 8).map((l) => (
+                  <Link key={l.id} href={`/marketplace/item/${l.id}`} className="group overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition-all hover:border-[#E8002D]/30 hover:shadow-md">
+                    <div className="relative h-40 bg-slate-100">
+                      {l.imageUrl
+                        ? <img src={l.imageUrl} alt={l.title} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]" /> // eslint-disable-line @next/next/no-img-element
+                        : <div className="flex h-full w-full items-center justify-center text-xs text-slate-400">No image</div>
+                      }
+                      {l.price && <span className="absolute right-2 top-2 rounded-full bg-white/90 px-2 py-0.5 text-[11px] font-bold text-slate-900 shadow-sm backdrop-blur-sm">{l.price}</span>}
+                    </div>
+                    <div className="p-3">
+                      <p className="line-clamp-2 text-sm font-semibold text-slate-900 group-hover:text-[#E8002D] transition-colors">{l.title}</p>
+                      <p className="mt-1 text-[11px] text-slate-500">{l.meta}</p>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+              <div className="mt-6">
+                <Link href="/marketplace" className="inline-flex items-center text-sm font-semibold text-[#E8002D] hover:underline">Browse all listings →</Link>
+              </div>
+            </div>
+          </section>
+        )}
+      </div>
     </div>
   );
 }
