@@ -519,8 +519,8 @@ export default function HeritagePage() {
                           {badge.label}
                         </span>
                       )}
-                      {/* Meta at image bottom */}
-                      <div className="absolute bottom-2 left-2.5 right-2.5">
+                      {/* Meta at image bottom — hidden on mobile */}
+                      <div className="absolute bottom-2 left-2.5 right-2.5 hidden sm:block">
                         <div className="flex flex-wrap items-center gap-1.5 text-[10px] text-white/90">
                           <span className="inline-flex items-center gap-1 rounded-full bg-black/45 px-2 py-0.5">
                             <MapPin className="h-2.5 w-2.5" />
@@ -590,8 +590,8 @@ export default function HeritagePage() {
                         {place.era}
                       </span>
                     )}
-                    {/* Area at image bottom */}
-                    <div className="absolute bottom-2 left-2.5 right-2.5">
+                    {/* Area at image bottom — hidden on mobile */}
+                    <div className="absolute bottom-2 left-2.5 right-2.5 hidden sm:block">
                       <div className="flex flex-wrap items-center gap-1.5 text-[10px] text-white/90">
                         <span className="inline-flex items-center gap-1 rounded-full bg-black/45 px-2 py-0.5">
                           <MapPin className="h-2.5 w-2.5" />

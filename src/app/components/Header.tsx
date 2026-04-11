@@ -398,7 +398,7 @@ export default function Header() {
         <div className="flex items-center gap-1.5 md:hidden">
           <button
             type="button"
-            onClick={() => router.push("/search")}
+            onClick={() => { setSearchExpanded((v) => !v); setMobileOpen(false); }}
             className="inline-flex items-center justify-center rounded-full p-2 text-gray-700 hover:bg-gray-100"
             aria-label="Search"
           >
@@ -413,9 +413,31 @@ export default function Header() {
         </div>
       </div>
 
+      {/* MOBILE SEARCH BAR */}
+      {searchExpanded && (
+        <div className="border-t border-slate-200 bg-white px-4 py-3 md:hidden">
+          <form onSubmit={handleSearchSubmit} className="flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-4 py-2.5">
+            <Search className="h-4 w-4 flex-shrink-0 text-slate-400" />
+            <input
+              autoFocus
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search the island..."
+              className="w-full bg-transparent text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none"
+            />
+            {searchQuery && (
+              <button type="button" onClick={() => { setSearchQuery(""); setSearchExpanded(false); }} className="text-slate-400">
+                <X className="h-4 w-4" />
+              </button>
+            )}
+          </form>
+        </div>
+      )}
+
       {/* MOBILE MENU */}
       {mobileOpen && (
-        <div className="border-t border-slate-200 bg-white px-4 pb-4 md:hidden">
+        <div className="border-t border-slate-200 bg-white px-4 pb-4 md:hidden overflow-y-auto max-h-[calc(100svh-56px)]">
           <nav className="flex flex-col pt-2 text-sm">
             {NAV_ITEMS.map((item) => {
               const active = isActive(item.href);

@@ -118,7 +118,7 @@ export default function CommunityPage() {
   const latest = rest.slice(0, 4);
 
   return (
-    <main className="mx-auto max-w-6xl px-4 py-8 space-y-8 overflow-x-hidden">
+    <main className="mx-auto w-full max-w-6xl px-4 py-8 space-y-8 overflow-x-hidden">
       {/* Breadcrumb */}
       <nav className="mb-1 text-xs text-gray-500">
         <Link href="/" className="hover:underline">
@@ -298,7 +298,7 @@ export default function CommunityPage() {
             <Link
               key={story.slug}
               href={`/community/${story.slug}`}
-              className="group grid gap-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm md:grid-cols-[180px,1fr]"
+              className="group flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm md:grid md:grid-cols-[180px,1fr]"
             >
               <div className="relative h-32 overflow-hidden rounded-xl bg-slate-100">
                 {story.imageUrl ? (

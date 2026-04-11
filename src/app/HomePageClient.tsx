@@ -1275,7 +1275,7 @@ export default function HomePageClient() {
   // ── RENDER ───────────────────────────────────────────────────────────────────
 
   return (
-    <div className="bg-white text-slate-900">
+    <div className="bg-white text-slate-900 overflow-x-hidden">
 
       {/* ── HERO ─────────────────────────────────────────────────────────────── */}
       <section className="relative overflow-x-hidden pb-16 pt-12 sm:pt-16 lg:pt-20">
@@ -1387,10 +1387,10 @@ export default function HomePageClient() {
             </div>
           </div>
 
-          {/* Stats strip */}
+          {/* Stats strip — hidden on mobile to keep homepage concise */}
           <div
             ref={statsRef}
-            className="mt-16 grid grid-cols-2 gap-8 border-t border-slate-100 pt-10 sm:grid-cols-4"
+            className="mt-16 hidden grid-cols-2 gap-8 border-t border-slate-100 pt-10 sm:grid sm:grid-cols-4"
           >
             <StatPill value={120} suffix="+" label="Upcoming events" active={statsVisible} delay={0} />
             <StatPill value={340} suffix="+" label="Local businesses" active={statsVisible} delay={150} />
@@ -1400,8 +1400,10 @@ export default function HomePageClient() {
         </div>
       </section>
 
-      {/* ── WEATHER ──────────────────────────────────────────────────────────── */}
-      <WeatherSection />
+      {/* ── WEATHER — hidden on mobile ────────────────────────────────────────── */}
+      <div className="hidden sm:block">
+        <WeatherSection />
+      </div>
 
       {/* ── WHAT'S ON ────────────────────────────────────────────────────────── */}
       <section className="py-16 sm:py-20">
